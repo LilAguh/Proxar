@@ -1,0 +1,116 @@
+@import '@/styles/variables';
+@import '@/styles/mixins';
+
+.tickets {
+  padding: $space-7;
+  height: 100%;
+  @include flex-column;
+  gap: $space-6;
+
+  &-loading {
+    @include flex-center;
+    height: 400px;
+  }
+
+  &__header {
+    @include flex-between;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-black;
+    color: $gray-900;
+  }
+
+  &__subtitle {
+    margin: $space-1 0 0;
+    font-size: $font-size-base;
+    color: $gray-500;
+  }
+
+  &__kanban {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: $space-4;
+    flex: 1;
+    overflow-x: auto;
+    padding-bottom: $space-4;
+  }
+
+  &__column {
+    min-width: 280px;
+    @include flex-column;
+    gap: $space-3;
+
+    &-header {
+      @include flex-between;
+      padding: $space-3;
+      background: $gray-100;
+      border-radius: $radius-md;
+    }
+
+    &-count {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-bold;
+      color: $gray-600;
+      background: $white;
+      padding: $space-1 $space-2;
+      border-radius: $radius-sm;
+    }
+
+    &-body {
+      @include flex-column;
+      gap: $space-3;
+      flex: 1;
+      overflow-y: auto;
+      @include custom-scrollbar;
+    }
+  }
+
+  &__card {
+    padding: $space-4;
+    cursor: pointer;
+
+    &-header {
+      @include flex-between;
+      margin-bottom: $space-2;
+    }
+
+    &-number {
+      font-family: $font-mono;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-bold;
+      color: $brand;
+    }
+
+    &-type {
+      font-size: $font-size-xs;
+      color: $gray-500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    &-title {
+      margin: 0 0 $space-2;
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      color: $gray-900;
+      line-height: 1.4;
+    }
+
+    &-client {
+      margin: 0;
+      font-size: $font-size-sm;
+      color: $gray-500;
+    }
+
+    &-assigned {
+      margin-top: $space-3;
+      padding-top: $space-3;
+      border-top: $border-width solid $border-color;
+      font-size: $font-size-xs;
+      color: $gray-600;
+    }
+  }
+}

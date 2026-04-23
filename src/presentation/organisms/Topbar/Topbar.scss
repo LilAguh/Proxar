@@ -1,0 +1,24 @@
+@import '@/styles/variables';
+@import '@/styles/mixins';
+
+.topbar {
+  background: $white;
+  border-bottom: $border-width solid $border-color;
+  padding: 0 $space-7;
+  height: $topbar-height;
+  @include flex-between;
+  position: sticky;
+  top: 0;
+  z-index: $z-sticky;
+
+  &__breadcrumb {
+    font-size: $font-size-sm;
+    color: $gray-400;
+    font-weight: $font-weight-medium;
+  }
+
+  &__actions {
+    @include flex-start;
+    gap: $space-2;
+  }
+}
