@@ -1,0 +1,10 @@
+export interface Client {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  notes?: string;
+  createdAt: string;
+  modifiedAt: string;
+}
