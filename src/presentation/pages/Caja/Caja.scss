@@ -1,0 +1,128 @@
+@import '@/styles/variables';
+@import '@/styles/mixins';
+
+.caja {
+  padding: $space-7;
+  @include flex-column;
+  gap: $space-6;
+
+  &-loading {
+    @include flex-center;
+    height: 400px;
+  }
+
+  &__header {
+    @include flex-between;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-black;
+    color: $gray-900;
+  }
+
+  &__subtitle {
+    margin: $space-1 0 0;
+    font-size: $font-size-base;
+    color: $gray-500;
+  }
+
+  &__balances {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $space-5;
+  }
+
+  &__balance {
+    padding: $space-5;
+
+    &-title {
+      margin: 0 0 $space-2;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      color: $gray-600;
+    }
+
+    &-amount {
+      font-size: 32px;
+      font-weight: $font-weight-black;
+      color: $info;
+    }
+  }
+
+  &__movements {
+    padding: $space-5;
+
+    &-title {
+      margin: 0 0 $space-5;
+      font-size: $font-size-lg;
+      font-weight: $font-weight-bold;
+      color: $gray-900;
+    }
+
+    &-list {
+      @include flex-column;
+      gap: $space-3;
+    }
+  }
+
+  &__movement {
+    @include flex-between;
+    padding: $space-4;
+    border-radius: $radius-sm;
+    border: $border-width solid $border-color;
+    transition: background $transition-fast;
+
+    &:hover {
+      background: $gray-50;
+    }
+
+    &-info {
+      @include flex-column;
+      gap: $space-1;
+    }
+
+    &-header {
+      @include flex-start;
+      gap: $space-3;
+    }
+
+    &-number {
+      font-family: $font-mono;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-bold;
+      color: $brand;
+    }
+
+    &-method {
+      font-size: $font-size-xs;
+      color: $gray-500;
+      text-transform: uppercase;
+    }
+
+    &-concept {
+      font-size: $font-size-base;
+      font-weight: $font-weight-medium;
+      color: $gray-900;
+    }
+
+    &-date {
+      font-size: $font-size-sm;
+      color: $gray-500;
+    }
+
+    &-amount {
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-black;
+
+      &--income {
+        color: $success;
+      }
+
+      &--expense {
+        color: $danger;
+      }
+    }
+  }
+}

@@ -1,0 +1,166 @@
+@import '@/styles/variables';
+@import '@/styles/mixins';
+
+.dashboard {
+  padding: $space-7;
+  @include flex-column;
+  gap: $space-6;
+
+  &-loading {
+    @include flex-center;
+    height: 400px;
+  }
+
+  &__header {
+    @include flex-between;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-black;
+    color: $gray-900;
+  }
+
+  &__subtitle {
+    margin: $space-1 0 0;
+    font-size: $font-size-base;
+    color: $gray-500;
+  }
+
+  &__metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $space-5;
+  }
+
+  &__metric {
+    padding: $space-5;
+
+    &-header {
+      @include flex-start;
+      gap: $space-3;
+      margin-bottom: $space-4;
+    }
+
+    &-icon {
+      font-size: 32px;
+    }
+
+    &-title {
+      margin: 0;
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      color: $gray-600;
+    }
+
+    &-content {
+      @include flex-column;
+      gap: $space-3;
+    }
+
+    &-value {
+      font-size: 36px;
+      font-weight: $font-weight-black;
+      color: $gray-900;
+      line-height: 1;
+
+      &--cash {
+        color: $success;
+      }
+
+      &--balance {
+        color: $info;
+      }
+    }
+
+    &-breakdown {
+      @include flex-start;
+      gap: $space-3;
+      flex-wrap: wrap;
+    }
+
+    &-item {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $gray-500;
+
+      &--new {
+        color: $info;
+      }
+
+      &--progress {
+        color: $warning;
+      }
+
+      &--completed {
+        color: $success;
+      }
+
+      &--income {
+        color: $success;
+      }
+
+      &--expense {
+        color: $danger;
+      }
+    }
+  }
+
+  &__recent {
+    padding: $space-5;
+
+    &-header {
+      @include flex-between;
+      margin-bottom: $space-4;
+      padding-bottom: $space-4;
+      border-bottom: $border-width solid $border-color;
+    }
+
+    &-title {
+      margin: 0;
+      font-size: $font-size-lg;
+      font-weight: $font-weight-bold;
+      color: $gray-900;
+    }
+
+    &-list {
+      @include flex-column;
+      gap: $space-3;
+    }
+
+    &-item {
+      @include flex-between;
+      padding: $space-3;
+      border-radius: $radius-sm;
+      cursor: pointer;
+      transition: background $transition-fast;
+
+      &:hover {
+        background: $gray-50;
+      }
+    }
+
+    &-info {
+      @include flex-start;
+      gap: $space-3;
+    }
+
+    &-number {
+      font-family: $font-mono;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-bold;
+      color: $brand;
+    }
+
+    &-title-text {
+      font-size: $font-size-base;
+      color: $gray-900;
+    }
+
+    &-client {
+      font-size: $font-size-sm;
+      color: $gray-500;
+    }
+  }
+}

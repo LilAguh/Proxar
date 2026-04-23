@@ -1,0 +1,13 @@
+@import '@/styles/variables';
+@import '@/styles/mixins';
+
+.modal-ticket {
+  @include flex-column;
+  gap: $space-4;
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-4;
+  }
+}
