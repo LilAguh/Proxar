@@ -31,7 +31,7 @@ export function useCreateClient() {
   const { showToast } = useToastStore();
 
   return useMutation({
-    mutationFn: clientRepository.create,
+    mutationFn: (data: Parameters<typeof clientRepository.create>[0]) => clientRepository.create(data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       showToast(`Cliente ${data.name} creado correctamente`);
@@ -65,7 +65,7 @@ export function useDeleteClient() {
   const { showToast } = useToastStore();
 
   return useMutation({
-    mutationFn: clientRepository.remove,
+    mutationFn: (id: string) => clientRepository.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       showToast('Cliente eliminado correctamente');

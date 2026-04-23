@@ -63,14 +63,37 @@
       @include flex-column;
       gap: $space-3;
       flex: 1;
+      min-height: 80px;
       overflow-y: auto;
+      padding: $space-2;
+      border-radius: $radius-md;
+      border: 2px dashed transparent;
+      transition: border-color 0.15s, background 0.15s;
       @include custom-scrollbar;
+
+      &--over {
+        border-color: $brand;
+        background: rgba($brand, 0.04);
+      }
     }
+  }
+
+  &__column-empty {
+    opacity: 0.5;
   }
 
   &__card {
     padding: $space-4;
-    cursor: pointer;
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &--dragging {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      rotate: 2deg;
+    }
 
     &-header {
       @include flex-between;

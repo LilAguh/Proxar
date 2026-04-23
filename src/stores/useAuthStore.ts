@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User } from '@core/entities/User.entity';
+import { UserRole } from '@core/enums';
 
 interface AuthStore {
   user: User | null;
@@ -10,11 +11,20 @@ interface AuthStore {
   isAuthenticated: () => boolean;
 }
 
+// MOCK USER TEMPORAL
+const MOCK_USER: User = {
+  id: '11111111-1111-1111-1111-111111111111',
+  name: 'Agustín',
+  email: 'admin@proxar.com',
+  role: UserRole.Admin,
+  active: true,
+};
+
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
-      user: null,
-      token: null,
+      user: MOCK_USER, // ← MOCK temporal
+      token: 'mock-token', // ← MOCK temporal
 
       setAuth: (user, token) => {
         set({ user, token });

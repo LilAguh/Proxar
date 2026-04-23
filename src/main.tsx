@@ -2,13 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import App from './App';
-import './styles/global.scss';
+import App from './app/App';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutos por defecto
+      staleTime: 5 * 60 * 1000, // 5 minutos
       refetchOnWindowFocus: false,
       retry: 1,
     },
