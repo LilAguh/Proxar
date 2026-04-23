@@ -1,0 +1,107 @@
+@import '@/styles/variables';
+@import '@/styles/mixins';
+
+.btn {
+  @include flex-center;
+  gap: $space-2;
+  border-radius: $radius-sm;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: opacity $transition-fast, box-shadow $transition-fast;
+  border: none;
+  outline: none;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):hover {
+    opacity: 0.88;
+  }
+
+  &:not(:disabled):active {
+    transform: scale(0.98);
+  }
+
+  // Sizes
+  &--sm {
+    padding: $space-2 $space-3;
+    font-size: $font-size-sm;
+  }
+
+  &--md {
+    padding: 9px $space-4;
+    font-size: $font-size-base;
+  }
+
+  &--lg {
+    padding: $space-3 $space-5;
+    font-size: $font-size-md;
+  }
+
+  // Variants
+  &--primary {
+    background: $brand;
+    color: $white;
+
+    &:focus-visible {
+      @include focus-ring($brand);
+    }
+  }
+
+  &--secondary {
+    background: $white;
+    color: $gray-700;
+    border: $border-width solid $border-color;
+
+    &:focus-visible {
+      @include focus-ring($gray-400);
+    }
+  }
+
+  &--success {
+    background: $success;
+    color: $white;
+
+    &:focus-visible {
+      @include focus-ring($success);
+    }
+  }
+
+  &--danger {
+    background: $danger;
+    color: $white;
+
+    &:focus-visible {
+      @include focus-ring($danger);
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: $gray-500;
+    border: $border-width solid $border-color;
+
+    &:focus-visible {
+      @include focus-ring($gray-400);
+    }
+  }
+
+  // Full width
+  &--full {
+    width: 100%;
+  }
+
+  &__icon {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+  }
+
+  &__text {
+    display: flex;
+    align-items: center;
+  }
+}

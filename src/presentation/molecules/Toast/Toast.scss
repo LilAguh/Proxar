@@ -1,0 +1,57 @@
+@import '@/styles/variables';
+@import '@/styles/mixins';
+
+.toast {
+  position: fixed;
+  bottom: $space-7;
+  right: $space-7;
+  z-index: $z-toast;
+  @include flex-start;
+  gap: $space-2;
+  padding: $space-3 $space-5;
+  border-radius: $radius-md;
+  box-shadow: $shadow-lg;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $white;
+  animation: slideUp $transition-slow;
+  min-width: 300px;
+  max-width: 500px;
+
+  &--success {
+    background: $success;
+  }
+
+  &--error {
+    background: $danger;
+  }
+
+  &--warning {
+    background: $warning;
+  }
+
+  &--info {
+    background: $info;
+  }
+
+  &__icon {
+    font-size: $font-size-lg;
+    flex-shrink: 0;
+  }
+
+  &__message {
+    flex: 1;
+  }
+
+  &__close {
+    @include button-reset;
+    font-size: 22px;
+    color: $white;
+    opacity: 0.8;
+    transition: opacity $transition-fast;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}

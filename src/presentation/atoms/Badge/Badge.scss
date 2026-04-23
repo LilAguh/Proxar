@@ -1,0 +1,21 @@
+@import '@/styles/variables';
+
+.badge {
+  display: inline-block;
+  border: $border-width solid;
+  border-radius: $radius-full;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  text-align: center;
+
+  &--sm {
+    padding: 3px 10px;
+    font-size: $font-size-sm;
+  }
+
+  &--lg {
+    padding: 6px 16px;
+    font-size: $font-size-base;
+  }
+}

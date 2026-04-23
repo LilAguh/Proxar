@@ -1,0 +1,76 @@
+@import '@/styles/variables';
+@import '@/styles/mixins';
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba($black, 0.45);
+  @include flex-center;
+  z-index: $z-modal-backdrop;
+  animation: fadeIn $transition-base;
+}
+
+.modal {
+  background: $white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-xl;
+  max-width: 95vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp $transition-slow;
+
+  &--sm {
+    width: 400px;
+  }
+
+  &--md {
+    width: 560px;
+  }
+
+  &--lg {
+    width: 720px;
+  }
+
+  &--xl {
+    width: 900px;
+  }
+
+  &__header {
+    @include flex-between;
+    padding: $space-5 $space-6;
+    border-bottom: $border-width solid $border-color;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $gray-900;
+  }
+
+  &__close {
+    @include button-reset;
+    font-size: 28px;
+    color: $gray-400;
+    line-height: 1;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: $gray-700;
+    }
+  }
+
+  &__body {
+    padding: $space-6;
+    overflow-y: auto;
+    @include custom-scrollbar;
+  }
+
+  &__footer {
+    @include flex-between;
+    gap: $space-3;
+    padding: $space-4 $space-6;
+    border-top: $border-width solid $border-color;
+  }
+}
