@@ -56,7 +56,7 @@ export function useCreateTicket() {
   const { showToast } = useToastStore();
 
   return useMutation({
-    mutationFn: ticketRepository.create,
+    mutationFn: (data: Parameters<typeof ticketRepository.create>[0]) => ticketRepository.create(data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
       showToast(`Ticket #${data.number} creado correctamente`);

@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore, useUIStore } from '@/stores';
 import { Avatar } from '@presentation/atoms';
+import logo from '../../../../public/SVG/Proxar.svg'
 import './Sidebar.scss';
 
 export const Sidebar = () => {
@@ -13,7 +14,7 @@ export const Sidebar = () => {
     { key: 'dashboard', label: 'Dashboard', icon: '▦', path: '/' },
     { key: 'tickets', label: 'Tickets', icon: '◈', path: '/tickets' },
     { key: 'caja', label: 'Caja', icon: '$', path: '/caja' },
-    { key: 'clients', label: 'Clientes', icon: '◉', path: '/clients', soon: true },
+    { key: 'clients', label: 'Clientes', icon: '◉', path: '/clientes' },
     { key: 'reports', label: 'Reportes', icon: '▣', path: '/reports', soon: true },
   ];
 
@@ -26,14 +27,7 @@ export const Sidebar = () => {
     <aside className="sidebar">
       {/* Logo */}
       <div className="sidebar__logo">
-        <svg viewBox="0 0 220 72" width="180" height="58" xmlns="http://www.w3.org/2000/svg">
-          <rect x="4" y="8" width="86" height="44" rx="10" ry="10" fill="none" stroke="#111827" strokeWidth="4"/>
-          <rect x="130" y="8" width="86" height="44" rx="10" ry="10" fill="none" stroke="#111827" strokeWidth="4"/>
-          <line x1="90" y1="8" x2="130" y2="52" stroke="#111827" strokeWidth="10" strokeLinecap="round"/>
-          <line x1="130" y1="8" x2="90" y2="52" stroke="#111827" strokeWidth="10" strokeLinecap="round"/>
-          <text x="47" y="38" textAnchor="middle" fontFamily="Inter,sans-serif" fontWeight="800" fontSize="20" fill="#111827" letterSpacing="1">PRO</text>
-          <text x="173" y="38" textAnchor="middle" fontFamily="Inter,sans-serif" fontWeight="800" fontSize="20" fill="#111827" letterSpacing="1">AR</text>
-        </svg>
+        <img src={logo} alt="Proxar" className="Proxar" />
         
         <div className="sidebar__client-tag">
           <span className="sidebar__client-dot" />

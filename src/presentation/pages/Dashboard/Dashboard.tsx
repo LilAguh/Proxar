@@ -126,7 +126,7 @@ export const Dashboard = () => {
                 <span className="dashboard__recent-number">#{ticket.number}</span>
                 <span className="dashboard__recent-title-text">{ticket.title}</span>
               </div>
-              <span className="dashboard__recent-client">{ticket.client.name}</span>
+              <span className="dashboard__recent-client">{ticket.client?.name ?? 'Sin cliente'}</span>
             </div>
           )) || <EmptyState icon="🎫" title="No hay tickets" />}
         </div>
