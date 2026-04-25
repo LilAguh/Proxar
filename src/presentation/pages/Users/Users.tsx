@@ -1,14 +1,20 @@
 import { useState } from 'react';
-import { useUsers, useCreateUser, useUpdateUser } from '@/hooks/api/useAuth';
+import { useUsers, useCreateUser, useUpdateUser, useDeactivateUser } from '@/hooks/api/useAuth';
 import { Card, Button, Input, Select } from '@presentation/atoms';
 import { Spinner, EmptyState, Modal } from '@presentation/molecules';
 import { UserRole } from '@core/enums';
+import { useConfirm } from '@/hooks/api/useConfirm';
+import { ConfirmDialog } from '@presentation/molecules';
 import './Users.scss';
 
 export const Users = () => {
   const { data: users, isLoading } = useUsers();
+  const deactivateUser = useDeactivateUser();
+  
   const [modalOpen, setModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
+
+  const { isOpen, options, confirm, handleConfirm, handleCancel } = useConfirm();
 
   if (isLoading) {
     return (
@@ -17,6 +23,20 @@ export const Users = () => {
       </div>
     );
   }
+
+  const handleDeactivate = async (user: any) => {
+    const confirmed = await confirm({
+      title: 'Desactivar Usuario',
+      message: `¿Estás seguro que querés desactivar a ${user.name}? El usuario no podrá acceder al sistema.`,
+      confirmText: 'Desactivar',
+      cancelText: 'Cancelar',
+      variant: 'warning',
+    });
+
+    if (confirmed) {
+      await deactivateUser.mutateAsync(user.id);
+    }
+  };
 
   const handleEdit = (user: any) => {
     setEditingUser(user);
@@ -82,6 +102,14 @@ export const Users = () => {
                     <Button variant="ghost" size="sm" onClick={() => handleEdit(user)}>
                       Editar
                     </Button>
+                    <Button
+  variant="warning"
+  size="sm"
+  onClick={() => handleDeactivate(user)}
+  disabled={!user.active}
+>
+  {user.active ? 'Desactivar' : 'Inactivo'}
+</Button>
                   </div>
                 </div>
               );
@@ -95,6 +123,18 @@ export const Users = () => {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         user={editingUser}
+      />
+
+      <ConfirmDialog
+        isOpen={isOpen}
+        title={options.title}
+        message={options.message}
+        confirmText={options.confirmText}
+        cancelText={options.cancelText}
+        variant={options.variant}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+        isLoading={deactivateUser.isPending}
       />
     </div>
   );
