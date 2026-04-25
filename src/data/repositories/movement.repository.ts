@@ -29,6 +29,10 @@ class MovementRepository extends BaseRepository {
   async register(data: any): Promise<BoxMovement> {
     return this.post<BoxMovement>('/movements', data);
   }
+
+  async delete(id: string): Promise<void> {
+  return this.apiDelete<void>(`/movements/${id}`);
+}
 }
 
 export const movementRepository = new MovementRepository();
