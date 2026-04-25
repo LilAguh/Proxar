@@ -52,3 +52,24 @@ export function useRegisterMovement() {
     },
   });
 }
+
+export function useDeleteMovement() {
+  const queryClient = useQueryClient();
+  const { showToast } = useToastStore();
+
+  return useMutation({
+    mutationFn: (id: string) => movementRepository.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      showToast('Movimiento eliminado y saldo revertido correctamente');
+    },
+    onError: (error: any) => {
+      showToast(
+        error.response?.data?.message || 'Error al eliminar movimiento',
+        'error'
+      );
+    },
+  });
+}
