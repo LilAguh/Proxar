@@ -22,8 +22,12 @@ class ClientRepository extends BaseRepository {
     return this.put<Client>(`/clients/${id}`, data);
   }
 
-  async remove(id: string): Promise<void> {
-    return this.delete<void>(`/clients/${id}`);
+  // async remove(id: string): Promise<void> {
+  //   return this.delete<void>(`/clients/${id}`);
+  // }
+
+  async delete(id: string): Promise<void> {
+    return this.apiDelete<void>(`/clients/${id}`);
   }
 }
 

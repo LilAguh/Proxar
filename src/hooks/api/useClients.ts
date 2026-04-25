@@ -65,13 +65,16 @@ export function useDeleteClient() {
   const { showToast } = useToastStore();
 
   return useMutation({
-    mutationFn: (id: string) => clientRepository.remove(id),
+    mutationFn: (id: string) => clientRepository.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       showToast('Cliente eliminado correctamente');
     },
     onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Error al eliminar cliente', 'error');
+      showToast(
+        error.response?.data?.message || 'Error al eliminar cliente',
+        'error'
+      );
     },
   });
 }

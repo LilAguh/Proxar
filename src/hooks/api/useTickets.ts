@@ -102,3 +102,23 @@ export function useAssignTicket() {
     },
   });
 }
+
+export function useDeleteTicket() {
+  const queryClient = useQueryClient();
+  const { showToast } = useToastStore();
+
+  return useMutation({
+    mutationFn: (id: string) => ticketRepository.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      showToast('Ticket eliminado correctamente');
+    },
+    onError: (error: any) => {
+      showToast(
+        error.response?.data?.message || 'Error al eliminar ticket',
+        'error'
+      );
+    },
+  });
+}

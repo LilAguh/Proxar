@@ -70,6 +70,7 @@ class TicketRepository extends BaseRepository {
   async getByClient(clientId: string): Promise<Ticket[]> {
     return this.get<Ticket[]>(`/tickets/client/${clientId}`);
   }
+  
 
   async create(data: { clientId: string; type: TicketType; priority: Priority; title: string; description?: string; address?: string }): Promise<Ticket> {
     const raw = await this.post<any>('/tickets', data);
@@ -84,6 +85,10 @@ class TicketRepository extends BaseRepository {
   async assign(id: string, userId: string): Promise<Ticket> {
     return this.put<Ticket>(`/tickets/${id}/assign`, { userId });
   }
+
+  async delete(id: string): Promise<void> {
+  return this.apiDelete<void>(`/tickets/${id}`);
+}
 }
 
 export const ticketRepository = new TicketRepository();

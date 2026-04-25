@@ -62,7 +62,7 @@ class AuthRepository extends BaseRepository {
   }
 
   async deactivateUser(id: string): Promise<void> {
-    return this.delete<void>(`/users/${id}`);
+    return this.apiDelete<void>(`/users/${id}`);
   }
 }
 

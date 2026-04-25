@@ -1,0 +1,12 @@
+@import '@/styles/variables';
+
+.confirm-dialog {
+  padding: $space-2 0;
+
+  &__message {
+    margin: 0;
+    font-size: $font-size-base;
+    line-height: 1.6;
+    color: $gray-700;
+  }
+}
