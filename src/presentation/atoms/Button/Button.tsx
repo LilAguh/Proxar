@@ -3,7 +3,7 @@ import './Button.scss';
 
 interface ButtonProps {
   children: ReactNode;
-  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'ghost' | 'warning';
   size?: 'sm' | 'md' | 'lg';
   icon?: ReactNode;
   disabled?: boolean;
