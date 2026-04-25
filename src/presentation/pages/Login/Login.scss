@@ -1,0 +1,73 @@
+@import '@/styles/variables';
+@import '@/styles/mixins';
+
+.login {
+  min-height: 100vh;
+  @include flex-center;
+  background: linear-gradient(135deg, $brand-light 0%, $gray-50 100%);
+  padding: $space-6;
+
+  &__container {
+    width: 100%;
+    max-width: 440px;
+    @include flex-column;
+    gap: $space-8;
+  }
+
+  &__logo {
+    @include flex-center;
+    
+    svg {
+      display: block;
+    }
+  }
+
+  &__card {
+    @include card;
+    padding: $space-8;
+    @include flex-column;
+    gap: $space-6;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-black;
+    color: $gray-900;
+    text-align: center;
+  }
+
+  &__subtitle {
+    margin: -$space-4 0 0;
+    font-size: $font-size-base;
+    color: $gray-500;
+    text-align: center;
+  }
+
+  &__form {
+    @include flex-column;
+    gap: $space-5;
+  }
+
+  &__footer {
+    padding-top: $space-4;
+    border-top: $border-width solid $border-color;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: $gray-500;
+    text-align: center;
+    line-height: 1.6;
+
+    code {
+      background: $gray-100;
+      padding: 2px $space-2;
+      border-radius: $radius-sm;
+      font-family: $font-mono;
+      font-size: $font-size-xs;
+      color: $brand;
+    }
+  }
+}

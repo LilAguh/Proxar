@@ -77,6 +77,7 @@ export function useUpdateTicketStatus() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
       queryClient.invalidateQueries({ queryKey: ['tickets', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['tickets', data.id, 'details'] });
       showToast('Estado del ticket actualizado');
     },
     onError: (error: any) => {

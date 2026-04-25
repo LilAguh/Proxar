@@ -154,4 +154,15 @@
     font-size: $font-size-xs;
     color: $gray-400;
   }
+
+  &__logout {
+  @include button-reset;
+  font-size: $font-size-xl;
+  color: $gray-400;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $danger;
+  }
+}
 }

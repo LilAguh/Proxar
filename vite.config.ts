@@ -13,6 +13,13 @@ export default defineConfig({
       '@presentation': path.resolve(__dirname, './src/presentation'),
     },
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        silenceDeprecations: ['legacy-js-api', 'import'],
+      },
+    },
+  },
   server: {
     port: 3000,
     proxy: {
