@@ -17,8 +17,13 @@ export class BaseRepository {
     return response.data;
   }
 
-  protected async delete<T>(url: string): Promise<T> {
+  protected async apiDelete<T>(url: string): Promise<T> {
     const response: AxiosResponse<T> = await apiClient.delete(url);
+    return response.data;
+  }
+
+  protected async patch<T>(url: string, data?: any): Promise<T> {
+    const response: AxiosResponse<T> = await apiClient.patch<T>(url, data);
     return response.data;
   }
 }
