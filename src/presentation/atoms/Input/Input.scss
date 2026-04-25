@@ -1,44 +1,54 @@
 @import '@/styles/variables';
 @import '@/styles/mixins';
 
-.input-wrapper {
+.input {
   @include flex-column;
   gap: $space-1;
   width: 100%;
-}
 
-.input-label {
-  font-size: $font-size-sm;
-  font-weight: $font-weight-semibold;
-  color: $gray-700;
+  &--full-width {
+    width: 100%;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $gray-700;
+  }
 
   &__required {
     color: $danger;
     margin-left: 2px;
   }
-}
 
-.input {
-  width: 100%;
-  border: $border-width solid $border-color;
-  border-radius: $radius-sm;
-  padding: 10px $font-size-base;
-  font-size: $font-size-md;
-  color: $gray-900;
-  background: $white;
-  transition: border-color $transition-fast, box-shadow $transition-fast;
-  outline: none;
+  &__field {
+    width: 100%;
+    border: $border-width solid $border-color;
+    border-radius: $radius-sm;
+    padding: 10px $font-size-base;
+    font-size: $font-size-md;
+    color: $gray-900;
+    background: $white;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
+    outline: none;
 
-  &::placeholder {
-    color: $gray-400;
+    &::placeholder {
+      color: $gray-400;
+    }
+
+    &:focus {
+      border-color: $brand;
+      box-shadow: 0 0 0 3px rgba($brand, 0.15);
+    }
+
+    &:disabled {
+      background: $gray-100;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
   }
 
-  &--focused {
-    border-color: $brand;
-    box-shadow: 0 0 0 3px rgba($brand, 0.15);
-  }
-
-  &--error {
+  &--error &__field {
     border-color: $danger;
 
     &:focus {
@@ -46,15 +56,11 @@
     }
   }
 
-  &:disabled {
-    background: $gray-100;
-    cursor: not-allowed;
-    opacity: 0.6;
+  &__error {
+    display: block;
+    margin-top: $space-1;
+    font-size: $font-size-xs;
+    color: $danger;
+    font-weight: $font-weight-medium;
   }
-}
-
-.input-error {
-  font-size: $font-size-xs;
-  color: $danger;
-  font-weight: $font-weight-medium;
 }
