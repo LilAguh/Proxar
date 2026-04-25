@@ -1,5 +1,6 @@
 import { Modal } from '../Modal/Modal';
 import { Button } from '@presentation/atoms';
+import './ConfirmDialog.scss';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -9,7 +10,8 @@ interface ConfirmDialogProps {
   onCancel: () => void;
   confirmText?: string;
   cancelText?: string;
-  variant?: 'danger' | 'warning';
+  variant?: 'danger' | 'warning' | 'primary';
+  isLoading?: boolean;
 }
 
 export const ConfirmDialog = ({
@@ -21,6 +23,7 @@ export const ConfirmDialog = ({
   confirmText = 'Confirmar',
   cancelText = 'Cancelar',
   variant = 'danger',
+  isLoading = false,
 }: ConfirmDialogProps) => {
   return (
     <Modal
@@ -30,16 +33,18 @@ export const ConfirmDialog = ({
       width="sm"
       footer={
         <>
-          <Button variant="ghost" onClick={onCancel}>
+          <Button variant="ghost" onClick={onCancel} disabled={isLoading}>
             {cancelText}
           </Button>
-          {/* <Button variant={variant} onClick={onConfirm}>
-            {confirmText}
-          </Button> */}
+          <Button variant={variant} onClick={onConfirm} disabled={isLoading}>
+            {isLoading ? 'Procesando...' : confirmText}
+          </Button>
         </>
       }
     >
-      <p style={{ margin: 0, fontSize: '15px', lineHeight: 1.6 }}>{message}</p>
+      <div className="confirm-dialog">
+        <p className="confirm-dialog__message">{message}</p>
+      </div>
     </Modal>
   );
 };
