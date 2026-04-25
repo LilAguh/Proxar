@@ -1,18 +1,42 @@
-import { useState } from 'react';
-import { useMovements, useAccountBalances, useActiveAccounts } from '@/hooks/api';
-import { Card, Button } from '@presentation/atoms';
-import { Spinner, EmptyState } from '@presentation/molecules';
-import { useUIStore } from '@/stores';
-import { MovementType } from '@core/enums';
-import './Caja.scss';
+import { useState } from "react";
+import {
+  useMovements,
+  useAccountBalances,
+  useActiveAccounts,
+  useDeleteMovement,
+} from "@/hooks/api";
+import { Card, Button } from "@presentation/atoms";
+import { Spinner, EmptyState, ConfirmDialog } from "@presentation/molecules";
+import { useUIStore, useAuthStore } from "@/stores";
+import { MovementType } from "@core/enums";
+import { useConfirm } from "@/hooks/api/useConfirm"; // ← CORREGIDO el path
+import "./Caja.scss";
 
 export const Caja = () => {
   const { data: movements, isLoading } = useMovements();
   const { data: balances } = useAccountBalances();
   const { data: accounts } = useActiveAccounts();
   const { openModalCaja } = useUIStore();
+  const deleteMovement = useDeleteMovement();
+  const { isAdmin } = useAuthStore();
 
-  const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const { isOpen, options, confirm, handleConfirm, handleCancel } = useConfirm();
+
+  const [filter, setFilter] = useState<"all" | "income" | "expense">("all");
+
+  const handleDelete = async (movement: any) => {
+    const confirmed = await confirm({
+      title: "Eliminar Movimiento",
+      message: `¿Estás seguro que querés eliminar este movimiento? El saldo de la cuenta será revertido automáticamente.`,
+      confirmText: "Eliminar",
+      cancelText: "Cancelar",
+      variant: "danger",
+    });
+
+    if (confirmed) {
+      await deleteMovement.mutateAsync(movement.id);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -23,46 +47,51 @@ export const Caja = () => {
   }
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: "ARS",
       minimumFractionDigits: 0,
     }).format(amount);
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('es-AR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(date).toLocaleDateString("es-AR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
-  const totalBalance = Object.values(balances || {}).reduce((sum, bal) => sum + (bal as number), 0);
+  const totalBalance = Object.values(balances || {}).reduce(
+    (sum, bal) => sum + (bal as number),
+    0
+  );
 
   const filteredMovements = movements?.filter((m) => {
-    if (filter === 'income') return m.type === MovementType.Income;
-    if (filter === 'expense') return m.type === MovementType.Expense;
+    if (filter === "income") return m.type === MovementType.Income;
+    if (filter === "expense") return m.type === MovementType.Expense;
     return true;
   });
 
-  const todayIncome = movements
-    ?.filter((m) => {
-      const today = new Date().toISOString().split('T')[0];
-      const movDate = m.movementDate.split('T')[0];
-      return movDate === today && m.type === MovementType.Income;
-    })
-    .reduce((sum, m) => sum + m.amount, 0) || 0;
+  const todayIncome =
+    movements
+      ?.filter((m) => {
+        const today = new Date().toISOString().split("T")[0];
+        const movDate = m.movementDate.split("T")[0];
+        return movDate === today && m.type === MovementType.Income;
+      })
+      .reduce((sum, m) => sum + m.amount, 0) || 0;
 
-  const todayExpense = movements
-    ?.filter((m) => {
-      const today = new Date().toISOString().split('T')[0];
-      const movDate = m.movementDate.split('T')[0];
-      return movDate === today && m.type === MovementType.Expense;
-    })
-    .reduce((sum, m) => sum + m.amount, 0) || 0;
+  const todayExpense =
+    movements
+      ?.filter((m) => {
+        const today = new Date().toISOString().split("T")[0];
+        const movDate = m.movementDate.split("T")[0];
+        return movDate === today && m.type === MovementType.Expense;
+      })
+      .reduce((sum, m) => sum + m.amount, 0) || 0;
 
   return (
     <div className="caja">
@@ -114,23 +143,23 @@ export const Caja = () => {
       {/* Filtros */}
       <div className="caja__filters">
         <Button
-          variant={filter === 'all' ? 'primary' : 'ghost'}
+          variant={filter === "all" ? "primary" : "ghost"}
           size="sm"
-          onClick={() => setFilter('all')}
+          onClick={() => setFilter("all")}
         >
           Todos
         </Button>
         <Button
-          variant={filter === 'income' ? 'success' : 'ghost'}
+          variant={filter === "income" ? "success" : "ghost"}
           size="sm"
-          onClick={() => setFilter('income')}
+          onClick={() => setFilter("income")}
         >
           Ingresos
         </Button>
         <Button
-          variant={filter === 'expense' ? 'danger' : 'ghost'}
+          variant={filter === "expense" ? "danger" : "ghost"}
           size="sm"
-          onClick={() => setFilter('expense')}
+          onClick={() => setFilter("expense")}
         >
           Egresos
         </Button>
@@ -150,29 +179,60 @@ export const Caja = () => {
                   <div className="caja__movement-header">
                     <span className="caja__movement-number">#{mov.number}</span>
                     <span className="caja__movement-method">{mov.method}</span>
-                    {mov.ticketNumber && (
-                      <span className="caja__movement-ticket">Ticket #{mov.ticketNumber}</span>
+                    {mov.ticket && ( // ← CORREGIDO: mov.ticket en vez de mov.ticketNumber
+                      <span className="caja__movement-ticket">
+                        Ticket #{mov.ticket.number} {/* ← CORREGIDO */}
+                      </span>
                     )}
                   </div>
                   <div className="caja__movement-concept">{mov.concept}</div>
                   <div className="caja__movement-footer">
-                    <span className="caja__movement-account">{mov.account?.name || 'Sin cuenta'}</span>
-                    <span className="caja__movement-date">{formatDate(mov.movementDate)}</span>
+                    <span className="caja__movement-account">
+                      {mov.account?.name || "Sin cuenta"}
+                    </span>
+                    <span className="caja__movement-date">
+                      {formatDate(mov.movementDate)}
+                    </span>
                   </div>
                 </div>
-                <div
-                  className={`caja__movement-amount caja__movement-amount--${
-                    mov.type === MovementType.Income ? 'income' : 'expense'
-                  }`}
-                >
-                  {mov.type === MovementType.Income ? '+' : '-'}
-                  {formatCurrency(mov.amount)}
+
+                <div className="caja__movement-actions">
+                  <div
+                    className={`caja__movement-amount caja__movement-amount--${
+                      mov.type === MovementType.Income ? "income" : "expense"
+                    }`}
+                  >
+                    {mov.type === MovementType.Income ? "+" : "-"}
+                    {formatCurrency(mov.amount)}
+                  </div>
+                  {isAdmin() && (
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleDelete(mov)}
+                      disabled={deleteMovement.isPending}
+                    >
+                      🗑️
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         )}
       </Card>
+
+      <ConfirmDialog
+        isOpen={isOpen}
+        title={options.title}
+        message={options.message}
+        confirmText={options.confirmText}
+        cancelText={options.cancelText}
+        variant={options.variant}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+        isLoading={deleteMovement.isPending}
+      />
     </div>
   );
 };
