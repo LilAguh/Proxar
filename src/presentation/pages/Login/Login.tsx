@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useLogin } from '@/hooks/api/useAuth';
 import { Input, Button } from '@presentation/atoms';
 import { Spinner } from '@presentation/molecules';
-import logo from '../../../../public/SVG/Proxar-full.svg'
 import './Login.scss';
 
 export const Login = () => {
@@ -21,7 +20,7 @@ export const Login = () => {
     <div className="login">
       <div className="login__container">
         <div className="login__logo">
-          <img src={logo} alt="Logo" className="logo" />
+          <img src="/SVG/Proxar-full.svg" alt="Logo" className="logo" />
         </div>
 
         <div className="login__card">
