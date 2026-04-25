@@ -4,6 +4,7 @@ import { Card, Button, Input } from '@presentation/atoms';
 import { Spinner, EmptyState } from '@presentation/molecules';
 import { ModalClient } from '@presentation/features';
 import { Client } from '@core/entities/Client.entity';
+import { ConfirmDialog } from '@presentation/molecules/ConfirmDialog/ConfirmDialog';
 import './Clients.scss';
 
 export const Clients = () => {
@@ -14,6 +15,22 @@ export const Clients = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; client: any }>({
+  open: false,
+  client: null,
+});
+
+const handleDeleteClick = (client: any) => {
+  setDeleteConfirm({ open: true, client });
+};
+
+const handleConfirmDelete = async () => {
+  if (deleteConfirm.client) {
+    await deleteClient.mutateAsync(deleteConfirm.client.id);
+  }
+  setDeleteConfirm({ open: false, client: null });
+};
+
 
   const filtered = clients?.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -68,6 +85,15 @@ export const Clients = () => {
           onChange={setSearch}
         />
       </div>
+      <ConfirmDialog
+  isOpen={deleteConfirm.open}
+  title="Eliminar Cliente"
+  message={`¿Estás seguro que querés eliminar a ${deleteConfirm.client?.name}? Esta acción no se puede deshacer.`}
+  onConfirm={handleConfirmDelete}
+  onCancel={() => setDeleteConfirm({ open: false, client: null })}
+  confirmText="Eliminar"
+  variant="danger"
+/>
 
       {filtered.length === 0 ? (
         <EmptyState

@@ -13,6 +13,26 @@ interface ModalNuevoTicketProps {
 export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => {
   const { data: clients } = useClients();
   const createTicket = useCreateTicket();
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+const validate = () => {
+  const newErrors: Record<string, string> = {};
+
+  if (!form.clientId) newErrors.clientId = 'Seleccione un cliente';
+  if (!form.title) newErrors.title = 'El título es requerido';
+  if (form.title.length > 200) newErrors.title = 'Máximo 200 caracteres';
+  if (form.description.length > 2000) newErrors.description = 'Máximo 2000 caracteres';
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
+const handleSubmit = async () => {
+  if (!validate()) return;
+  
+  await createTicket.mutateAsync(form);
+  handleClose();
+};
 
   const [form, setForm] = useState({
     clientId: '',
@@ -22,11 +42,6 @@ export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => 
     description: '',
     address: '',
   });
-
-  const handleSubmit = async () => {
-    await createTicket.mutateAsync(form);
-    handleClose();
-  };
 
   const handleClose = () => {
     setForm({
@@ -113,12 +128,16 @@ export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => 
         </div>
 
         <Input
-          label="Título"
-          required
-          value={form.title}
-          onChange={(value) => setForm({ ...form, title: value })}
-          placeholder="Ej: Cambio de vidrio ventana cocina"
-        />
+  label="Título"
+  required
+  value={form.title}
+  onChange={(value) => {
+    setForm({ ...form, title: value });
+    if (errors.title) setErrors({ ...errors, title: '' });
+  }}
+  placeholder="Ej: Cambio de vidrio ventana cocina"
+  error={errors.title}
+/>
 
         <Textarea
           label="Descripción"

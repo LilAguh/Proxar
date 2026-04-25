@@ -1,54 +1,45 @@
-import { useState, ChangeEvent } from 'react';
 import './Input.scss';
 
 interface InputProps {
   label?: string;
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'date';
   value: string;
   onChange: (value: string) => void;
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel';
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
-  error?: string;
-  className?: string;
+  error?: string; // ← NUEVO
+  fullWidth?: boolean;
 }
 
 export const Input = ({
   label,
+  type = 'text',
   value,
   onChange,
-  type = 'text',
   placeholder,
-  required = false,
-  disabled = false,
-  error,
-  className = '',
+  required,
+  disabled,
+  error, // ← NUEVO
+  fullWidth,
 }: InputProps) => {
-  const [focused, setFocused] = useState(false);
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
-  };
-
   return (
-    <div className={`input-wrapper ${className}`}>
+    <div className={`input ${fullWidth ? 'input--full-width' : ''} ${error ? 'input--error' : ''}`}>
       {label && (
-        <label className="input-label">
+        <label className="input__label">
           {label}
-          {required && <span className="input-label__required">*</span>}
+          {required && <span className="input__required">*</span>}
         </label>
       )}
       <input
         type={type}
         value={value}
-        onChange={handleChange}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className={`input ${focused ? 'input--focused' : ''} ${error ? 'input--error' : ''}`}
+        className="input__field"
       />
-      {error && <span className="input-error">{error}</span>}
+      {error && <span className="input__error">{error}</span>}
     </div>
   );
 };
