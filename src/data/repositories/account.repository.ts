@@ -23,7 +23,7 @@ class AccountRepository extends BaseRepository {
   }
 
   async remove(id: string): Promise<void> {
-    return this.delete<void>(`/accounts/${id}`);
+    return this.apiDelete<void>(`/accounts/${id}`);
   }
 }
 

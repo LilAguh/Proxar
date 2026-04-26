@@ -23,9 +23,9 @@ apiClient.interceptors.request.use(
           config.headers.Authorization = `Bearer ${token}`;
         }
 
-        // Agregar headers multi-tenant
+        // Agregar headers multi-tenant desde el usuario logueado
         const userId = state?.user?.id;
-        const companyId = '00000000-0000-0000-0000-000000000001'; // Temporal
+        const companyId = state?.user?.companyId;
 
         if (userId) {
           config.headers['X-User-Id'] = userId;

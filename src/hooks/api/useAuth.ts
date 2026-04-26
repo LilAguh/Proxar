@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { authRepository } from '@data/repositories/auth.repository';
-import { useAuthStore } from '@/stores';
+import { authRepository } from '@/data/repositories/auth.repository';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { useNavigate } from 'react-router-dom';
-import { useToastStore } from '@/stores';
+import { useToastStore } from '@/stores/useToastStore';
 
 export function useLogin() {
   const { setAuth } = useAuthStore();
@@ -10,17 +10,18 @@ export function useLogin() {
   const { showToast } = useToastStore();
 
   return useMutation({
-    mutationFn: (data: Parameters<typeof authRepository.login>[0]) => authRepository.login(data),
+    mutationFn: (credentials: { email: string; password: string }) =>
+      authRepository.login(credentials),
     onSuccess: (data) => {
+      // Tu store espera (user, token) en ese orden
       setAuth(data.user, data.token);
-      showToast('Bienvenido!');
       navigate('/');
+      showToast('¡Bienvenido!', 'success');
     },
     onError: (error: any) => {
-      showToast(
-        error.response?.data?.message || 'Email o contraseña incorrectos',
-        'error'
-      );
+      console.error('Login error:', error);
+      const message = error?.response?.data?.message || 'Error al iniciar sesión';
+      showToast(message, 'error');
     },
   });
 }
@@ -28,23 +29,23 @@ export function useLogin() {
 export function useLogout() {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { showToast } = useToastStore();
 
   return () => {
     logout();
-    queryClient.clear();
     navigate('/login');
+    showToast('Sesión cerrada', 'info');
   };
 }
 
-export function useCurrentUser() {
-  const { isAuthenticated } = useAuthStore();
+export function useMe() {
+  const { token } = useAuthStore();
 
   return useQuery({
-    queryKey: ['auth', 'me'],
+    queryKey: ['me'],
     queryFn: () => authRepository.getMe(),
-    enabled: isAuthenticated(),
-    staleTime: 10 * 60 * 1000, // 10 minutos
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000, // 5 minutos
   });
 }
 
@@ -52,25 +53,24 @@ export function useChangePassword() {
   const { showToast } = useToastStore();
 
   return useMutation({
-    mutationFn: authRepository.changePassword,
+    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
+      authRepository.changePassword(data),
     onSuccess: () => {
-      showToast('Contraseña actualizada correctamente');
+      showToast('Contraseña actualizada correctamente', 'success');
     },
     onError: (error: any) => {
-      showToast(
-        error.response?.data?.message || 'Error al cambiar contraseña',
-        'error'
-      );
+      const message = error?.response?.data?.message || 'Error al cambiar contraseña';
+      showToast(message, 'error');
     },
   });
 }
 
-// Admin only hooks
+// User management hooks (Admin only)
 export function useUsers() {
   return useQuery({
     queryKey: ['users'],
     queryFn: () => authRepository.getAllUsers(),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   });
 }
 
@@ -79,55 +79,46 @@ export function useCreateUser() {
   const { showToast } = useToastStore();
 
   return useMutation({
-    mutationFn: authRepository.createUser,
+    mutationFn: (data: { name: string; email: string; password: string; role: string }) =>
+      authRepository.createUser(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
-      showToast('Usuario creado correctamente');
+      showToast('Usuario creado correctamente', 'success');
     },
     onError: (error: any) => {
-      showToast(
-        error.response?.data?.message || 'Error al crear usuario',
-        'error'
-      );
+      const message = error?.response?.data?.message || 'Error al crear usuario';
+      showToast(message, 'error');
     },
   });
 }
 
 export function useUpdateUser() {
-  const queryClient = useQueryClient();
   const { showToast } = useToastStore();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
+    mutationFn: ({ id, data }: { id: string; data: { name: string; email: string; role: string; active: boolean } }) =>
       authRepository.updateUser(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      showToast('Usuario actualizado correctamente');
+      showToast('Usuario actualizado correctamente', 'success');
     },
     onError: (error: any) => {
-      showToast(
-        error.response?.data?.message || 'Error al actualizar usuario',
-        'error'
-      );
+      const message = error?.response?.data?.message || 'Error al actualizar usuario';
+      showToast(message, 'error');
     },
   });
 }
 
 export function useDeactivateUser() {
-  const queryClient = useQueryClient();
   const { showToast } = useToastStore();
 
   return useMutation({
-    mutationFn: authRepository.deactivateUser,
+    mutationFn: (userId: string) => authRepository.deactivateUser(userId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      showToast('Usuario desactivado correctamente');
+      showToast('Usuario desactivado correctamente', 'success');
     },
     onError: (error: any) => {
-      showToast(
-        error.response?.data?.message || 'Error al desactivar usuario',
-        'error'
-      );
+      const message = error?.response?.data?.message || 'Error al desactivar usuario';
+      showToast(message, 'error');
     },
   });
 }
