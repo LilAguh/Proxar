@@ -2,33 +2,32 @@
 @import '@/styles/mixins';
 
 .card {
-  @include card;
-
-  &--padding-none {
-    padding: 0;
-  }
-
-  &--padding-sm {
-    padding: $space-3;
-  }
-
-  &--padding-md {
-    padding: $space-4;
-  }
-
-  &--padding-lg {
-    padding: $space-6;
-  }
+  background: $white;
+  border-radius: $radius-xl;
+  border: $border-width solid $border-color;
+  box-shadow: $shadow-sm;
+  transition: all $transition-base;
 
   &--hoverable {
-    transition: box-shadow $transition-base;
+    cursor: pointer;
 
     &:hover {
       box-shadow: $shadow-md;
+      transform: translateY(-2px);
+      border-color: darken($border-color, 5%);
+    }
+
+    &:active {
+      transform: translateY(0);
     }
   }
 
   &--clickable {
     cursor: pointer;
+    user-select: none;
+
+    &:active {
+      transform: scale(0.98);
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuthStore, useUIStore } from "@/stores";
+import { useAuthStore, useUIStore, useCompanyStore } from "@/stores";
 import { useLogout } from "@/hooks/api/useAuth";
 import { Avatar } from "@presentation/atoms";
 import "./Sidebar.scss";
@@ -7,37 +7,19 @@ import "./Sidebar.scss";
 export const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuthStore();
+  const { user, isAdmin } = useAuthStore();
+  const { company } = useCompanyStore();
   const { openModalTicket, openModalCaja } = useUIStore();
   const logout = useLogout();
-  const { isAdmin } = useAuthStore();
 
   const navItems = [
-    { key: "dashboard", label: "Dashboard", icon: "▦", path: "/" },
-    { key: "tickets", label: "Tickets", icon: "◈", path: "/tickets" },
-    { key: "caja", label: "Caja", icon: "$", path: "/caja" },
-    {
-      key: "clients",
-      label: "Clientes",
-      icon: "◉",
-      path: "/clients",
-      soon: true,
-    },
-    {
-      key: "users",
-      label: "Usuarios",
-      icon: "👥",
-      path: "/users",
-      adminOnly: true,
-    }, // ← NUEVO
-    {
-      key: "reports",
-      label: "Reportes",
-      icon: "▣",
-      path: "/reports",
-      soon: true,
-    },
-  ];
+  { key: 'dashboard', label: 'Dashboard', icon: '▦', path: '/' },
+  { key: 'tickets', label: 'Tickets', icon: '◈', path: '/tickets' },
+  { key: 'caja', label: 'Caja', icon: '$', path: '/caja' },
+  { key: 'clients', label: 'Clientes', icon: '◉', path: '/clients' }, // ← QUITAR soon: true
+  { key: 'users', label: 'Usuarios', icon: '👥', path: '/users', adminOnly: true },
+  { key: 'reports', label: 'Reportes', icon: '▣', path: '/reports', soon: true },
+];
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
@@ -52,7 +34,7 @@ export const Sidebar = () => {
 
         <div className="sidebar__client-tag">
           <span className="sidebar__client-dot" />
-          <span className="sidebar__client-name">Aberturas Sagitario</span>
+          <span className="sidebar__client-name">{company?.name || 'Empresa'}</span>
         </div>
       </div>
 

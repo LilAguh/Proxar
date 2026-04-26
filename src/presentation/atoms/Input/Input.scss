@@ -3,8 +3,7 @@
 
 .input {
   @include flex-column;
-  gap: $space-1;
-  width: 100%;
+  gap: $space-2;
 
   &--full-width {
     width: 100%;
@@ -14,6 +13,7 @@
     font-size: $font-size-sm;
     font-weight: $font-weight-semibold;
     color: $gray-700;
+    display: block;
   }
 
   &__required {
@@ -21,46 +21,92 @@
     margin-left: 2px;
   }
 
+  &__wrapper {
+    position: relative;
+    @include flex-start;
+  }
+
+  &__icon {
+    position: absolute;
+    left: $space-3;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $gray-400;
+    @include flex-center;
+    pointer-events: none;
+  }
+
   &__field {
     width: 100%;
-    border: $border-width solid $border-color;
-    border-radius: $radius-sm;
-    padding: 10px $font-size-base;
-    font-size: $font-size-md;
+    padding: $space-3 $space-4;
+    border: 2px solid $border-color;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
     color: $gray-900;
     background: $white;
-    transition: border-color $transition-fast, box-shadow $transition-fast;
-    outline: none;
+    transition: all $transition-fast;
 
     &::placeholder {
       color: $gray-400;
     }
 
     &:focus {
+      outline: none;
       border-color: $brand;
-      box-shadow: 0 0 0 3px rgba($brand, 0.15);
+      box-shadow: 0 0 0 3px rgba($brand, 0.1);
     }
 
     &:disabled {
-      background: $gray-100;
+      background: $gray-50;
+      color: $gray-400;
       cursor: not-allowed;
-      opacity: 0.6;
     }
   }
 
+  // Con icono
+  .input__icon + &__field {
+    padding-left: $space-10;
+  }
+
+  // Con toggle password
+  &__toggle-password {
+    @include button-reset;
+    position: absolute;
+    right: $space-3;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: $font-size-lg;
+    opacity: 0.6;
+    transition: opacity $transition-fast;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  // Error state
   &--error &__field {
     border-color: $danger;
 
     &:focus {
-      box-shadow: 0 0 0 3px rgba($danger, 0.15);
+      box-shadow: 0 0 0 3px rgba($danger, 0.1);
     }
   }
 
   &__error {
-    display: block;
-    margin-top: $space-1;
     font-size: $font-size-xs;
     color: $danger;
-    font-weight: $font-weight-medium;
+    @include flex-start;
+    gap: $space-1;
+  }
+
+  &__hint {
+    font-size: $font-size-xs;
+    color: $gray-500;
+  }
+
+  // Focused state
+  &--focused &__label {
+    color: $brand;
   }
 }
