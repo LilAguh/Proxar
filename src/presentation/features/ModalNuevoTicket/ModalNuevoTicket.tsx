@@ -14,25 +14,7 @@ export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => 
   const { data: clients } = useClients();
   const createTicket = useCreateTicket();
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-const validate = () => {
-  const newErrors: Record<string, string> = {};
-
-  if (!form.clientId) newErrors.clientId = 'Seleccione un cliente';
-  if (!form.title) newErrors.title = 'El título es requerido';
-  if (form.title.length > 200) newErrors.title = 'Máximo 200 caracteres';
-  if (form.description.length > 2000) newErrors.description = 'Máximo 2000 caracteres';
-
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-};
-
-const handleSubmit = async () => {
-  if (!validate()) return;
-  
-  await createTicket.mutateAsync(form);
-  handleClose();
-};
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const [form, setForm] = useState({
     clientId: '',
@@ -43,6 +25,46 @@ const handleSubmit = async () => {
     address: '',
   });
 
+  const validateField = (field: string, value: string): string => {
+    switch (field) {
+      case 'clientId':
+        if (!value) return 'Selecciona un cliente';
+        return '';
+
+      case 'title':
+        if (!value) return 'El título es requerido';
+        if (value.length < 5) return 'Mínimo 5 caracteres';
+        if (value.length > 200) return 'Máximo 200 caracteres';
+        return '';
+
+      case 'description':
+        if (value.length > 2000) return 'Máximo 2000 caracteres';
+        return '';
+
+      default:
+        return '';
+    }
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {
+      clientId: validateField('clientId', form.clientId),
+      title: validateField('title', form.title),
+      description: validateField('description', form.description),
+    };
+
+    setErrors(newErrors);
+    setTouched({ clientId: true, title: true, description: true });
+    return !newErrors.clientId && !newErrors.title && !newErrors.description;
+  };
+
+  const handleSubmit = async () => {
+    if (!validate()) return;
+
+    await createTicket.mutateAsync(form);
+    handleClose();
+  };
+
   const handleClose = () => {
     setForm({
       clientId: '',
@@ -52,10 +74,28 @@ const handleSubmit = async () => {
       description: '',
       address: '',
     });
+    setErrors({});
+    setTouched({});
     onClose();
   };
 
-  const isValid = form.clientId && form.title;
+  const handleFieldChange = (field: string, value: string) => {
+    setForm({ ...form, [field]: value });
+
+    // Solo validar si el campo ya fue tocado
+    if (touched[field]) {
+      const error = validateField(field, value);
+      setErrors({ ...errors, [field]: error });
+    }
+  };
+
+  const handleFieldBlur = (field: string) => {
+    setTouched({ ...touched, [field]: true });
+    const error = validateField(field, form[field as keyof typeof form]);
+    setErrors({ ...errors, [field]: error });
+  };
+
+  const isValid = form.clientId && form.title && form.title.length >= 5 && !errors.clientId && !errors.title && !errors.description;
 
   return (
     <Modal
@@ -84,7 +124,8 @@ const handleSubmit = async () => {
             label="Cliente"
             required
             value={form.clientId}
-            onChange={(value) => setForm({ ...form, clientId: value })}
+            onChange={(value) => handleFieldChange('clientId', value)}
+            error={touched.clientId ? errors.clientId : ''}
             options={[
               { value: '', label: 'Seleccionar cliente' },
               ...(clients?.map((c) => ({ value: c.id, label: c.name })) || []),
@@ -120,7 +161,7 @@ const handleSubmit = async () => {
             ]}
           />
           <Input
-            label="Dirección"
+            label="Dirección (opcional)"
             value={form.address}
             onChange={(value) => setForm({ ...form, address: value })}
             placeholder="Dirección del trabajo"
@@ -128,22 +169,23 @@ const handleSubmit = async () => {
         </div>
 
         <Input
-  label="Título"
-  required
-  value={form.title}
-  onChange={(value) => {
-    setForm({ ...form, title: value });
-    if (errors.title) setErrors({ ...errors, title: '' });
-  }}
-  placeholder="Ej: Cambio de vidrio ventana cocina"
-  error={errors.title}
-/>
+          label="Título"
+          required
+          value={form.title}
+          onChange={(value) => handleFieldChange('title', value)}
+          onBlur={() => handleFieldBlur('title')}
+          placeholder="Ej: Cambio de vidrio ventana cocina"
+          error={touched.title ? errors.title : ''}
+          hint="Mínimo 5 caracteres"
+        />
 
         <Textarea
-          label="Descripción"
+          label="Descripción (opcional)"
           value={form.description}
-          onChange={(value) => setForm({ ...form, description: value })}
+          onChange={(value) => handleFieldChange('description', value)}
+          onBlur={() => handleFieldBlur('description')}
           placeholder="Detalles del trabajo a realizar..."
+          error={touched.description ? errors.description : ''}
           rows={5}
         />
       </div>

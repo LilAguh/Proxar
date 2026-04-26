@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useUsers, useCreateUser, useUpdateUser, useDeactivateUser } from '@/hooks/api/useAuth';
 import { Card, Button, Input, Select } from '@presentation/atoms';
 import { Spinner, EmptyState, Modal } from '@presentation/molecules';
@@ -159,29 +159,70 @@ const UserModal = ({ isOpen, onClose, user }: UserModalProps) => {
     active: user?.active ?? true,
   });
 
-  const handleSubmit = async () => {
-    if (user) {
-      await updateUser.mutateAsync({
-        id: user.id,
-        data: {
-          name: form.name,
-          email: form.email,
-          role: form.role,
-          active: form.active,
-        },
-      });
-    } else {
-      await createUser.mutateAsync({
-        name: form.name,
-        email: form.email,
-        password: form.password,
-        role: form.role,
+  // Resetear formulario cuando cambia el user o se abre el modal
+  useEffect(() => {
+    if (isOpen) {
+      setForm({
+        name: user?.name || '',
+        email: user?.email || '',
+        password: '',
+        role: user?.role || UserRole.Operador,
+        active: user?.active ?? true,
       });
     }
-    onClose();
+  }, [user, isOpen]);
+
+  const handleSubmit = async () => {
+    try {
+      if (user) {
+        await updateUser.mutateAsync({
+          id: user.id,
+          data: {
+            name: form.name,
+            email: form.email,
+            role: form.role,
+            active: form.active,
+          },
+        });
+      } else {
+        await createUser.mutateAsync({
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          role: form.role,
+        });
+      }
+      onClose();
+    } catch (error) {
+      console.error('Error al guardar usuario:', error);
+    }
   };
 
-  const isValid = form.name && form.email && (user || form.password);
+  const validateName = (name: string): string => {
+    if (!name) return 'El nombre es requerido';
+    if (name.length < 3) return 'Mínimo 3 caracteres';
+    return '';
+  };
+
+  const validateEmail = (email: string): string => {
+    if (!email) return 'El email es requerido';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Email inválido';
+    return '';
+  };
+
+  const validatePassword = (password: string): string => {
+    if (!password) return 'La contraseña es requerida';
+    if (password.length < 8) return 'Mínimo 8 caracteres';
+    if (!/[A-Z]/.test(password)) return 'Debe tener al menos una mayúscula';
+    if (!/[0-9]/.test(password)) return 'Debe tener al menos un número';
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) return 'Debe tener al menos un carácter especial';
+    return '';
+  };
+
+  const nameError = form.name ? validateName(form.name) : '';
+  const emailError = form.email ? validateEmail(form.email) : '';
+  const passwordError = !user && form.password ? validatePassword(form.password) : '';
+  const isValid = form.name && !nameError && form.email && !emailError && (user || (form.password && !passwordError));
 
   return (
     <Modal
@@ -204,6 +245,8 @@ const UserModal = ({ isOpen, onClose, user }: UserModalProps) => {
           label="Nombre"
           value={form.name}
           onChange={(v) => setForm({ ...form, name: v })}
+          error={nameError}
+          hint="Mínimo 3 caracteres"
           required
         />
         <Input
@@ -211,6 +254,7 @@ const UserModal = ({ isOpen, onClose, user }: UserModalProps) => {
           type="email"
           value={form.email}
           onChange={(v) => setForm({ ...form, email: v })}
+          error={emailError}
           required
         />
         {!user && (
@@ -219,6 +263,8 @@ const UserModal = ({ isOpen, onClose, user }: UserModalProps) => {
             type="password"
             value={form.password}
             onChange={(v) => setForm({ ...form, password: v })}
+            error={passwordError}
+            hint="8+ caracteres, mayúscula, número y carácter especial"
             required
           />
         )}
