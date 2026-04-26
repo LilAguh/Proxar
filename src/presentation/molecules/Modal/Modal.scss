@@ -1,24 +1,48 @@
 @import '@/styles/variables';
 @import '@/styles/mixins';
 
+@keyframes modalBackdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba($black, 0.45);
+  background: rgba($black, 0.6);
+  backdrop-filter: blur(4px);
   @include flex-center;
   z-index: $z-modal-backdrop;
-  animation: fadeIn $transition-base;
+  animation: modalBackdropFadeIn $transition-base;
+  padding: $space-6;
 }
 
 .modal {
   background: $white;
-  border-radius: $radius-xl;
-  box-shadow: $shadow-xl;
+  border-radius: $radius-2xl;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
   max-width: 95vw;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  animation: slideUp $transition-slow;
+  animation: modalSlideUp $transition-slow;
 
   &--sm {
     width: 400px;
@@ -38,7 +62,7 @@
 
   &__header {
     @include flex-between;
-    padding: $space-5 $space-6;
+    padding: $space-6 $space-7;
     border-bottom: $border-width solid $border-color;
   }
 
@@ -51,26 +75,34 @@
 
   &__close {
     @include button-reset;
-    font-size: 28px;
+    width: 32px;
+    height: 32px;
+    @include flex-center;
+    border-radius: $radius-md;
+    font-size: 24px;
     color: $gray-400;
-    line-height: 1;
-    transition: color $transition-fast;
+    transition: all $transition-fast;
 
     &:hover {
+      background: $gray-100;
       color: $gray-700;
     }
   }
 
   &__body {
-    padding: $space-6;
+    padding: $space-7;
     overflow-y: auto;
     @include custom-scrollbar;
+    flex: 1;
   }
 
   &__footer {
     @include flex-between;
     gap: $space-3;
-    padding: $space-4 $space-6;
+    padding: $space-5 $space-7;
     border-top: $border-width solid $border-color;
+    background: $gray-50;
+    border-bottom-left-radius: $radius-2xl;
+    border-bottom-right-radius: $radius-2xl;
   }
 }

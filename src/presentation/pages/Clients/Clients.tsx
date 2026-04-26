@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useClients, useCreateClient, useUpdateClient, useDeleteClient } from '@/hooks/api';
 import { Card, Button, Input, Textarea } from '@presentation/atoms';
 import { Spinner, EmptyState, Modal, ConfirmDialog } from '@presentation/molecules';
@@ -8,8 +8,8 @@ import './Clients.scss';
 
 export const Clients = () => {
   const { data: clients, isLoading } = useClients();
-  const createClient = useCreateClient();
-  const updateClient = useUpdateClient();
+  // const createClient = useCreateClient();
+  // const updateClient = useUpdateClient();
   const deleteClient = useDeleteClient();
 
   const [search, setSearch] = useState('');
@@ -168,23 +168,107 @@ const ClientModal = ({ isOpen, onClose, client }: ClientModalProps) => {
   const updateClient = useUpdateClient();
 
   const [form, setForm] = useState({
-    name: client?.name || '',
-    phone: client?.phone || '',
-    email: client?.email || '',
-    address: client?.address || '',
-    notes: client?.notes || '',
+    name: '',
+    phone: '',
+    email: '',
+    address: '',
+    notes: '',
   });
 
-  const handleSubmit = async () => {
-    if (client) {
-      await updateClient.mutateAsync({ id: client.id, data: form });
-    } else {
-      await createClient.mutateAsync(form);
+  const [errors, setErrors] = useState({
+    name: '',
+    phone: '',
+    email: '',
+  });
+
+  const [touched, setTouched] = useState({
+    name: false,
+    phone: false,
+    email: false,
+  });
+
+  // Resetear formulario cuando cambia el modal
+  useEffect(() => {
+    if (isOpen) {
+      setForm({
+        name: client?.name || '',
+        phone: client?.phone || '',
+        email: client?.email || '',
+        address: client?.address || '',
+        notes: client?.notes || '',
+      });
+      setErrors({ name: '', phone: '', email: '' });
+      setTouched({ name: false, phone: false, email: false });
     }
-    onClose();
+  }, [client, isOpen]);
+
+  const validateField = (name: string, value: string): string => {
+    switch (name) {
+      case 'name':
+        if (!value) return 'El nombre es requerido';
+        return '';
+
+      case 'phone':
+        if (!value) return 'El teléfono es requerido';
+        const phoneDigits = value.replace(/\D/g, '');
+        if (phoneDigits.length < 8) return 'Mínimo 8 dígitos';
+        return '';
+
+      case 'email':
+        if (!value) return ''; // Email es opcional
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Email inválido';
+        return '';
+
+      default:
+        return '';
+    }
   };
 
-  const isValid = form.name && form.phone;
+  const handleChange = (field: string, value: string) => {
+    setForm({ ...form, [field]: value });
+
+    // Validar solo si el campo ya fue tocado
+    if (touched[field as keyof typeof touched]) {
+      const error = validateField(field, value);
+      setErrors({ ...errors, [field]: error });
+    }
+  };
+
+  const handleBlur = (field: string) => {
+    setTouched({ ...touched, [field]: true });
+    const error = validateField(field, form[field as keyof typeof form]);
+    setErrors({ ...errors, [field]: error });
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors = {
+      name: validateField('name', form.name),
+      phone: validateField('phone', form.phone),
+      email: validateField('email', form.email),
+    };
+
+    setErrors(newErrors);
+    setTouched({ name: true, phone: true, email: true });
+
+    return !newErrors.name && !newErrors.phone && !newErrors.email;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    try {
+      if (client) {
+        await updateClient.mutateAsync({ id: client.id, data: form });
+      } else {
+        await createClient.mutateAsync(form);
+      }
+      onClose();
+    } catch (error) {
+      console.error('Error al guardar cliente:', error);
+    }
+  };
+
+  const isValid = form.name && form.phone && !errors.name && !errors.phone && !errors.email;
 
   return (
     <Modal
@@ -196,8 +280,12 @@ const ClientModal = ({ isOpen, onClose, client }: ClientModalProps) => {
           <Button variant="ghost" onClick={onClose}>
             Cancelar
           </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={!isValid}>
-            {client ? 'Guardar' : 'Crear'}
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={!isValid || createClient.isPending || updateClient.isPending}
+          >
+            {createClient.isPending || updateClient.isPending ? 'Guardando...' : (client ? 'Guardar' : 'Crear')}
           </Button>
         </>
       }
@@ -206,21 +294,28 @@ const ClientModal = ({ isOpen, onClose, client }: ClientModalProps) => {
         <Input
           label="Nombre"
           value={form.name}
-          onChange={(v) => setForm({ ...form, name: v })}
+          onChange={(v) => handleChange('name', v)}
+          onBlur={() => handleBlur('name')}
+          error={touched.name ? errors.name : ''}
           required
         />
         <Input
           label="Teléfono"
           type="tel"
           value={form.phone}
-          onChange={(v) => setForm({ ...form, phone: v })}
+          onChange={(v) => handleChange('phone', v)}
+          onBlur={() => handleBlur('phone')}
+          error={touched.phone ? errors.phone : ''}
+          hint="Mínimo 8 dígitos"
           required
         />
         <Input
           label="Email"
           type="email"
           value={form.email}
-          onChange={(v) => setForm({ ...form, email: v })}
+          onChange={(v) => handleChange('email', v)}
+          onBlur={() => handleBlur('email')}
+          error={touched.email ? errors.email : ''}
         />
         <Input
           label="Dirección"

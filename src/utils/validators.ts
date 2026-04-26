@@ -9,8 +9,8 @@ export const isValidPhone = (phone: string): boolean => {
   return regex.test(phone) && digitsOnly.length >= 8;
 };
 
-export const isValidAmount = (amount: string): boolean => {
-  const num = parseFloat(amount);
+export const isValidAmount = (amount: string | number): boolean => {
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
   return !isNaN(num) && num > 0;
 };
 
@@ -43,28 +43,21 @@ export const isValidPassword = (password: string): { valid: boolean; errors: str
   };
 };
 
-export const validateForm = (fields: Record<string, any>, rules: Record<string, string[]>): Record<string, string> => {
-  const errors: Record<string, string> = {};
+export const isValidDate = (date: string): boolean => {
+  const d = new Date(date);
+  return !isNaN(d.getTime());
+};
 
-  Object.keys(rules).forEach((field) => {
-    const value = fields[field];
-    const fieldRules = rules[field];
+export const isFutureDate = (date: string): boolean => {
+  const d = new Date(date);
+  const now = new Date();
+  return d > now;
+};
 
-    fieldRules.forEach((rule) => {
-      if (rule === 'required' && isEmpty(value)) {
-        errors[field] = 'Este campo es requerido';
-      }
-      if (rule === 'email' && !isEmpty(value) && !isValidEmail(value)) {
-        errors[field] = 'Email inválido';
-      }
-      if (rule === 'phone' && !isEmpty(value) && !isValidPhone(value)) {
-        errors[field] = 'Teléfono inválido';
-      }
-      if (rule === 'amount' && !isEmpty(value) && !isValidAmount(value)) {
-        errors[field] = 'Monto inválido';
-      }
-    });
-  });
+export const maxLength = (value: string, max: number): boolean => {
+  return value.length <= max;
+};
 
-  return errors;
+export const minLength = (value: string, min: number): boolean => {
+  return value.length >= min;
 };

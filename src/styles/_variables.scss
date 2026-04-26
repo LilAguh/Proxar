@@ -43,6 +43,7 @@ $space-8: 32px;
 $space-10: 40px;
 $space-12: 48px;
 $space-16: 64px;
+$space-20: 80px;
 
 // ============================================
 // BORDER RADIUS (Sistema coherente)
@@ -51,6 +52,7 @@ $radius-sm: 6px;
 $radius-md: 8px;
 $radius-lg: 10px;
 $radius-xl: 12px;
+$radius-2xl: 16px;
 $radius-full: 9999px;
 
 // ============================================
@@ -112,3 +114,17 @@ $z-toast: 2000;
 // ============================================
 $sidebar-width: 220px;
 $topbar-height: 52px;
+
+// ============================================
+// SEMANTIC COLORS (Aliases)
+// ============================================
+$color-primary: $brand;
+$color-primary-dark: $brand-dark;
+$color-primary-light: $brand-light;
+
+$color-text-primary: $gray-900;
+$color-text-secondary: $gray-600;
+$color-text-tertiary: $gray-400;
+
+$color-background: $gray-50;
+$color-border: $gray-200;

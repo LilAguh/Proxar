@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { User } from '@core/entities/User.entity';
+import { UserRole } from '@core/enums';
 
 interface AuthStore {
   user: User | null;
   token: string | null;
   _hasHydrated: boolean;
   setAuth: (user: User, token: string) => void;
+  clearAuth: () => void; // ← Agregado para compatibilidad
   logout: () => void;
   isAuthenticated: () => boolean;
   isAdmin: () => boolean;
@@ -22,6 +24,12 @@ export const useAuthStore = create<AuthStore>()(
 
       setAuth: (user, token) => {
         set({ user, token, _hasHydrated: true });
+      },
+
+      clearAuth: () => {
+        set({ user: null, token: null });
+        localStorage.removeItem('token');
+        localStorage.removeItem('proxar-auth');
       },
 
       logout: () => {
@@ -46,7 +54,7 @@ export const useAuthStore = create<AuthStore>()(
 
       isAdmin: () => {
         const user = get().user;
-        return user?.role === 'Admin';
+        return user?.role === UserRole.Admin;
       },
 
       setHasHydrated: (state) => {

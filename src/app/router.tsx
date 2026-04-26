@@ -7,8 +7,18 @@ import { Caja } from '@presentation/pages/Caja/Caja';
 import { Clients } from '@presentation/pages/Clients/Clients';
 import { Users } from '@presentation/pages/Users/Users';
 import { Login } from '@presentation/pages/Login/Login';
+import { CompanyLogin } from '@presentation/pages/CompanyLogin/CompanyLogin';
+import { CompanyRegister } from '@presentation/pages/CompanyRegister/CompanyRegister';
 
 export const router = createBrowserRouter([
+  {
+    path: '/company',
+    element: <CompanyLogin />,
+  },
+  {
+    path: '/company/register',
+    element: <CompanyRegister />,
+  },
   {
     path: '/login',
     element: <Login />,
@@ -30,12 +40,12 @@ export const router = createBrowserRouter([
         element: <Tickets />,
       },
       {
-        path: 'clientes',
-        element: <Clients />,
-      },
-      {
         path: 'caja',
         element: <Caja />,
+      },
+      {
+        path: 'clients', // ← ACTIVAR
+        element: <Clients />,
       },
       {
         path: 'users',

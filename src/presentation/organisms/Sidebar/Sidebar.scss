@@ -7,10 +7,10 @@
   background: $white;
   border-right: $border-width solid $border-color;
   @include flex-column;
-  box-shadow: 1px 0 0 $border-color;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
 
   &__logo {
-    padding: 18px $space-4 14px;
+    padding: 20px $space-4 16px;
     border-bottom: $border-width solid $border-color;
 
     svg {
@@ -19,9 +19,13 @@
   }
 
   &__client-tag {
-    margin-top: $space-2;
+    margin-top: $space-3;
     @include flex-start;
     gap: $space-2;
+    padding: $space-2 $space-3;
+    background: linear-gradient(135deg, rgba($brand, 0.08) 0%, rgba($brand, 0.04) 100%);
+    border-radius: $radius-md;
+    border: 1px solid rgba($brand, 0.1);
   }
 
   &__client-dot {
@@ -30,6 +34,7 @@
     border-radius: $radius-full;
     background: $brand;
     flex-shrink: 0;
+    animation: pulse 2s ease-in-out infinite;
   }
 
   &__client-name {
@@ -42,32 +47,52 @@
 
   &__nav {
     flex: 1;
-    padding: $space-3 10px;
+    padding: $space-4 12px;
     @include flex-column;
-    gap: 2px;
+    gap: 3px;
   }
 
   &__nav-item {
     @include button-reset;
     @include flex-start;
-    gap: 10px;
-    padding: 10px $space-3;
-    border-radius: $radius-sm;
+    gap: 12px;
+    padding: 11px $space-3;
+    border-radius: $radius-md;
     width: 100%;
     text-align: left;
-    transition: background $transition-fast, color $transition-fast;
+    transition: all $transition-fast;
     font-size: $font-size-base;
     font-weight: $font-weight-medium;
     color: $gray-700;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 0;
+      background: $brand;
+      border-radius: 0 $radius-sm $radius-sm 0;
+      transition: height $transition-fast;
+    }
 
     &--active {
-      background: $brand;
+      background: linear-gradient(135deg, $brand 0%, darken($brand, 8%) 100%);
       color: $white;
       font-weight: $font-weight-bold;
+      box-shadow: 0 2px 8px rgba($brand, 0.25);
+
+      &::before {
+        height: 24px;
+      }
     }
 
     &:not(&--active):not(:disabled):hover {
       background: $gray-100;
+      transform: translateX(2px);
     }
 
     &:disabled {
@@ -77,8 +102,8 @@
   }
 
   &__nav-icon {
-    font-size: $font-size-lg;
-    width: 20px;
+    font-size: $font-size-xl;
+    width: 22px;
     text-align: center;
   }
 
@@ -90,13 +115,14 @@
     font-size: 10px;
     background: $gray-100;
     color: $gray-400;
-    border-radius: $radius-md;
-    padding: 1px $space-2;
+    border-radius: $radius-full;
+    padding: 2px $space-2;
     font-weight: $font-weight-semibold;
+    letter-spacing: 0.3px;
   }
 
   &__actions {
-    padding: $space-3 10px;
+    padding: $space-3 12px;
     border-top: $border-width solid $border-color;
     @include flex-column;
     gap: $space-2;
@@ -106,34 +132,56 @@
     @include button-reset;
     @include flex-center;
     gap: $space-2;
-    padding: 9px;
-    border-radius: $radius-sm;
+    padding: 10px;
+    border-radius: $radius-md;
     font-size: $font-size-sm;
     font-weight: $font-weight-bold;
-    transition: opacity $transition-fast;
+    transition: all $transition-fast;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity $transition-fast;
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
 
     &:hover {
-      opacity: 0.88;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+      transform: translateY(0);
     }
 
     &--ticket {
-      border: $border-width-bold solid $brand;
-      background: transparent;
+      border: 2px solid $brand;
+      background: linear-gradient(135deg, rgba($brand, 0.05) 0%, transparent 100%);
       color: $brand;
     }
 
     &--cash {
-      border: $border-width-bold solid $success;
-      background: transparent;
+      border: 2px solid $success;
+      background: linear-gradient(135deg, rgba($success, 0.05) 0%, transparent 100%);
       color: $success;
     }
   }
 
   &__user {
-    padding: $font-size-base;
+    padding: $space-4;
     border-top: $border-width solid $border-color;
     @include flex-start;
-    gap: 10px;
+    gap: 12px;
+    background: linear-gradient(180deg, $white 0%, $gray-50 100%);
+    position: relative;
   }
 
   &__user-info {
@@ -150,19 +198,34 @@
   }
 
   &__user-role {
-    margin: 0;
+    margin: 2px 0 0;
     font-size: $font-size-xs;
-    color: $gray-400;
+    color: $gray-500;
+    font-weight: $font-weight-medium;
   }
 
   &__logout {
-  @include button-reset;
-  font-size: $font-size-xl;
-  color: $gray-400;
-  transition: color $transition-fast;
+    @include button-reset;
+    @include flex-center;
+    width: 32px;
+    height: 32px;
+    border-radius: $radius-md;
+    font-size: $font-size-lg;
+    color: $gray-400;
+    transition: all $transition-fast;
 
-  &:hover {
-    color: $danger;
+    &:hover {
+      background: rgba($danger, 0.1);
+      color: $danger;
+    }
   }
 }
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }

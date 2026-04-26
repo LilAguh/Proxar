@@ -1,6 +1,28 @@
 @import '@/styles/variables';
 @import '@/styles/mixins';
 
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .tickets {
   padding: $space-7;
   height: 100%;
@@ -42,12 +64,14 @@
     min-width: 280px;
     @include flex-column;
     gap: $space-3;
+    animation: scaleIn 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 
     &-header {
       @include flex-between;
       padding: $space-3;
       background: $gray-100;
       border-radius: $radius-md;
+      transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     &-count {
@@ -68,12 +92,15 @@
       padding: $space-2;
       border-radius: $radius-md;
       border: 2px dashed transparent;
-      transition: border-color 0.15s, background 0.15s;
+      transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      scroll-behavior: smooth;
       @include custom-scrollbar;
 
       &--over {
         border-color: $brand;
         background: rgba($brand, 0.04);
+        transform: scale(1.01);
+        box-shadow: 0 0 0 1px rgba($brand, 0.1);
       }
     }
   }
@@ -85,14 +112,22 @@
   &__card {
     padding: $space-4;
     cursor: grab;
+    animation: slideIn 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
 
     &:active {
       cursor: grabbing;
     }
 
     &--dragging {
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-      rotate: 2deg;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+      transform: rotate(3deg) scale(1.05);
+      animation: none;
     }
 
     &-header {
@@ -135,5 +170,42 @@
       font-size: $font-size-xs;
       color: $gray-600;
     }
+  }
+
+  &__closed-section {
+    margin-top: $space-4;
+    animation: slideIn 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  &__closed-toggle {
+    width: 100%;
+    padding: $space-4;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s;
+
+    &:hover {
+      background: rgba($gray-100, 0.5);
+    }
+  }
+
+  &__closed-title {
+    margin: 0;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $gray-700;
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+  }
+
+  &__closed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: $space-3;
+    padding: 0 $space-4 $space-4;
+    animation: slideIn 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   }
 }

@@ -1,10 +1,22 @@
 @import '@/styles/variables';
 @import '@/styles/mixins';
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .dashboard {
   padding: $space-7;
   @include flex-column;
   gap: $space-6;
+  animation: fadeInUp 0.4s ease-out;
 
   &-loading {
     @include flex-center;
@@ -13,6 +25,7 @@
 
   &__header {
     @include flex-between;
+    animation: fadeInUp 0.4s ease-out 0.1s backwards;
   }
 
   &__title {
@@ -20,6 +33,7 @@
     font-size: $font-size-3xl;
     font-weight: $font-weight-black;
     color: $gray-900;
+    letter-spacing: -0.5px;
   }
 
   &__subtitle {
@@ -35,7 +49,38 @@
   }
 
   &__metric {
-    padding: $space-5;
+    padding: $space-6;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.4s ease-out backwards;
+
+    &:nth-child(1) {
+      animation-delay: 0.15s;
+    }
+
+    &:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: 0.25s;
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, $brand 0%, darken($brand, 10%) 100%);
+      opacity: 0;
+      transition: opacity $transition-fast;
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
 
     &-header {
       @include flex-start;
@@ -44,7 +89,8 @@
     }
 
     &-icon {
-      font-size: 32px;
+      font-size: 36px;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
     }
 
     &-title {
@@ -52,6 +98,8 @@
       font-size: $font-size-base;
       font-weight: $font-weight-semibold;
       color: $gray-600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     &-content {
@@ -60,30 +108,39 @@
     }
 
     &-value {
-      font-size: 36px;
+      font-size: 42px;
       font-weight: $font-weight-black;
       color: $gray-900;
       line-height: 1;
+      letter-spacing: -1px;
 
       &--cash {
-        color: $success;
+        background: linear-gradient(135deg, $success 0%, darken($success, 10%) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
       &--balance {
-        color: $info;
+        background: linear-gradient(135deg, $info 0%, darken($info, 10%) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
     }
 
     &-breakdown {
       @include flex-start;
-      gap: $space-3;
+      gap: $space-4;
       flex-wrap: wrap;
     }
 
     &-item {
       font-size: $font-size-sm;
-      font-weight: $font-weight-medium;
+      font-weight: $font-weight-semibold;
       color: $gray-500;
+      @include flex-start;
+      gap: $space-1;
 
       &--new {
         color: $info;
@@ -108,18 +165,19 @@
   }
 
   &__recent {
-    padding: $space-5;
+    padding: $space-6;
+    animation: fadeInUp 0.4s ease-out 0.3s backwards;
 
     &-header {
       @include flex-between;
-      margin-bottom: $space-4;
+      margin-bottom: $space-5;
       padding-bottom: $space-4;
-      border-bottom: $border-width solid $border-color;
+      border-bottom: 2px solid $border-color;
     }
 
     &-title {
       margin: 0;
-      font-size: $font-size-lg;
+      font-size: $font-size-xl;
       font-weight: $font-weight-bold;
       color: $gray-900;
     }
@@ -131,13 +189,16 @@
 
     &-item {
       @include flex-between;
-      padding: $space-3;
-      border-radius: $radius-sm;
+      padding: $space-4;
+      border-radius: $radius-md;
       cursor: pointer;
-      transition: background $transition-fast;
+      transition: all $transition-fast;
+      border: 1px solid transparent;
 
       &:hover {
         background: $gray-50;
+        border-color: $border-color;
+        transform: translateX(4px);
       }
     }
 
@@ -151,11 +212,15 @@
       font-size: $font-size-sm;
       font-weight: $font-weight-bold;
       color: $brand;
+      background: rgba($brand, 0.1);
+      padding: 4px $space-2;
+      border-radius: $radius-sm;
     }
 
     &-title-text {
       font-size: $font-size-base;
       color: $gray-900;
+      font-weight: $font-weight-medium;
     }
 
     &-client {

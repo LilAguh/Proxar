@@ -13,6 +13,8 @@ interface ModalCajaProps {
 export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
   const { data: accounts } = useActiveAccounts();
   const registerMovement = useRegisterMovement();
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const [form, setForm] = useState({
     accountId: '',
@@ -25,7 +27,54 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
     movementDate: new Date().toISOString().split('T')[0],
   });
 
+  const validateField = (field: string, value: string): string => {
+    switch (field) {
+      case 'accountId':
+        if (!value) return 'Selecciona una cuenta';
+        return '';
+
+      case 'amount':
+        if (!value) return 'El monto es requerido';
+        const amount = parseFloat(value);
+        if (isNaN(amount)) return 'Debe ser un número válido';
+        if (amount < 0) return 'El monto no puede ser negativo';
+        if (amount === 0) return 'El monto debe ser mayor a 0';
+        return '';
+
+      case 'concept':
+        if (!value) return 'El concepto es requerido';
+        if (value.length < 3) return 'Mínimo 3 caracteres';
+        return '';
+
+      case 'movementDate':
+        if (!value) return 'La fecha es requerida';
+        const selectedDate = new Date(value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate > today) return 'La fecha no puede ser futura';
+        return '';
+
+      default:
+        return '';
+    }
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {
+      accountId: validateField('accountId', form.accountId),
+      amount: validateField('amount', form.amount),
+      concept: validateField('concept', form.concept),
+      movementDate: validateField('movementDate', form.movementDate),
+    };
+
+    setErrors(newErrors);
+    setTouched({ accountId: true, amount: true, concept: true, movementDate: true });
+    return !newErrors.accountId && !newErrors.amount && !newErrors.concept && !newErrors.movementDate;
+  };
+
   const handleSubmit = async () => {
+    if (!validate()) return;
+
     await registerMovement.mutateAsync({
       ...form,
       amount: parseFloat(form.amount),
@@ -44,10 +93,29 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
       observations: '',
       movementDate: new Date().toISOString().split('T')[0],
     });
+    setErrors({});
+    setTouched({});
     onClose();
   };
 
-  const isValid = form.accountId && form.amount && form.concept;
+  const handleFieldChange = (field: string, value: string) => {
+    setForm({ ...form, [field]: value });
+
+    // Solo validar si el campo ya fue tocado
+    if (touched[field]) {
+      const error = validateField(field, value);
+      setErrors({ ...errors, [field]: error });
+    }
+  };
+
+  const handleFieldBlur = (field: string) => {
+    setTouched({ ...touched, [field]: true });
+    const error = validateField(field, form[field as keyof typeof form]);
+    setErrors({ ...errors, [field]: error });
+  };
+
+  const isValid = form.accountId && form.amount && form.concept && form.movementDate &&
+    !errors.accountId && !errors.amount && !errors.concept && !errors.movementDate;
 
   return (
     <Modal
@@ -76,7 +144,8 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
             label="Cuenta"
             required
             value={form.accountId}
-            onChange={(value) => setForm({ ...form, accountId: value })}
+            onChange={(value) => handleFieldChange('accountId', value)}
+            error={touched.accountId ? errors.accountId : ''}
             options={[
               { value: '', label: 'Seleccionar cuenta' },
               ...(accounts?.map((a) => ({ value: a.id, label: a.name })) || []),
@@ -100,8 +169,11 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
             type="number"
             required
             value={form.amount}
-            onChange={(value) => setForm({ ...form, amount: value })}
+            onChange={(value) => handleFieldChange('amount', value)}
+            onBlur={() => handleFieldBlur('amount')}
             placeholder="0.00"
+            error={touched.amount ? errors.amount : ''}
+            hint="Debe ser mayor a 0"
           />
           <Select
             label="Medio de Pago"
@@ -127,10 +199,13 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
           />
           <Input
             label="Fecha"
-            type="number"
+            type="date"
             required
             value={form.movementDate}
-            onChange={(value) => setForm({ ...form, movementDate: value })}
+            onChange={(value) => handleFieldChange('movementDate', value)}
+            onBlur={() => handleFieldBlur('movementDate')}
+            error={touched.movementDate ? errors.movementDate : ''}
+            hint="No puede ser futura"
           />
         </div>
 
@@ -138,8 +213,11 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
           label="Concepto"
           required
           value={form.concept}
-          onChange={(value) => setForm({ ...form, concept: value })}
+          onChange={(value) => handleFieldChange('concept', value)}
+          onBlur={() => handleFieldBlur('concept')}
           placeholder="Ej: Pago de proveedor, Cobro cliente, etc."
+          error={touched.concept ? errors.concept : ''}
+          hint="Mínimo 3 caracteres"
         />
 
         <Textarea

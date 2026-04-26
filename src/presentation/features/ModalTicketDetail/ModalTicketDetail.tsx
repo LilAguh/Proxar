@@ -54,10 +54,43 @@ export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
 
   const nextStatus = ticket ? STATUS_TRANSITIONS[ticket.status] : null;
   const nextConfig = nextStatus ? TICKET_STATE_CONFIG[nextStatus] : null;
+  const canClose = ticket && ticket.status !== TicketState.Completado && ticket.status !== TicketState.Descartado;
 
   const handleAdvance = () => {
     if (!ticket || !nextStatus) return;
     updateStatus.mutate({ id: ticket.id, data: { newStatus: nextStatus } });
+  };
+
+  const handleComplete = async () => {
+    if (!ticket) return;
+
+    const confirmed = await confirm({
+      title: 'Completar Ticket',
+      message: `¿Estás seguro que querés marcar el ticket #${ticket.number} como completado?`,
+      confirmText: 'Completar',
+      cancelText: 'Cancelar',
+      variant: 'success',
+    });
+
+    if (confirmed) {
+      updateStatus.mutate({ id: ticket.id, data: { newStatus: TicketState.Completado } });
+    }
+  };
+
+  const handleDiscard = async () => {
+    if (!ticket) return;
+
+    const confirmed = await confirm({
+      title: 'Descartar Ticket',
+      message: `¿Estás seguro que querés descartar el ticket #${ticket.number}? Este ticket se moverá a la sección de cerrados.`,
+      confirmText: 'Descartar',
+      cancelText: 'Cancelar',
+      variant: 'warning',
+    });
+
+    if (confirmed) {
+      updateStatus.mutate({ id: ticket.id, data: { newStatus: TicketState.Descartado } });
+    }
   };
 
   const handleDelete = async () => {
@@ -102,10 +135,29 @@ export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
               <div style={{ flex: 1 }} />
               
               {/* Botones de acción - A LA DERECHA */}
+              {canClose && (
+                <>
+                  <Button
+                    variant="warning"
+                    onClick={handleDiscard}
+                    disabled={updateStatus.isPending}
+                  >
+                    Descartar
+                  </Button>
+                  <Button
+                    variant="success"
+                    onClick={handleComplete}
+                    disabled={updateStatus.isPending}
+                  >
+                    Completar
+                  </Button>
+                </>
+              )}
+
               <Button variant="ghost" onClick={onClose}>
                 Cerrar
               </Button>
-              
+
               {nextStatus && (
                 <Button
                   variant="primary"
@@ -235,7 +287,7 @@ export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
         variant={options.variant}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
-        isLoading={deleteTicket.isPending}
+        isLoading={deleteTicket.isPending || updateStatus.isPending}
       />
     </>
   );
