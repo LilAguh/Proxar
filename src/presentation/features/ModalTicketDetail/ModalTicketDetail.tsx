@@ -69,7 +69,7 @@ export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
       message: `¿Estás seguro que querés marcar el ticket #${ticket.number} como completado?`,
       confirmText: 'Completar',
       cancelText: 'Cancelar',
-      variant: 'success',
+      variant: 'primary',
     });
 
     if (confirmed) {
