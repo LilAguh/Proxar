@@ -1,0 +1,204 @@
+@import '@/styles/variables';
+@import '@/styles/mixins';
+
+.saldo-loading {
+  @include flex-center;
+  height: 400px;
+}
+
+.saldo {
+  padding: $space-7;
+  @include flex-column;
+  gap: $space-6;
+
+  &__header {
+    @include flex-between;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-black;
+    color: $gray-900;
+    letter-spacing: -0.5px;
+  }
+
+  &__subtitle {
+    margin: $space-1 0 0;
+    font-size: $font-size-base;
+    color: $gray-500;
+  }
+
+  &__metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $space-5;
+  }
+
+  &__metric {
+    padding: $space-6;
+
+    &-title {
+      margin: 0 0 $space-3;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      color: $gray-500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    &-value {
+      font-size: 36px;
+      font-weight: $font-weight-black;
+      color: $gray-900;
+      line-height: 1;
+      letter-spacing: -1px;
+      margin-bottom: $space-3;
+
+      &--balance {
+        background: linear-gradient(135deg, $info 0%, darken($info, 10%) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      &--today {
+        background: linear-gradient(135deg, $success 0%, darken($success, 10%) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+    }
+
+    &-accounts {
+      display: flex;
+      flex-direction: column;
+      gap: $space-2;
+    }
+
+    &-account {
+      @include flex-between;
+      font-size: $font-size-sm;
+
+      &-name { color: $gray-600; }
+      &-balance { font-weight: $font-weight-semibold; color: $gray-800; }
+    }
+
+    &-breakdown {
+      display: flex;
+      gap: $space-4;
+    }
+
+    &-item {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+
+      &--income { color: $success; }
+      &--expense { color: $danger; }
+    }
+  }
+
+  &__filters {
+    display: flex;
+    gap: $space-2;
+  }
+
+  &__movements {
+    padding: $space-6;
+
+    &-title {
+      margin: 0 0 $space-5;
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+      color: $gray-900;
+    }
+
+    &-list {
+      display: flex;
+      flex-direction: column;
+      gap: $space-2;
+    }
+  }
+
+  &__movement {
+    @include flex-between;
+    padding: $space-4 $space-5;
+    border-radius: $radius-md;
+    border: 1px solid $border-color;
+    transition: background $transition-fast;
+
+    &:hover { background: $gray-50; }
+
+    &-info {
+      @include flex-column;
+      gap: $space-1;
+    }
+
+    &-header {
+      display: flex;
+      align-items: center;
+      gap: $space-3;
+    }
+
+    &-number {
+      font-family: $font-mono;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-bold;
+      color: $brand;
+      background: rgba($brand, 0.1);
+      padding: 2px $space-2;
+      border-radius: $radius-sm;
+    }
+
+    &-method {
+      font-size: $font-size-sm;
+      color: $gray-500;
+    }
+
+    &-ticket {
+      font-size: $font-size-xs;
+      background: rgba($info, 0.1);
+      color: $info;
+      padding: 2px $space-2;
+      border-radius: $radius-sm;
+      font-weight: $font-weight-semibold;
+    }
+
+    &-concept {
+      font-size: $font-size-base;
+      color: $gray-800;
+      font-weight: $font-weight-medium;
+    }
+
+    &-footer {
+      display: flex;
+      gap: $space-4;
+    }
+
+    &-account {
+      font-size: $font-size-sm;
+      color: $gray-500;
+    }
+
+    &-date {
+      font-size: $font-size-sm;
+      color: $gray-400;
+    }
+
+    &-actions {
+      display: flex;
+      align-items: center;
+      gap: $space-3;
+    }
+
+    &-amount {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-black;
+      min-width: 120px;
+      text-align: right;
+
+      &--income { color: $success; }
+      &--expense { color: $danger; }
+    }
+  }
+}
