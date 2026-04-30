@@ -93,12 +93,14 @@ export function useCreateUser() {
 }
 
 export function useUpdateUser() {
+  const queryClient = useQueryClient();
   const { showToast } = useToastStore();
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: { name: string; email: string; role: string; active: boolean } }) =>
       authRepository.updateUser(id, data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       showToast('Usuario actualizado correctamente', 'success');
     },
     onError: (error: any) => {
@@ -109,11 +111,13 @@ export function useUpdateUser() {
 }
 
 export function useDeactivateUser() {
+  const queryClient = useQueryClient();
   const { showToast } = useToastStore();
 
   return useMutation({
     mutationFn: (userId: string) => authRepository.deactivateUser(userId),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       showToast('Usuario desactivado correctamente', 'success');
     },
     onError: (error: any) => {
