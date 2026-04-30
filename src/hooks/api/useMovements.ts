@@ -40,7 +40,7 @@ export function useRegisterMovement() {
   const { showToast } = useToastStore();
 
   return useMutation({
-    mutationFn: movementRepository.register,
+    mutationFn: (data: any) => movementRepository.register(data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['movements'] });
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
