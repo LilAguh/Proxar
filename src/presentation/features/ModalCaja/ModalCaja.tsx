@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Modal } from '@presentation/molecules';
+import { useNavigate } from 'react-router-dom';
+import { Modal, Spinner } from '@presentation/molecules';
 import { Input, Select, Textarea, Button } from '../../atoms';
-import { useActiveAccounts, useRegisterMovement } from '@/hooks/api';
-import { MovementType, PaymentMethod } from '@core/enums';
+import { useActiveAccounts, useRegisterMovement, useTodayCashRegister } from '@/hooks/api';
+import { MovementType, PaymentMethod, CashRegisterStatus } from '@core/enums';
 import './ModalCaja.scss';
 
 interface ModalCajaProps {
@@ -11,8 +12,17 @@ interface ModalCajaProps {
 }
 
 export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
+  if (!isOpen) return null;
+  return <ModalCajaContent onClose={onClose} />;
+};
+
+const ModalCajaContent = ({ onClose }: { onClose: () => void }) => {
+  const navigate = useNavigate();
+  const { data: todayRegister, isLoading: loadingRegister } = useTodayCashRegister();
   const { data: accounts } = useActiveAccounts();
   const registerMovement = useRegisterMovement();
+
+  const cajaAbierta = todayRegister?.status === CashRegisterStatus.Open;
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
@@ -30,56 +40,39 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
   const validateField = (field: string, value: string): string => {
     switch (field) {
       case 'accountId':
-        if (!value) return 'Selecciona una cuenta';
-        return '';
-
-      case 'amount':
+        return !value ? 'Selecciona una cuenta' : '';
+      case 'amount': {
         if (!value) return 'El monto es requerido';
-        const amount = parseFloat(value);
-        if (isNaN(amount)) return 'Debe ser un número válido';
-        if (amount < 0) return 'El monto no puede ser negativo';
-        if (amount === 0) return 'El monto debe ser mayor a 0';
+        const n = parseFloat(value);
+        if (isNaN(n)) return 'Debe ser un número válido';
+        if (n <= 0) return 'El monto debe ser mayor a 0';
         return '';
-
+      }
       case 'concept':
         if (!value) return 'El concepto es requerido';
-        if (value.length < 3) return 'Mínimo 3 caracteres';
-        return '';
-
-      case 'movementDate':
+        return value.length < 3 ? 'Mínimo 3 caracteres' : '';
+      case 'movementDate': {
         if (!value) return 'La fecha es requerida';
-        const selectedDate = new Date(value);
+        const d = new Date(value);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        if (selectedDate > today) return 'La fecha no puede ser futura';
-        return '';
-
+        return d > today ? 'La fecha no puede ser futura' : '';
+      }
       default:
         return '';
     }
   };
 
   const validate = () => {
-    const newErrors: Record<string, string> = {
+    const newErrors = {
       accountId: validateField('accountId', form.accountId),
       amount: validateField('amount', form.amount),
       concept: validateField('concept', form.concept),
       movementDate: validateField('movementDate', form.movementDate),
     };
-
     setErrors(newErrors);
     setTouched({ accountId: true, amount: true, concept: true, movementDate: true });
-    return !newErrors.accountId && !newErrors.amount && !newErrors.concept && !newErrors.movementDate;
-  };
-
-  const handleSubmit = async () => {
-    if (!validate()) return;
-
-    await registerMovement.mutateAsync({
-      ...form,
-      amount: parseFloat(form.amount),
-    });
-    handleClose();
+    return !Object.values(newErrors).some(Boolean);
   };
 
   const handleClose = () => {
@@ -98,41 +91,70 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
     onClose();
   };
 
+  const handleSubmit = async () => {
+    if (!validate()) return;
+    await registerMovement.mutateAsync({ ...form, amount: parseFloat(form.amount) });
+    handleClose();
+  };
+
   const handleFieldChange = (field: string, value: string) => {
     setForm({ ...form, [field]: value });
-
-    // Solo validar si el campo ya fue tocado
-    if (touched[field]) {
-      const error = validateField(field, value);
-      setErrors({ ...errors, [field]: error });
-    }
+    if (touched[field]) setErrors({ ...errors, [field]: validateField(field, value) });
   };
 
   const handleFieldBlur = (field: string) => {
     setTouched({ ...touched, [field]: true });
-    const error = validateField(field, form[field as keyof typeof form]);
-    setErrors({ ...errors, [field]: error });
+    setErrors({ ...errors, [field]: validateField(field, form[field as keyof typeof form] as string) });
   };
 
   const isValid = form.accountId && form.amount && form.concept && form.movementDate &&
     !errors.accountId && !errors.amount && !errors.concept && !errors.movementDate;
 
+  if (loadingRegister) {
+    return (
+      <Modal isOpen onClose={handleClose} title="Registrar Movimiento de Caja" width="lg">
+        <div className="modal-caja__loading"><Spinner size="md" /></div>
+      </Modal>
+    );
+  }
+
+  if (!cajaAbierta) {
+    return (
+      <Modal
+        isOpen
+        onClose={handleClose}
+        title="Registrar Movimiento de Caja"
+        width="lg"
+        footer={
+          <>
+            <Button variant="ghost" onClick={handleClose}>Cancelar</Button>
+            <Button variant="primary" onClick={() => { handleClose(); navigate('/caja'); }}>
+              Ir a abrir la caja →
+            </Button>
+          </>
+        }
+      >
+        <div className="modal-caja__blocked">
+          <div className="modal-caja__blocked-icon">⬡</div>
+          <h3 className="modal-caja__blocked-title">La caja no está abierta</h3>
+          <p className="modal-caja__blocked-text">
+            Para registrar movimientos primero tenés que abrir la caja del día.
+          </p>
+        </div>
+      </Modal>
+    );
+  }
+
   return (
     <Modal
-      isOpen={isOpen}
+      isOpen
       onClose={handleClose}
       title="Registrar Movimiento de Caja"
       width="lg"
       footer={
         <>
-          <Button variant="ghost" onClick={handleClose}>
-            Cancelar
-          </Button>
-          <Button
-            variant="success"
-            onClick={handleSubmit}
-            disabled={!isValid || registerMovement.isPending}
-          >
+          <Button variant="ghost" onClick={handleClose}>Cancelar</Button>
+          <Button variant="success" onClick={handleSubmit} disabled={!isValid || registerMovement.isPending}>
             {registerMovement.isPending ? 'Registrando...' : 'Registrar'}
           </Button>
         </>
@@ -144,7 +166,7 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
             label="Cuenta"
             required
             value={form.accountId}
-            onChange={(value) => handleFieldChange('accountId', value)}
+            onChange={(v) => handleFieldChange('accountId', v)}
             error={touched.accountId ? errors.accountId : ''}
             options={[
               { value: '', label: 'Seleccionar cuenta' },
@@ -155,7 +177,7 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
             label="Tipo"
             required
             value={form.type}
-            onChange={(value) => setForm({ ...form, type: value as MovementType })}
+            onChange={(v) => setForm({ ...form, type: v as MovementType })}
             options={[
               { value: MovementType.Income, label: '💰 Ingreso' },
               { value: MovementType.Expense, label: '💸 Egreso' },
@@ -169,7 +191,7 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
             type="number"
             required
             value={form.amount}
-            onChange={(value) => handleFieldChange('amount', value)}
+            onChange={(v) => handleFieldChange('amount', v)}
             onBlur={() => handleFieldBlur('amount')}
             placeholder="0.00"
             error={touched.amount ? errors.amount : ''}
@@ -179,7 +201,7 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
             label="Medio de Pago"
             required
             value={form.method}
-            onChange={(value) => setForm({ ...form, method: value as PaymentMethod })}
+            onChange={(v) => setForm({ ...form, method: v as PaymentMethod })}
             options={[
               { value: PaymentMethod.Cash, label: 'Efectivo' },
               { value: PaymentMethod.Transfer, label: 'Transferencia' },
@@ -194,7 +216,7 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
           <Input
             label="Nº Comprobante"
             value={form.voucherNumber}
-            onChange={(value) => setForm({ ...form, voucherNumber: value })}
+            onChange={(v) => setForm({ ...form, voucherNumber: v })}
             placeholder="FAC-001, REC-001, etc."
           />
           <Input
@@ -202,7 +224,7 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
             type="date"
             required
             value={form.movementDate}
-            onChange={(value) => handleFieldChange('movementDate', value)}
+            onChange={(v) => handleFieldChange('movementDate', v)}
             onBlur={() => handleFieldBlur('movementDate')}
             error={touched.movementDate ? errors.movementDate : ''}
             hint="No puede ser futura"
@@ -213,7 +235,7 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
           label="Concepto"
           required
           value={form.concept}
-          onChange={(value) => handleFieldChange('concept', value)}
+          onChange={(v) => handleFieldChange('concept', v)}
           onBlur={() => handleFieldBlur('concept')}
           placeholder="Ej: Pago de proveedor, Cobro cliente, etc."
           error={touched.concept ? errors.concept : ''}
@@ -223,7 +245,7 @@ export const ModalCaja = ({ isOpen, onClose }: ModalCajaProps) => {
         <Textarea
           label="Observaciones"
           value={form.observations}
-          onChange={(value) => setForm({ ...form, observations: value })}
+          onChange={(v) => setForm({ ...form, observations: v })}
           placeholder="Notas adicionales..."
           rows={3}
         />
