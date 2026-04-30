@@ -24,8 +24,7 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba($black, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba($black, 0.5);
   @include flex-center;
   z-index: $z-modal-backdrop;
   animation: modalBackdropFadeIn $transition-base;
