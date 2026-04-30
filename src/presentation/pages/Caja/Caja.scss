@@ -1,18 +1,23 @@
 @import '@/styles/variables';
 @import '@/styles/mixins';
 
+.caja-loading {
+  @include flex-center;
+  height: 400px;
+}
+
 .caja {
   padding: $space-7;
   @include flex-column;
   gap: $space-6;
 
-  &-loading {
-    @include flex-center;
-    height: 400px;
-  }
-
   &__header {
     @include flex-between;
+
+    &-tabs {
+      display: flex;
+      gap: $space-2;
+    }
   }
 
   &__title {
@@ -20,6 +25,7 @@
     font-size: $font-size-3xl;
     font-weight: $font-weight-black;
     color: $gray-900;
+    letter-spacing: -0.5px;
   }
 
   &__subtitle {
@@ -28,172 +34,448 @@
     color: $gray-500;
   }
 
-  &__metrics {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+  // ─── Today view ────────────────────────────────────
+  &__today {
+    display: flex;
+    flex-direction: column;
     gap: $space-5;
+    max-width: 680px;
   }
 
-  &__metric {
-    padding: $space-5;
+  &__status-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-4;
+    padding: $space-10 $space-8;
+    text-align: center;
 
-    &-title {
-      margin: 0 0 $space-3;
-      font-size: $font-size-sm;
-      font-weight: $font-weight-semibold;
-      color: $gray-600;
-    }
-
-    &-value {
-      font-size: 36px;
-      font-weight: $font-weight-black;
-      line-height: 1;
-      margin-bottom: $space-4;
-
-      &--balance {
-        color: $info;
-      }
-
-      &--today {
-        color: $success;
-      }
-    }
-
-    &-accounts {
-      @include flex-column;
-      gap: $space-2;
-      padding-top: $space-3;
-      border-top: $border-width solid $border-color;
-    }
-
-    &-account {
-      @include flex-between;
-      font-size: $font-size-sm;
-
-      &-name {
-        color: $gray-600;
-      }
-
-      &-balance {
-        font-weight: $font-weight-bold;
-        color: $gray-900;
-      }
-    }
-
-    &-breakdown {
-      @include flex-start;
-      gap: $space-4;
-    }
-
-    &-item {
-      font-size: $font-size-base;
-      font-weight: $font-weight-semibold;
-
-      &--income {
-        color: $success;
-      }
-
-      &--expense {
-        color: $danger;
-      }
-    }
+    &--idle .caja__status-icon { color: $gray-400; }
+    &--open .caja__status-icon { color: $warning; }
+    &--closed .caja__status-icon { color: $success; }
   }
 
-  &__filters {
-    @include flex-start;
+  &__status-icon {
+    font-size: 48px;
+    line-height: 1;
+  }
+
+  &__status-title {
+    margin: 0;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $gray-900;
+  }
+
+  &__status-sub {
+    margin: 0;
+    font-size: $font-size-base;
+    color: $gray-500;
+  }
+
+  &__today-actions {
+    display: flex;
+    gap: $space-3;
+    margin-top: $space-2;
+  }
+
+  // ─── Entries grid ──────────────────────────────────
+  &__entries-grid {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    margin: $space-2 0;
+  }
+
+  &__entry-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: $space-4;
+    align-items: center;
+    padding: $space-3 $space-4;
+    background: $gray-50;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
+  }
+
+  &__entry-name {
+    font-weight: $font-weight-semibold;
+    color: $gray-800;
+  }
+
+  &__entry-open { color: $gray-600; }
+  &__entry-arrow { color: $gray-400; }
+  &__entry-close { font-weight: $font-weight-bold; color: $success; }
+
+  // ─── Discrepancy card ──────────────────────────────
+  &__discrepancy-card {
+    border: 2px solid rgba($warning, 0.4) !important;
+    background: rgba($warning, 0.05);
+    padding: $space-6;
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+  }
+
+  &__discrepancy-title {
+    margin: 0;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $gray-900;
+  }
+
+  &__discrepancy-sub {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: $gray-600;
+  }
+
+  &__discrepancy-list {
+    display: flex;
+    flex-direction: column;
     gap: $space-2;
   }
 
-  &__movements {
-    padding: $space-5;
+  &__discrepancy-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: $space-3;
+    align-items: center;
+    padding: $space-3 $space-4;
+    background: $white;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+  }
+
+  &__discrepancy-account {
+    font-weight: $font-weight-semibold;
+    color: $gray-800;
+  }
+
+  &__discrepancy-prev { color: $gray-500; }
+  &__discrepancy-current { color: $gray-700; }
+
+  &__discrepancy-diff {
+    font-weight: $font-weight-bold;
+    &--pos { color: $success; }
+    &--neg { color: $danger; }
+  }
+
+  // ─── Form card ─────────────────────────────────────
+  &__form-card {
+    padding: $space-8;
+    display: flex;
+    flex-direction: column;
+    gap: $space-5;
+  }
+
+  &__form-title {
+    margin: 0;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $gray-900;
+  }
+
+  &__form-subtitle {
+    margin: -$space-3 0 0;
+    font-size: $font-size-base;
+    color: $gray-500;
+  }
+
+  &__form-alert {
+    padding: $space-4;
+    background: rgba($warning, 0.1);
+    border: 1px solid rgba($warning, 0.4);
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+    color: $gray-800;
+    font-weight: $font-weight-medium;
+  }
+
+  &__form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+  }
+
+  &__form-row {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    padding: $space-4;
+    background: $gray-50;
+    border-radius: $radius-md;
+
+    &-header { @include flex-between; }
+  }
+
+  &__form-account {
+    font-weight: $font-weight-semibold;
+    color: $gray-800;
+    font-size: $font-size-base;
+  }
+
+  &__form-opened,
+  &__form-suggested {
+    font-size: $font-size-sm;
+    color: $gray-500;
+  }
+
+  &__form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $space-3;
+    padding-top: $space-2;
+    border-top: 1px solid $border-color;
+  }
+
+  // ─── History ───────────────────────────────────────
+  &__history {
+    padding: $space-6;
 
     &-title {
       margin: 0 0 $space-5;
-      font-size: $font-size-lg;
+      font-size: $font-size-xl;
       font-weight: $font-weight-bold;
       color: $gray-900;
     }
 
     &-list {
+      display: flex;
+      flex-direction: column;
+      gap: $space-2;
+    }
+
+    &-item {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: $space-4;
+      align-items: center;
+      padding: $space-4 $space-5;
+      border-radius: $radius-md;
+      cursor: pointer;
+      border: 1px solid $border-color;
+      transition: all $transition-fast;
+
+      &:hover {
+        background: $gray-50;
+        border-color: $brand;
+        transform: translateX(3px);
+      }
+    }
+
+    &-date {
+      font-weight: $font-weight-semibold;
+      color: $gray-900;
+      font-size: $font-size-base;
+      text-transform: capitalize;
+    }
+
+    &-amounts {
+      display: flex;
+      gap: $space-5;
+      font-size: $font-size-sm;
+      color: $gray-600;
+    }
+
+    &-close { color: $success; }
+
+    &-status {
+      padding: $space-1 $space-3;
+      border-radius: $radius-full;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      &--open {
+        background: rgba($warning, 0.15);
+        color: darken($warning, 15%);
+      }
+
+      &--closed {
+        background: rgba($success, 0.15);
+        color: darken($success, 10%);
+      }
+    }
+
+    &-arrow {
+      color: $gray-400;
+      font-size: $font-size-lg;
+    }
+  }
+
+  // ─── Detail view ───────────────────────────────────
+  &__detail {
+    display: flex;
+    flex-direction: column;
+    gap: $space-5;
+
+    &-back {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: $brand;
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      padding: 0;
+      text-align: left;
+      transition: opacity $transition-fast;
+
+      &:hover { opacity: 0.7; }
+    }
+
+    &-card {
+      padding: $space-8;
+      display: flex;
+      flex-direction: column;
+      gap: $space-5;
+    }
+
+    &-header { @include flex-between; }
+
+    &-date {
+      margin: 0;
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
+      color: $gray-900;
+      text-transform: capitalize;
+    }
+
+    &-meta {
+      display: flex;
+      gap: $space-6;
+      font-size: $font-size-sm;
+      color: $gray-500;
+    }
+
+    &-entries {
+      display: flex;
+      flex-direction: column;
+      gap: $space-1;
+
+      &-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: $space-4;
+        padding: $space-2 $space-4;
+        font-size: $font-size-xs;
+        font-weight: $font-weight-bold;
+        color: $gray-500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    &-entry-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: $space-4;
+      align-items: center;
+      padding: $space-3 $space-4;
+      background: $gray-50;
+      border-radius: $radius-md;
+      font-size: $font-size-base;
+
+      &--total {
+        background: $gray-100;
+        font-weight: $font-weight-bold;
+        margin-top: $space-2;
+      }
+    }
+
+    &-notes {
+      padding: $space-4;
+      background: $gray-50;
+      border-radius: $radius-md;
+      font-size: $font-size-sm;
+      color: $gray-700;
+      border-left: 3px solid $brand;
+    }
+  }
+
+  &__diff {
+    &--pos { color: $success; font-weight: $font-weight-bold; }
+    &--neg { color: $danger; font-weight: $font-weight-bold; }
+  }
+
+  &__movements {
+    &-title {
+      margin: 0 0 $space-4;
+      font-size: $font-size-lg;
+      font-weight: $font-weight-bold;
+      color: $gray-900;
+    }
+
+    &-empty {
+      padding: $space-6;
+      text-align: center;
+      color: $gray-400;
+      font-size: $font-size-sm;
+    }
+
+    &-summary {
+      display: flex;
+      gap: $space-4;
+      padding: $space-3 $space-4;
+      background: $gray-50;
+      border-radius: $radius-md;
+      margin-bottom: $space-3;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+    }
+
+    &-income { color: $success; }
+    &-expense { color: $danger; }
+    &-net { color: $gray-700; margin-left: auto; }
+
+    &-list {
       @include flex-column;
-      gap: $space-3;
+      gap: $space-2;
+    }
+  }
+
+  &__movement-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto auto;
+    gap: $space-3;
+    align-items: center;
+    padding: $space-3 $space-4;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+    border-left: 3px solid transparent;
+
+    &--income {
+      background: rgba($success, 0.04);
+      border-left-color: $success;
+    }
+
+    &--expense {
+      background: rgba($danger, 0.04);
+      border-left-color: $danger;
     }
   }
 
   &__movement {
-    @include flex-between;
-    padding: $space-4;
-    border-radius: $radius-sm;
-    border: $border-width solid $border-color;
-    transition: background $transition-fast;
-
-    &:hover {
-      background: $gray-50;
-    }
-
-    &-info {
-      @include flex-column;
-      gap: $space-2;
-      flex: 1;
-    }
-
-    &-header {
-      @include flex-start;
-      gap: $space-3;
-      flex-wrap: wrap;
-    }
-
     &-number {
       font-family: $font-mono;
-      font-size: $font-size-sm;
+      font-size: $font-size-xs;
       font-weight: $font-weight-bold;
       color: $brand;
-    }
-
-    &-method {
-      font-size: $font-size-xs;
-      color: $gray-500;
-      text-transform: uppercase;
+      background: rgba($brand, 0.1);
       padding: 2px $space-2;
-      background: $gray-100;
       border-radius: $radius-sm;
     }
 
-    &-ticket {
-      font-size: $font-size-xs;
-      color: $info;
-      font-weight: $font-weight-semibold;
-    }
-
-    &-concept {
-      font-size: $font-size-base;
-      font-weight: $font-weight-medium;
-      color: $gray-900;
-    }
-
-    &-footer {
-      @include flex-start;
-      gap: $space-3;
-      font-size: $font-size-sm;
-      color: $gray-500;
-    }
-
-    &-account {
-      font-weight: $font-weight-medium;
-    }
+    &-concept { color: $gray-900; font-weight: $font-weight-medium; }
+    &-account { color: $gray-500; }
+    &-date { color: $gray-400; font-size: $font-size-xs; }
 
     &-amount {
-      font-size: $font-size-2xl;
-      font-weight: $font-weight-black;
-      flex-shrink: 0;
-
-      &--income {
-        color: $success;
-      }
-
-      &--expense {
-        color: $danger;
-      }
+      font-weight: $font-weight-bold;
+      .caja__movement-row--income & { color: $success; }
+      .caja__movement-row--expense & { color: $danger; }
     }
   }
 }
