@@ -7,3 +7,4 @@ export { UserRole } from './UserRole.enum';
 export { MovementType } from './MovementType.enum';
 export { PaymentMethod } from './PaymentMethod.enum';
 export { AccountType } from './AccountType.enum';
+export { CashRegisterStatus } from './CashRegisterStatus.enum';
