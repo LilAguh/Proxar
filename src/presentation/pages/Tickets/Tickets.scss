@@ -38,6 +38,33 @@
     @include flex-between;
   }
 
+  &__caja-alert {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-3 $space-5;
+    background: rgba($warning, 0.08);
+    border: 1.5px solid rgba($warning, 0.35);
+    border-radius: $radius-xl;
+    font-size: $font-size-sm;
+    color: $gray-700;
+    font-weight: $font-weight-medium;
+
+    &-link {
+      margin-left: auto;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: $brand;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-bold;
+      padding: 0;
+      transition: opacity $transition-fast;
+
+      &:hover { opacity: 0.7; }
+    }
+  }
+
   &__title {
     margin: 0;
     font-size: $font-size-3xl;
@@ -54,6 +81,7 @@
   &__kanban {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
+    align-items: stretch;
     gap: $space-4;
     flex: 1;
     overflow-x: auto;
@@ -87,7 +115,7 @@
       @include flex-column;
       gap: $space-3;
       flex: 1;
-      min-height: 80px;
+      min-height: 200px;
       overflow-y: auto;
       padding: $space-2;
       border-radius: $radius-md;
@@ -106,7 +134,12 @@
   }
 
   &__column-empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     opacity: 0.5;
+    pointer-events: none;
   }
 
   &__card {
