@@ -3,3 +3,4 @@ export * from './useTickets';
 export * from './useAccounts';
 export * from './useMovements';
 export * from './useDashboard';
+export * from './useCashRegisters';

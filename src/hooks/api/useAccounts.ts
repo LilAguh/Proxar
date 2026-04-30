@@ -10,11 +10,12 @@ export function useAccounts() {
   });
 }
 
-export function useActiveAccounts() {
+export function useActiveAccounts(enabled = true) {
   return useQuery({
     queryKey: ['accounts', 'active'],
     queryFn: () => accountRepository.getActive(),
     staleTime: 5 * 60 * 1000,
+    enabled,
   });
 }
 
@@ -23,7 +24,7 @@ export function useCreateAccount() {
   const { showToast } = useToastStore();
 
   return useMutation({
-    mutationFn: accountRepository.create,
+    mutationFn: (data: any) => accountRepository.create(data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
       showToast(`Cuenta ${data.name} creada correctamente`);

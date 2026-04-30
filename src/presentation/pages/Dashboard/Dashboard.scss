@@ -42,6 +42,40 @@
     color: $gray-500;
   }
 
+  &__caja-alert {
+    @include flex-between;
+    padding: $space-4 $space-6;
+    background: rgba($warning, 0.08);
+    border: 1.5px solid rgba($warning, 0.35);
+    border-radius: $radius-xl;
+    animation: fadeInUp 0.4s ease-out 0.1s backwards;
+
+    &-content {
+      display: flex;
+      align-items: center;
+      gap: $space-4;
+    }
+
+    &-icon {
+      font-size: 28px;
+      color: $warning;
+      flex-shrink: 0;
+    }
+
+    &-title {
+      margin: 0;
+      font-size: $font-size-base;
+      font-weight: $font-weight-bold;
+      color: $gray-900;
+    }
+
+    &-text {
+      margin: $space-1 0 0;
+      font-size: $font-size-sm;
+      color: $gray-500;
+    }
+  }
+
   &__metrics {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -82,10 +116,37 @@
       opacity: 1;
     }
 
+    &--clickable {
+      cursor: pointer;
+      transition: transform $transition-fast, box-shadow $transition-fast;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
     &-header {
       @include flex-start;
       gap: $space-3;
       margin-bottom: $space-4;
+    }
+
+    &-arrow {
+      margin-left: auto;
+      font-size: $font-size-lg;
+      font-weight: $font-weight-bold;
+      color: $gray-400;
+      transition: color $transition-fast, transform $transition-fast;
+
+      .dashboard__metric--clickable:hover & {
+        color: $brand;
+        transform: translateX(3px);
+      }
     }
 
     &-icon {

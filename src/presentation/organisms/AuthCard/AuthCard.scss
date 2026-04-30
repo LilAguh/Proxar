@@ -1,0 +1,127 @@
+@import '@/styles/variables';
+@import '@/styles/mixins';
+
+@keyframes auth-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes auth-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.auth-card {
+  min-height: 100vh;
+  @include flex-center;
+  background: linear-gradient(135deg, #fff5f0 0%, #ffe8dc 100%);
+  padding: $space-6;
+
+  &__container {
+    width: 100%;
+    max-width: 440px;
+    animation: auth-fade-in-up 0.5s ease-out;
+  }
+
+  &__card {
+    background: $white;
+    padding: $space-10 $space-8;
+    border-radius: $radius-2xl;
+    box-shadow: $shadow-xl;
+    display: flex;
+    flex-direction: column;
+    gap: $space-5;
+  }
+
+  &__badge {
+    background: $color-primary-light;
+    color: $color-primary;
+    padding: $space-2 $space-4;
+    border-radius: $radius-lg;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    text-align: center;
+  }
+
+  &__logo {
+    display: flex;
+    justify-content: center;
+
+    img {
+      width: 180px;
+      height: auto;
+    }
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-black;
+    color: $gray-900;
+    text-align: center;
+    letter-spacing: -0.5px;
+  }
+
+  &__subtitle {
+    margin: -$space-3 0 0;
+    font-size: $font-size-base;
+    color: $gray-500;
+    text-align: center;
+  }
+
+  &__error {
+    padding: $space-4;
+    background: rgba($danger, 0.1);
+    border: 1px solid rgba($danger, 0.3);
+    border-radius: $radius-md;
+    color: $danger;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    animation: auth-shake 0.3s ease-in-out;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: $space-5;
+  }
+
+  &__footer {
+    padding-top: $space-4;
+    border-top: $border-width solid $border-color;
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+  }
+}
+
+// Shared quick-fill buttons used in both login pages
+.auth-quick-fill {
+  padding: $space-2 $space-4;
+  background: $gray-100;
+  color: $color-primary;
+  border: 1px solid transparent;
+  border-radius: $radius-full;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: $color-primary;
+    color: $white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba($color-primary, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}

@@ -1,13 +1,17 @@
-import { useDashboardSummary, useTickets } from '@/hooks/api';
+import { useDashboardSummary, useTickets, useTodayCashRegister } from '@/hooks/api';
 import { Card, Button } from '@presentation/atoms';
 import { Spinner, EmptyState } from '@presentation/molecules';
 import { useNavigate } from 'react-router-dom';
+import { CashRegisterStatus } from '@core/enums';
 import './Dashboard.scss';
 
 export const Dashboard = () => {
   const navigate = useNavigate();
   const { data: summary, isLoading } = useDashboardSummary();
   const { data: recentTickets } = useTickets();
+  const { data: todayRegister } = useTodayCashRegister();
+
+  const cajaAbierta = todayRegister?.status === CashRegisterStatus.Open;
 
   if (isLoading) {
     return (
@@ -44,12 +48,29 @@ export const Dashboard = () => {
         </div>
       </div>
 
+      {/* Banner apertura de caja */}
+      {!cajaAbierta && (
+        <div className="dashboard__caja-alert">
+          <div className="dashboard__caja-alert-content">
+            <span className="dashboard__caja-alert-icon">⬡</span>
+            <div>
+              <p className="dashboard__caja-alert-title">La caja no está abierta</p>
+              <p className="dashboard__caja-alert-text">Abrí la caja del día para registrar movimientos y mover tickets</p>
+            </div>
+          </div>
+          <Button variant="primary" size="sm" onClick={() => navigate('/caja')}>
+            Abrir caja →
+          </Button>
+        </div>
+      )}
+
       {/* Métricas principales */}
       <div className="dashboard__metrics">
-        <Card className="dashboard__metric">
+        <Card className="dashboard__metric dashboard__metric--clickable" onClick={() => navigate('/tickets')}>
           <div className="dashboard__metric-header">
             <span className="dashboard__metric-icon">🎫</span>
             <h3 className="dashboard__metric-title">Tickets</h3>
+            <span className="dashboard__metric-arrow">→</span>
           </div>
           <div className="dashboard__metric-content">
             <div className="dashboard__metric-value">{summary.tickets.total}</div>
@@ -67,10 +88,11 @@ export const Dashboard = () => {
           </div>
         </Card>
 
-        <Card className="dashboard__metric">
+        <Card className="dashboard__metric dashboard__metric--clickable" onClick={() => navigate('/caja')}>
           <div className="dashboard__metric-header">
             <span className="dashboard__metric-icon">💰</span>
             <h3 className="dashboard__metric-title">Caja Hoy</h3>
+            <span className="dashboard__metric-arrow">+</span>
           </div>
           <div className="dashboard__metric-content">
             <div className="dashboard__metric-value dashboard__metric-value--cash">
@@ -87,10 +109,11 @@ export const Dashboard = () => {
           </div>
         </Card>
 
-        <Card className="dashboard__metric">
+        <Card className="dashboard__metric dashboard__metric--clickable" onClick={() => navigate('/caja')}>
           <div className="dashboard__metric-header">
             <span className="dashboard__metric-icon">🏦</span>
             <h3 className="dashboard__metric-title">Saldo Total</h3>
+            <span className="dashboard__metric-arrow">→</span>
           </div>
           <div className="dashboard__metric-content">
             <div className="dashboard__metric-value dashboard__metric-value--balance">
