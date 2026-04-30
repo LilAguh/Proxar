@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { useToastStore } from "@/stores";
 import {
   DndContext,
   DragEndEvent,
@@ -8,8 +10,11 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  closestCenter,
+  pointerWithin,
+  rectIntersection,
   useDroppable,
+  type Modifier,
+  type CollisionDetection,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -17,12 +22,12 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useTickets, useUpdateTicketStatus } from "@/hooks/api";
+import { useTickets, useUpdateTicketStatus, useTodayCashRegister } from "@/hooks/api";
 import { Card, Badge, Button } from "@presentation/atoms";
 import { Spinner, EmptyState } from "@presentation/molecules";
 import { ModalTicketDetail } from "@presentation/features";
 import { useUIStore, useAuthStore } from "@/stores";
-import { TicketState, TicketType, Priority } from "@core/enums";
+import { TicketState, TicketType, Priority, CashRegisterStatus } from "@core/enums";
 import { Ticket } from "@core/entities/Ticket.entity";
 import "./Tickets.scss";
 
@@ -72,14 +77,38 @@ const sortByPriority = (tickets: Ticket[]): Ticket[] => {
   });
 };
 
+// Prioriza columnas (col::) sobre tickets individuales para el drop
+const columnFirstCollision: CollisionDetection = (args) => {
+  const pointerCollisions = pointerWithin(args);
+  const columnCollision = pointerCollisions.find((c) =>
+    String(c.id).startsWith('col::')
+  );
+  if (columnCollision) return [columnCollision];
+  if (pointerCollisions.length > 0) return pointerCollisions;
+  return rectIntersection(args);
+};
+
+const snapCursorToTopCenter: Modifier = ({ activatorEvent, draggingNodeRect, transform }) => {
+  if (draggingNodeRect && activatorEvent) {
+    const activatorCoordinates = {
+      x: (activatorEvent as MouseEvent).clientX,
+      y: (activatorEvent as MouseEvent).clientY,
+    };
+    return {
+      ...transform,
+      x: transform.x + activatorCoordinates.x - (draggingNodeRect.left + draggingNodeRect.width / 2),
+      y: transform.y + activatorCoordinates.y - draggingNodeRect.top - 16,
+    };
+  }
+  return transform;
+};
+
 const TicketCard = ({
   ticket,
   onClick,
-  isDraggable = true,
 }: {
   ticket: Ticket;
   onClick: () => void;
-  isDraggable?: boolean;
 }) => {
   const {
     attributes,
@@ -95,14 +124,13 @@ const TicketCard = ({
       duration: 300,
       easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
     },
-    disabled: !isDraggable,
   });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition: transition || 'transform 300ms cubic-bezier(0.25, 1, 0.5, 1)',
     opacity: isDragging ? 0.5 : 1,
-    cursor: isDraggable ? (isDragging ? 'grabbing' : 'grab') : 'pointer',
+    cursor: isDragging ? 'grabbing' : 'grab',
     scale: isDragging ? '1.05' : '1',
   };
 
@@ -111,7 +139,7 @@ const TicketCard = ({
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...(isDraggable ? listeners : {})}
+      {...listeners}
       onClick={onClick}
     >
       <Card className="tickets__card" hoverable>
@@ -147,12 +175,10 @@ const DroppableColumn = ({
   status,
   tickets,
   onTicketClick,
-  isDraggable = true,
 }: {
   status: TicketState;
   tickets: Ticket[];
   onTicketClick: (id: string) => void;
-  isDraggable?: boolean;
 }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: colId(status),
@@ -160,14 +186,12 @@ const DroppableColumn = ({
   });
 
   return (
-    <div className="tickets__column">
+    <div ref={setNodeRef} className="tickets__column">
       <div className="tickets__column-header">
         <Badge status={status} size="lg" />
         <span className="tickets__column-count">{tickets.length}</span>
       </div>
-      <div
-        ref={setNodeRef}
-        className={`tickets__column-body ${isOver ? "tickets__column-body--over" : ""}`}
+      <div className={`tickets__column-body ${isOver ? "tickets__column-body--over" : ""}`}
       >
         <SortableContext
           items={tickets.map((t) => t.id)}
@@ -183,7 +207,7 @@ const DroppableColumn = ({
                 key={ticket.id}
                 ticket={ticket}
                 onClick={() => onTicketClick(ticket.id)}
-                isDraggable={isDraggable}
+
               />
             ))
           )}
@@ -199,11 +223,16 @@ export const Tickets = () => {
   const updateStatus = useUpdateTicketStatus();
   const { openModalTicket } = useUIStore();
   const { isAdmin } = useAuthStore();
+  const { data: todayRegister } = useTodayCashRegister();
+  const navigate = useNavigate();
+  const { showToast } = useToastStore();
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [showClosed, setShowClosed] = useState(false);
+  const [wasDragging, setWasDragging] = useState(false);
 
-  const canDrag = isAdmin();
+  const cajaAbierta = todayRegister?.status === CashRegisterStatus.Open;
+  const canDrag = isAdmin() && cajaAbierta;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -235,50 +264,64 @@ export const Tickets = () => {
   const closedTickets = tickets?.filter((t) => CLOSED_STATES.includes(t.status)) ?? [];
   const sortedClosedTickets = sortByPriority(closedTickets);
 
-  const [wasDragging, setWasDragging] = useState(false);
-
   const handleDragStart = (event: DragStartEvent) => {
     setActiveTicket(event.active.data.current?.ticket ?? null);
-    setWasDragging(false);
+    setWasDragging(true);
+  };
+
+  const handleDragCancel = () => {
+    setActiveTicket(null);
+    setTimeout(() => setWasDragging(false), 0);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
-    // Solo permitir drag si es admin
-    if (!canDrag) return;
+    setActiveTicket(null);
+    setTimeout(() => setWasDragging(false), 0);
+
+    if (!canDrag) {
+      showToast('Abrí la caja del día para poder mover tickets', 'warning');
+      return;
+    }
 
     const { active, over } = event;
-
     if (!over) return;
 
     const ticketId = active.id as string;
-    const newStatus = over.id as TicketState;
+    const overId = over.id as string;
+
+    let newStatus: TicketState;
+    if (overId.startsWith('col::')) {
+      newStatus = overId.slice(5) as TicketState;
+    } else {
+      const overTicket = tickets?.find((t) => t.id === overId);
+      if (!overTicket) return;
+      newStatus = overTicket.status;
+    }
 
     const ticket = tickets?.find((t) => t.id === ticketId);
     if (!ticket || ticket.status === newStatus) return;
 
     const previousStatus = ticket.status;
 
-    // OPTIMISTIC UPDATE
-    queryClient.setQueryData(['tickets'], (old: Ticket[] | undefined) => {
-    if (!old) return old;
-    return old.map((t) =>
-      t.id === ticketId ? { ...t, status: newStatus } : t
-    );
-  });
-
-  try {
-    await updateStatus.mutateAsync({
-      id: ticketId,
-      data: { newStatus },
-    });
-  } catch (error) {
-    // REVERT ON ERROR
     queryClient.setQueryData(['tickets'], (old: Ticket[] | undefined) => {
       if (!old) return old;
       return old.map((t) =>
-        t.id === ticketId ? { ...t, status: previousStatus } : t
+        t.id === ticketId ? { ...t, status: newStatus } : t
       );
     });
+
+    try {
+      await updateStatus.mutateAsync({
+        id: ticketId,
+        data: { newStatus },
+      });
+    } catch {
+      queryClient.setQueryData(['tickets'], (old: Ticket[] | undefined) => {
+        if (!old) return old;
+        return old.map((t) =>
+          t.id === ticketId ? { ...t, status: previousStatus } : t
+        );
+      });
     }
   };
 
@@ -294,11 +337,22 @@ export const Tickets = () => {
         </Button>
       </div>
 
+      {!cajaAbierta && (
+        <div className="tickets__caja-alert">
+          <span>⬡</span>
+          <span>La caja no está abierta — el movimiento de tickets está desactivado</span>
+          <button className="tickets__caja-alert-link" onClick={() => navigate('/caja')}>
+            Abrir caja →
+          </button>
+        </div>
+      )}
+
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCenter}
+        collisionDetection={columnFirstCollision}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
       >
         <div className="tickets__kanban">
           {COLUMNS.map((status) => (
@@ -309,15 +363,18 @@ export const Tickets = () => {
               onTicketClick={(id) => {
                 if (!wasDragging) setSelectedTicketId(id);
               }}
-              isDraggable={canDrag}
+
             />
           ))}
         </div>
 
-        <DragOverlay dropAnimation={{
-          duration: 350,
-          easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
-        }}>
+        <DragOverlay
+          modifiers={[snapCursorToTopCenter]}
+          dropAnimation={{
+            duration: 350,
+            easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+          }}
+        >
           {activeTicket && (
             <div style={{
               transform: 'rotate(3deg) scale(1.05)',
