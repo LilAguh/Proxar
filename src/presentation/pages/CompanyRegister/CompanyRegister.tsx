@@ -174,7 +174,13 @@ export const CompanyRegister = () => {
         });
 
         // Guardar auth (el usuario owner ya viene logueado)
-        setAuth(response.data.user, response.data.token);
+        setAuth(
+          response.data.user,
+          response.data.token,
+          response.data.refreshToken,
+          response.data.expiresAt,
+          response.data.refreshTokenExpiresAt
+        );
 
         // Redirigir al dashboard
         navigate('/');

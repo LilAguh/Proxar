@@ -64,7 +64,13 @@ export const Login = () => {
           password,
         });
         if (response.data) {
-          setAuth(response.data.user, response.data.token);
+          setAuth(
+            response.data.user,
+            response.data.token,
+            response.data.refreshToken,
+            response.data.expiresAt,
+            response.data.refreshTokenExpiresAt
+          );
           navigate('/');
         }
       } catch (err: any) {

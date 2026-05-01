@@ -27,13 +27,19 @@ interface ChangePasswordRequest {
 
 interface AuthResponse {
   token: string;
+  refreshToken: string;
   user: User;
   expiresAt: string;
+  refreshTokenExpiresAt: string;
 }
 
 class AuthRepository extends BaseRepository {
   async login(data: LoginRequest): Promise<AuthResponse> {
     return this.post<AuthResponse>('/auth/login', data);
+  }
+
+  async refresh(refreshToken: string): Promise<AuthResponse> {
+    return this.post<AuthResponse>('/auth/refresh', { refreshToken });
   }
 
   async getMe(): Promise<User> {

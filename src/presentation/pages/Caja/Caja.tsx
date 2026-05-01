@@ -6,7 +6,7 @@ import {
   useCashRegisterById,
   useOpenCashRegister,
   useCloseCashRegister,
-  useMovements,
+  useMovementsByDateRange,
 } from '@/hooks/api';
 import { Card, Button, Input } from '@presentation/atoms';
 import { Spinner, EmptyState } from '@presentation/molecules';
@@ -27,7 +27,6 @@ export const Caja = () => {
   const { data: today, isLoading: loadingToday } = useTodayCashRegister();
   const { data: preview, isLoading: loadingPreview } = useCashRegisterPreview();
   const { data: history, isLoading: loadingHistory } = useCashRegisterHistory();
-  const { data: allMovements } = useMovements();
   const openMutation = useOpenCashRegister();
   const closeMutation = useCloseCashRegister();
 
@@ -37,13 +36,23 @@ export const Caja = () => {
   const [closingAmounts, setClosingAmounts] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState('');
 
-  const isLoading = loadingToday || loadingPreview;
+  const todayBounds = (() => {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+    return {
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+    };
+  })();
 
-  const todayDate = today?.date ? new Date(today.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-  const todayMovements = (allMovements ?? []).filter((m) => {
-    const md = new Date(m.movementDate).toISOString().split('T')[0];
-    return md === todayDate;
-  });
+  const { data: todayMovements, isLoading: loadingMovements } = useMovementsByDateRange(
+    todayBounds.startDate,
+    todayBounds.endDate
+  );
+
+  const isLoading = loadingToday || loadingPreview || loadingMovements;
 
   const handleOpen = async () => {
     if (!preview) return;
@@ -112,7 +121,7 @@ export const Caja = () => {
           openingAmounts={openingAmounts}
           closingAmounts={closingAmounts}
           notes={notes}
-          movements={todayMovements}
+          movements={todayMovements ?? []}
           onOpeningChange={(id, val) => setOpeningAmounts((p) => ({ ...p, [id]: val }))}
           onClosingChange={(id, val) => setClosingAmounts((p) => ({ ...p, [id]: val }))}
           onNotesChange={setNotes}

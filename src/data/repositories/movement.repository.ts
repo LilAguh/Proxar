@@ -1,9 +1,16 @@
 import { BaseRepository } from './base.repository';
 import { BoxMovement } from '@core/entities/BoxMovement.entity';
+import { MovementType } from '@core/enums';
+import { PagedResult } from '@core/types/PagedResult';
 
 class MovementRepository extends BaseRepository {
-  async getAll(): Promise<BoxMovement[]> {
-    return this.get<BoxMovement[]>('/movements');
+  async getAll(page = 1, pageSize = 100): Promise<PagedResult<BoxMovement>> {
+    return this.get<PagedResult<BoxMovement>>(`/movements?page=${page}&pageSize=${pageSize}`);
+  }
+
+  async getPaged(page: number, pageSize: number, type?: MovementType): Promise<PagedResult<BoxMovement>> {
+    const typeQuery = type ? `&type=${encodeURIComponent(type)}` : '';
+    return this.get<PagedResult<BoxMovement>>(`/movements?page=${page}&pageSize=${pageSize}${typeQuery}`);
   }
 
   async getById(id: string): Promise<BoxMovement> {
@@ -19,7 +26,9 @@ class MovementRepository extends BaseRepository {
   }
 
   async getByDateRange(startDate: string, endDate: string): Promise<BoxMovement[]> {
-    return this.get<BoxMovement[]>(`/movements/date-range?startDate=${startDate}&endDate=${endDate}`);
+    return this.get<BoxMovement[]>(
+      `/movements/date-range?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`
+    );
   }
 
   async getBalances(): Promise<Record<string, number>> {
@@ -31,8 +40,8 @@ class MovementRepository extends BaseRepository {
   }
 
   async delete(id: string): Promise<void> {
-  return this.apiDelete<void>(`/movements/${id}`);
-}
+    return this.apiDelete<void>(`/movements/${id}`);
+  }
 }
 
 export const movementRepository = new MovementRepository();
