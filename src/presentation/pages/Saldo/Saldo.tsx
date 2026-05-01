@@ -1,32 +1,21 @@
 import { useEffect, useState } from "react";
 import {
   useMovementsPage,
-  useMovementsByDateRange,
+  useTodayCashRegister,
   useAccountBalances,
   useActiveAccounts,
   useDeleteMovement,
 } from "@/hooks/api";
 import { Card, Button } from "@presentation/atoms";
 import { Spinner, EmptyState, ConfirmDialog } from "@presentation/molecules";
-import { useUIStore, useAuthStore } from "@/stores";
+import { useCompanyStore, useUIStore, useAuthStore } from "@/stores";
 import { MovementType } from "@core/enums";
 import { useConfirm } from "@/hooks/useConfirm";
+import { formatDateInTimeZone } from "@/utils/dateTime";
 import "./Saldo.scss";
 
-const getLocalDayBounds = () => {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date();
-  end.setHours(23, 59, 59, 999);
-
-  return {
-    startDate: start.toISOString(),
-    endDate: end.toISOString(),
-  };
-};
-
 export const Saldo = () => {
+  const { company } = useCompanyStore();
   const [filter, setFilter] = useState<"all" | "income" | "expense">("all");
   const [page, setPage] = useState(1);
   const pageSize = 10;
@@ -34,9 +23,8 @@ export const Saldo = () => {
   const movementType =
     filter === "income" ? MovementType.Income : filter === "expense" ? MovementType.Expense : undefined;
 
-  const { startDate, endDate } = getLocalDayBounds();
   const { data: pagedMovements, isLoading: isLoadingMovements } = useMovementsPage(page, pageSize, movementType);
-  const { data: todayMovements, isLoading: isLoadingToday } = useMovementsByDateRange(startDate, endDate);
+  const { data: todayCashRegister, isLoading: isLoadingToday } = useTodayCashRegister();
   const { data: balances, isLoading: isLoadingBalances } = useAccountBalances();
   const { data: accounts, isLoading: isLoadingAccounts } = useActiveAccounts();
   const { openModalCaja } = useUIStore();
@@ -71,15 +59,6 @@ export const Saldo = () => {
       minimumFractionDigits: 0,
     }).format(amount);
 
-  const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString("es-AR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
   const totalBalance = Object.values(balances || {}).reduce(
     (sum, bal) => sum + (bal as number),
     0
@@ -87,13 +66,13 @@ export const Saldo = () => {
 
   const movements = pagedMovements?.items ?? [];
   const totalPages = pagedMovements?.totalPages ?? 1;
+  const todayMovements = todayCashRegister?.movements ?? [];
 
-  const today = new Date().toISOString().split("T")[0];
   const todayIncome = todayMovements
-    ?.filter((m) => new Date(m.movementDate).toISOString().split("T")[0] === today && m.type === MovementType.Income)
+    ?.filter((m) => m.type === MovementType.Income)
     .reduce((sum, m) => sum + m.amount, 0) || 0;
   const todayExpense = todayMovements
-    ?.filter((m) => new Date(m.movementDate).toISOString().split("T")[0] === today && m.type === MovementType.Expense)
+    ?.filter((m) => m.type === MovementType.Expense)
     .reduce((sum, m) => sum + m.amount, 0) || 0;
 
   return (
@@ -172,7 +151,13 @@ export const Saldo = () => {
                   <div className="saldo__movement-concept">{mov.concept}</div>
                   <div className="saldo__movement-footer">
                     <span className="saldo__movement-account">{mov.account?.name || "Sin cuenta"}</span>
-                    <span className="saldo__movement-date">{formatDate(mov.movementDate)}</span>
+                    <span className="saldo__movement-date">{formatDateInTimeZone(mov.movementDate, company?.timeZoneId, {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}</span>
                   </div>
                 </div>
                 <div className="saldo__movement-actions">

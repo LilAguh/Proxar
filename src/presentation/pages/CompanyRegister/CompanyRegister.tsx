@@ -171,6 +171,7 @@ export const CompanyRegister = () => {
           slug: formData.companySlug,
           name: formData.companyName,
           logoUrl: formData.logoUrl || undefined,
+          timeZoneId: 'America/Argentina/Buenos_Aires',
         });
 
         // Guardar auth (el usuario owner ya viene logueado)

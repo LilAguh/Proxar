@@ -3,6 +3,7 @@ export interface Company {
   name: string;
   slug: string;
   logoUrl?: string;
+  timeZoneId?: string;
   active: boolean;
   createdAt: string;
 }

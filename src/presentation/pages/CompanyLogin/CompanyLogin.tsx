@@ -46,6 +46,7 @@ export const CompanyLogin = () => {
         slug: company.slug,
         name: company.name,
         logoUrl: company.logoUrl,
+        timeZoneId: company.timeZoneId,
       });
 
       navigate('/login');
