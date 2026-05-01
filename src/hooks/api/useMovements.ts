@@ -4,14 +4,6 @@ import { useToastStore } from '@/stores';
 import { getErrorMessage } from '@core/utils/errorMessage';
 import { MovementType } from '@core/enums';
 
-export function useMovements() {
-  return useQuery({
-    queryKey: ['movements'],
-    queryFn: async () => (await movementRepository.getAll()).items,
-    staleTime: 1 * 60 * 1000,
-  });
-}
-
 export function useMovementsPage(page: number, pageSize: number, type?: MovementType) {
   return useQuery({
     queryKey: ['movements', 'page', page, pageSize, type ?? 'all'],
