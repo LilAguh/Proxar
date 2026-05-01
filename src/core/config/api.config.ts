@@ -4,15 +4,15 @@ export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5109/ap
 
 export const apiClient = axios.create({
   baseURL: API_URL,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor
+// Request interceptor — agrega auth token y headers multi-tenant
 apiClient.interceptors.request.use(
   (config) => {
-    // Leer token desde Zustand persist storage
     const authStorage = localStorage.getItem('proxar-auth');
     if (authStorage) {
       try {
@@ -23,18 +23,14 @@ apiClient.interceptors.request.use(
           config.headers.Authorization = `Bearer ${token}`;
         }
 
-        // Agregar headers multi-tenant desde el usuario logueado
-        const userId = state?.user?.id;
-        const companyId = state?.user?.companyId;
-
-        if (userId) {
-          config.headers['X-User-Id'] = userId;
+        if (state?.user?.id) {
+          config.headers['X-User-Id'] = state.user.id;
         }
-        if (companyId) {
-          config.headers['X-Company-Id'] = companyId;
+        if (state?.user?.companyId) {
+          config.headers['X-Company-Id'] = state.user.companyId;
         }
-      } catch (error) {
-        console.error('Error parsing auth storage:', error);
+      } catch {
+        // Si el storage está corrupto no bloqueamos el request
       }
     }
 
@@ -43,14 +39,19 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor
+// Response interceptor — detecta 401 y errores de red
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Solo limpiar storage, NO hacer redirect (dejamos que ProtectedRoute maneje eso)
       localStorage.removeItem('proxar-auth');
     }
+
+    // Si no hay respuesta, es un error de red — normalizamos el código
+    if (!error.response && !error.code) {
+      error.code = 'ERR_NETWORK';
+    }
+
     return Promise.reject(error);
   }
 );

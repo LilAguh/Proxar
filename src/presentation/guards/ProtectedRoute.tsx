@@ -19,7 +19,7 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
   // 1. Verificar company primero
   if (!hasCompany()) {
     console.log('No company selected');
-    return <Navigate to="/company" replace />;
+    return <Navigate to="/company/login" replace />;
   }
 
   // 2. Verificar autenticación de empleado

@@ -5,6 +5,7 @@ interface TextareaProps {
   label?: string;
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
@@ -17,6 +18,7 @@ export const Textarea = ({
   label,
   value,
   onChange,
+  onBlur,
   placeholder,
   required = false,
   disabled = false,
@@ -42,7 +44,10 @@ export const Textarea = ({
         value={value}
         onChange={handleChange}
         onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onBlur={() => {
+          setFocused(false);
+          onBlur?.();
+        }}
         placeholder={placeholder}
         disabled={disabled}
         rows={rows}

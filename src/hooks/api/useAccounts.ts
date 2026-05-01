@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { accountRepository } from '@data/repositories/account.repository';
 import { useToastStore } from '@/stores';
+import { getErrorMessage } from '@core/utils/errorMessage';
 
 export function useAccounts() {
   return useQuery({
@@ -29,8 +30,26 @@ export function useCreateAccount() {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
       showToast(`Cuenta ${data.name} creada correctamente`);
     },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Error al crear cuenta', 'error');
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al crear cuenta'), 'error');
+    },
+  });
+}
+
+export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+  const { showToast } = useToastStore();
+
+  return useMutation({
+    mutationFn: (id: string) => accountRepository.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      showToast('Cuenta eliminada correctamente');
+    },
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al eliminar cuenta'), 'error');
     },
   });
 }

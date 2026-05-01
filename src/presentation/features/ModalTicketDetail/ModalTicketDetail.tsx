@@ -1,10 +1,10 @@
 import { Modal } from '@presentation/molecules';
 import { Badge, Button } from '@presentation/atoms';
 import { Spinner, ConfirmDialog } from '@presentation/molecules';
-import { useTicketWithDetails, useUpdateTicketStatus, useDeleteTicket } from '@/hooks/api';
+import { useTicketDetails, useUpdateTicketStatus, useDeleteTicket } from '@/hooks/api';
 import { TicketState, TICKET_STATE_CONFIG, PRIORITY_CONFIG } from '@core/enums';
 import { useAuthStore } from '@/stores';
-import { useConfirm } from '@/hooks/api/useConfirm';
+import { useConfirm } from '@/hooks/useConfirm';
 import './ModalTicketDetail.scss';
 
 const TICKET_TYPE_LABEL: Record<string, string> = {
@@ -46,7 +46,7 @@ const formatCurrency = (n: number) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(n);
 
 export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
-  const { data: ticket, isLoading } = useTicketWithDetails(ticketId ?? '');
+  const { data: ticket, isLoading } = useTicketDetails(ticketId ?? '');
   const updateStatus = useUpdateTicketStatus();
   const deleteTicket = useDeleteTicket();
   const { isAdmin } = useAuthStore();

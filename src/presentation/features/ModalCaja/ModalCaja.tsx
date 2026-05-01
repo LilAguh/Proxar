@@ -53,7 +53,8 @@ const ModalCajaContent = ({ onClose }: { onClose: () => void }) => {
         return value.length < 3 ? 'Mínimo 3 caracteres' : '';
       case 'movementDate': {
         if (!value) return 'La fecha es requerida';
-        const d = new Date(value);
+        const [year, month, day] = value.split('-').map(Number);
+        const d = new Date(year, month - 1, day);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         return d > today ? 'La fecha no puede ser futura' : '';
@@ -107,8 +108,9 @@ const ModalCajaContent = ({ onClose }: { onClose: () => void }) => {
     setErrors({ ...errors, [field]: validateField(field, form[field as keyof typeof form] as string) });
   };
 
-  const isValid = form.accountId && form.amount && form.concept && form.movementDate &&
-    !errors.accountId && !errors.amount && !errors.concept && !errors.movementDate;
+  const hasErrors = Object.values(errors).some(Boolean);
+  const hasRequiredFields = !!(form.accountId && form.amount && form.concept && form.movementDate);
+  const isValid = hasRequiredFields && !hasErrors;
 
   if (loadingRegister) {
     return (
@@ -151,11 +153,17 @@ const ModalCajaContent = ({ onClose }: { onClose: () => void }) => {
       onClose={handleClose}
       title="Registrar Movimiento de Caja"
       width="lg"
+      isLoading={registerMovement.isPending}
       footer={
         <>
-          <Button variant="ghost" onClick={handleClose}>Cancelar</Button>
-          <Button variant="success" onClick={handleSubmit} disabled={!isValid || registerMovement.isPending}>
-            {registerMovement.isPending ? 'Registrando...' : 'Registrar'}
+          <Button variant="ghost" onClick={handleClose} disabled={registerMovement.isPending}>Cancelar</Button>
+          <Button
+            variant="success"
+            onClick={handleSubmit}
+            disabled={!isValid || registerMovement.isPending}
+            loading={registerMovement.isPending}
+          >
+            Registrar
           </Button>
         </>
       }

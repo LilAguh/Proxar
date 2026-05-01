@@ -19,7 +19,7 @@ export const useConfirm = () => {
   const confirm = (opts: ConfirmOptions): Promise<boolean> => {
     setOptions(opts);
     setIsOpen(true);
-    
+
     return new Promise((resolve) => {
       setResolver(() => resolve);
     });

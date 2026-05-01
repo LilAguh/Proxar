@@ -9,7 +9,7 @@ import { Card, Button } from "@presentation/atoms";
 import { Spinner, EmptyState, ConfirmDialog } from "@presentation/molecules";
 import { useUIStore, useAuthStore } from "@/stores";
 import { MovementType } from "@core/enums";
-import { useConfirm } from "@/hooks/api/useConfirm";
+import { useConfirm } from "@/hooks/useConfirm";
 import "./Saldo.scss";
 
 export const Saldo = () => {

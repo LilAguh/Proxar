@@ -2,12 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ticketRepository } from '@data/repositories/ticket.repository';
 import { useToastStore } from '@/stores';
 import { TicketState } from '@core/enums';
+import { getErrorMessage } from '@core/utils/errorMessage';
 
 export function useTickets() {
   return useQuery({
     queryKey: ['tickets'],
     queryFn: () => ticketRepository.getAll(),
-    staleTime: 3 * 60 * 1000, // 3 minutos
+    staleTime: 3 * 60 * 1000,
   });
 }
 
@@ -19,7 +20,7 @@ export function useTicket(id: string) {
   });
 }
 
-export function useTicketWithDetails(id: string) {
+export function useTicketDetails(id: string) {
   return useQuery({
     queryKey: ['tickets', id, 'details'],
     queryFn: () => ticketRepository.getWithDetails(id),
@@ -61,8 +62,8 @@ export function useCreateTicket() {
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
       showToast(`Ticket #${data.number} creado correctamente`);
     },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Error al crear ticket', 'error');
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al crear ticket'), 'error');
     },
   });
 }
@@ -80,8 +81,8 @@ export function useUpdateTicketStatus() {
       queryClient.invalidateQueries({ queryKey: ['tickets', data.id, 'details'] });
       showToast('Estado del ticket actualizado');
     },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Error al actualizar estado', 'error');
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al actualizar estado'), 'error');
     },
   });
 }
@@ -97,8 +98,8 @@ export function useAssignTicket() {
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
       showToast('Ticket asignado correctamente');
     },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Error al asignar ticket', 'error');
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al asignar ticket'), 'error');
     },
   });
 }
@@ -114,11 +115,8 @@ export function useDeleteTicket() {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       showToast('Ticket eliminado correctamente');
     },
-    onError: (error: any) => {
-      showToast(
-        error.response?.data?.message || 'Error al eliminar ticket',
-        'error'
-      );
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al eliminar ticket'), 'error');
     },
   });
 }

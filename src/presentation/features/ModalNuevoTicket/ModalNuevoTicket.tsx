@@ -10,92 +10,104 @@ interface ModalNuevoTicketProps {
   onClose: () => void;
 }
 
+interface TicketForm {
+  clientId: string;
+  type: string;
+  priority: string;
+  title: string;
+  description: string;
+  address: string;
+}
+
+const EMPTY_FORM: TicketForm = {
+  clientId: '',
+  type: '',
+  priority: '',
+  title: '',
+  description: '',
+  address: '',
+};
+
+const validateField = (field: keyof TicketForm, value: string): string => {
+  switch (field) {
+    case 'clientId':
+      return value ? '' : 'Seleccioná un cliente';
+    case 'type':
+      return value ? '' : 'Seleccioná el tipo de trabajo';
+    case 'priority':
+      return value ? '' : 'Seleccioná la prioridad';
+    case 'title':
+      if (!value) return 'El título es requerido';
+      if (value.length < 5) return 'Mínimo 5 caracteres';
+      if (value.length > 200) return 'Máximo 200 caracteres';
+      return '';
+    case 'description':
+      return value.length > 2000 ? 'Máximo 2000 caracteres' : '';
+    default:
+      return '';
+  }
+};
+
+const REQUIRED_FIELDS: (keyof TicketForm)[] = ['clientId', 'type', 'priority', 'title'];
+
 export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => {
   const { data: clients } = useClients();
   const createTicket = useCreateTicket();
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [form, setForm] = useState<TicketForm>(EMPTY_FORM);
+  const [errors, setErrors] = useState<Partial<Record<keyof TicketForm, string>>>({});
+  const [touched, setTouched] = useState<Partial<Record<keyof TicketForm, boolean>>>({});
 
-  const [form, setForm] = useState({
-    clientId: '',
-    type: TicketType.Glass,
-    priority: Priority.Medium,
-    title: '',
-    description: '',
-    address: '',
-  });
-
-  const validateField = (field: string, value: string): string => {
-    switch (field) {
-      case 'clientId':
-        if (!value) return 'Selecciona un cliente';
-        return '';
-
-      case 'title':
-        if (!value) return 'El título es requerido';
-        if (value.length < 5) return 'Mínimo 5 caracteres';
-        if (value.length > 200) return 'Máximo 200 caracteres';
-        return '';
-
-      case 'description':
-        if (value.length > 2000) return 'Máximo 2000 caracteres';
-        return '';
-
-      default:
-        return '';
+  const handleChange = (field: keyof TicketForm, value: string) => {
+    const updated = { ...form, [field]: value };
+    setForm(updated);
+    if (touched[field]) {
+      setErrors((prev) => ({ ...prev, [field]: validateField(field, value) }));
     }
   };
 
-  const validate = () => {
-    const newErrors: Record<string, string> = {
-      clientId: validateField('clientId', form.clientId),
-      title: validateField('title', form.title),
-      description: validateField('description', form.description),
-    };
+  const handleBlur = (field: keyof TicketForm) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    setErrors((prev) => ({ ...prev, [field]: validateField(field, form[field]) }));
+  };
+
+  const validateAll = (): boolean => {
+    const allFields: (keyof TicketForm)[] = ['clientId', 'type', 'priority', 'title', 'description'];
+    const newErrors: Partial<Record<keyof TicketForm, string>> = {};
+    const allTouched: Partial<Record<keyof TicketForm, boolean>> = {};
+
+    for (const field of allFields) {
+      newErrors[field] = validateField(field, form[field]);
+      allTouched[field] = true;
+    }
 
     setErrors(newErrors);
-    setTouched({ clientId: true, title: true, description: true });
-    return !newErrors.clientId && !newErrors.title && !newErrors.description;
+    setTouched(allTouched);
+
+    return !Object.values(newErrors).some(Boolean);
   };
 
   const handleSubmit = async () => {
-    if (!validate()) return;
+    if (!validateAll()) return;
 
-    await createTicket.mutateAsync(form);
+    await createTicket.mutateAsync({
+      ...form,
+      type: form.type as TicketType,
+      priority: form.priority as Priority,
+    });
     handleClose();
   };
 
   const handleClose = () => {
-    setForm({
-      clientId: '',
-      type: TicketType.Glass,
-      priority: Priority.Medium,
-      title: '',
-      description: '',
-      address: '',
-    });
+    setForm(EMPTY_FORM);
     setErrors({});
     setTouched({});
     onClose();
   };
 
-  const handleFieldChange = (field: string, value: string) => {
-    setForm({ ...form, [field]: value });
-
-    // Solo validar si el campo ya fue tocado
-    if (touched[field]) {
-      const error = validateField(field, value);
-      setErrors({ ...errors, [field]: error });
-    }
-  };
-
-  const handleFieldBlur = (field: string) => {
-    setTouched({ ...touched, [field]: true });
-    const error = validateField(field, form[field as keyof typeof form]);
-    setErrors({ ...errors, [field]: error });
-  };
-
-  const isValid = form.clientId && form.title && form.title.length >= 5 && !errors.clientId && !errors.title && !errors.description;
+  const isSubmitDisabled =
+    createTicket.isPending ||
+    REQUIRED_FIELDS.some((f) => !form[f]) ||
+    Object.values(errors).some(Boolean);
 
   return (
     <Modal
@@ -103,17 +115,19 @@ export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => 
       onClose={handleClose}
       title="Nuevo Ticket"
       width="lg"
+      isLoading={createTicket.isPending}
       footer={
         <>
-          <Button variant="ghost" onClick={handleClose}>
+          <Button variant="ghost" onClick={handleClose} disabled={createTicket.isPending}>
             Cancelar
           </Button>
           <Button
             variant="primary"
             onClick={handleSubmit}
-            disabled={!isValid || createTicket.isPending}
+            disabled={isSubmitDisabled}
+            loading={createTicket.isPending}
           >
-            {createTicket.isPending ? 'Creando...' : 'Crear Ticket'}
+            Crear Ticket
           </Button>
         </>
       }
@@ -124,7 +138,8 @@ export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => 
             label="Cliente"
             required
             value={form.clientId}
-            onChange={(value) => handleFieldChange('clientId', value)}
+            onChange={(value) => handleChange('clientId', value)}
+            onBlur={() => handleBlur('clientId')}
             error={touched.clientId ? errors.clientId : ''}
             options={[
               { value: '', label: 'Seleccionar cliente' },
@@ -135,8 +150,11 @@ export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => 
             label="Tipo"
             required
             value={form.type}
-            onChange={(value) => setForm({ ...form, type: value as TicketType })}
+            onChange={(value) => handleChange('type', value)}
+            onBlur={() => handleBlur('type')}
+            error={touched.type ? errors.type : ''}
             options={[
+              { value: '', label: 'Seleccionar tipo' },
               { value: TicketType.Measurement, label: 'Medición' },
               { value: TicketType.Repair, label: 'Reparación' },
               { value: TicketType.Glass, label: 'Vidrio' },
@@ -152,8 +170,11 @@ export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => 
             label="Prioridad"
             required
             value={form.priority}
-            onChange={(value) => setForm({ ...form, priority: value as Priority })}
+            onChange={(value) => handleChange('priority', value)}
+            onBlur={() => handleBlur('priority')}
+            error={touched.priority ? errors.priority : ''}
             options={[
+              { value: '', label: 'Seleccionar prioridad' },
               { value: Priority.Low, label: 'Baja' },
               { value: Priority.Medium, label: 'Media' },
               { value: Priority.High, label: 'Alta' },
@@ -163,7 +184,7 @@ export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => 
           <Input
             label="Dirección (opcional)"
             value={form.address}
-            onChange={(value) => setForm({ ...form, address: value })}
+            onChange={(value) => handleChange('address', value)}
             placeholder="Dirección del trabajo"
           />
         </div>
@@ -172,8 +193,8 @@ export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => 
           label="Título"
           required
           value={form.title}
-          onChange={(value) => handleFieldChange('title', value)}
-          onBlur={() => handleFieldBlur('title')}
+          onChange={(value) => handleChange('title', value)}
+          onBlur={() => handleBlur('title')}
           placeholder="Ej: Cambio de vidrio ventana cocina"
           error={touched.title ? errors.title : ''}
           hint="Mínimo 5 caracteres"
@@ -182,8 +203,8 @@ export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => 
         <Textarea
           label="Descripción (opcional)"
           value={form.description}
-          onChange={(value) => handleFieldChange('description', value)}
-          onBlur={() => handleFieldBlur('description')}
+          onChange={(value) => handleChange('description', value)}
+          onBlur={() => handleBlur('description')}
           placeholder="Detalles del trabajo a realizar..."
           error={touched.description ? errors.description : ''}
           rows={5}
