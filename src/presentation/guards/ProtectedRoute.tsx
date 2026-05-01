@@ -16,16 +16,16 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
     return null;
   }
 
-  // 1. Verificar company primero
-  if (!hasCompany()) {
-    console.log('No company selected');
-    return <Navigate to="/company/login" replace />;
-  }
-
-  // 2. Verificar autenticación de empleado
+  // 1. Verificar autenticación de empleado
   if (!isAuthenticated()) {
     console.log('Not authenticated');
-    return <Navigate to="/login" replace />;
+    return <Navigate to={hasCompany() ? '/login' : '/company/login'} replace />;
+  }
+
+  // 2. Si falta company, no bloqueamos la sesión autenticada.
+  // La company se usa como contexto visual y de selección inicial.
+  if (!hasCompany()) {
+    console.log('No company selected');
   }
 
   // 3. Requiere admin pero no lo es → redirect a home

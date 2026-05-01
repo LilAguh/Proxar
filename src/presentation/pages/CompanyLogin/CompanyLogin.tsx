@@ -1,71 +1,69 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { useCompanyStore } from '@/stores/useCompanyStore';
 import { Input, Button } from '@presentation/atoms';
 import { AuthCard } from '@presentation/organisms';
 import { apiClient } from '@/core/config/api.config';
-import { isValidEmail } from '@/utils/validators';
 import './CompanyLogin.scss';
 
 const isDevelopment = import.meta.env.DEV;
 
 export const CompanyLogin = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [touched, setTouched] = useState({ email: false, password: false });
-  const [errors, setErrors] = useState({ email: '', password: '' });
+  const [slug, setSlug] = useState('');
+  const [touched, setTouched] = useState({ slug: false });
+  const [errors, setErrors] = useState({ slug: '' });
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
-  const { setCompany } = useCompanyStore();
+  const { setCompany, clearCompany } = useCompanyStore();
+  const { logout } = useAuthStore();
   const navigate = useNavigate();
 
   const validateForm = (): boolean => {
-    const newErrors = { email: '', password: '' };
-    if (!email) newErrors.email = 'El email es requerido';
-    else if (!isValidEmail(email)) newErrors.email = 'El email no es válido';
-    if (!password) newErrors.password = 'La contraseña es requerida';
-    else if (password.length < 8) newErrors.password = 'Mínimo 8 caracteres';
+    const newErrors = { slug: '' };
+    if (!slug) newErrors.slug = 'El slug de la empresa es requerido';
+    else if (!/^[a-z0-9-]+$/.test(slug)) newErrors.slug = 'Solo letras minúsculas, números y guiones';
     setErrors(newErrors);
-    return !newErrors.email && !newErrors.password;
+    return !newErrors.slug;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTouched({ email: true, password: true });
+    setTouched({ slug: true });
     setServerError('');
     if (!validateForm()) return;
 
     setLoading(true);
     try {
-      const response = await apiClient.post('/auth/login', { email, password });
-      if (response.data) {
-        const { user, token } = response.data;
-        const companyResponse = await apiClient.get(`/companies/${user.companyId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCompany({
-          slug: companyResponse.data.slug,
-          name: companyResponse.data.name,
-          logoUrl: companyResponse.data.logoUrl,
-        });
-        navigate('/login');
-      }
+      const response = await apiClient.get(`/companies/slug/${slug.trim().toLowerCase()}`);
+      const company = response.data;
+
+      // Evita que una sesión previa quede activa durante la selección de empresa.
+      logout();
+      clearCompany();
+
+      setCompany({
+        slug: company.slug,
+        name: company.name,
+        logoUrl: company.logoUrl,
+      });
+
+      navigate('/login');
     } catch (err: any) {
-      setServerError(err?.response?.data?.message || 'Email o contraseña incorrectos');
+      setServerError(err?.response?.data?.message || 'No se pudo identificar la empresa');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleQuickFill = (emailValue: string, passwordValue: string) => {
-    setEmail(emailValue);
-    setPassword(passwordValue);
-    setTouched({ email: true, password: true });
-    setErrors({ email: '', password: '' });
+  const handleQuickFill = (slugValue: string) => {
+    setSlug(slugValue);
+    setTouched({ slug: true });
+    setErrors({ slug: '' });
     setServerError('');
   };
 
-  const isValid = email && password && !errors.email && !errors.password;
+  const isValid = slug && !errors.slug;
 
   const footer = (
     <>
@@ -74,15 +72,15 @@ export const CompanyLogin = () => {
           <p style={{ margin: 0, fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>💡 Empresas de prueba:</p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
             {[
-              { label: '🏢 Sagitario', email: 'admin@sagitario.com', pass: 'Admin1234' },
-              { label: '🪟 Vidrios Norte', email: 'admin@vidriosnorte.com', pass: 'Admin1234' },
-              { label: '🔧 AlumCor', email: 'admin@alumcor.com', pass: 'Admin1234' },
-            ].map(({ label, email: e, pass }) => (
+              { label: '🏢 sagitario', slug: 'sagitario' },
+              { label: '🪟 vidrios-norte', slug: 'vidrios-norte' },
+              { label: '🔧 alumcor', slug: 'alumcor' },
+            ].map(({ label, slug: s }) => (
               <button
                 key={label}
                 type="button"
                 className="auth-quick-fill"
-                onClick={() => handleQuickFill(e, pass)}
+                onClick={() => handleQuickFill(s)}
               >
                 {label}
               </button>
@@ -102,38 +100,28 @@ export const CompanyLogin = () => {
   return (
     <>
       <AuthCard
-        title="Bienvenido a Proxar"
-        subtitle="Ingresá con tu cuenta para gestionar tu empresa"
+        title="Identificá tu empresa"
+        subtitle="Ingresá el slug para continuar con el acceso"
         error={serverError}
         footer={footer}
       >
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <Input
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(value) => { setEmail(value); if (!touched.email) setTouched({ ...touched, email: true }); }}
-            onBlur={() => { setTouched({ ...touched, email: true }); validateForm(); }}
-            placeholder="tu@email.com"
+            label="Slug de empresa"
+            value={slug}
+            onChange={(value) => {
+              setSlug(value.toLowerCase());
+              if (!touched.slug) setTouched({ ...touched, slug: true });
+            }}
+            onBlur={() => { setTouched({ ...touched, slug: true }); validateForm(); }}
+            placeholder="sagitario"
             required
             disabled={loading}
-            error={touched.email ? errors.email : ''}
-            autoComplete="email"
-          />
-          <Input
-            label="Contraseña"
-            type="password"
-            value={password}
-            onChange={(value) => { setPassword(value); if (!touched.password) setTouched({ ...touched, password: true }); }}
-            onBlur={() => { setTouched({ ...touched, password: true }); validateForm(); }}
-            placeholder="••••••••"
-            required
-            disabled={loading}
-            error={touched.password ? errors.password : ''}
-            autoComplete="current-password"
+            error={touched.slug ? errors.slug : ''}
+            autoComplete="off"
           />
           <Button type="submit" variant="primary" fullWidth disabled={!isValid || loading}>
-            {loading ? 'Ingresando...' : 'Iniciar Sesión'}
+            {loading ? 'Buscando...' : 'Continuar'}
           </Button>
         </form>
       </AuthCard>
