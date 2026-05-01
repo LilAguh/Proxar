@@ -57,6 +57,21 @@ const COLUMNS = [
 
 const CLOSED_STATES = [TicketState.Completado, TicketState.Descartado];
 
+// Transiciones de estado permitidas
+const ALLOWED_TRANSITIONS: Record<TicketState, TicketState[]> = {
+  [TicketState.Nuevo]: [TicketState.EnVisita, TicketState.Presupuestado, TicketState.Descartado],
+  [TicketState.EnVisita]: [TicketState.Presupuestado, TicketState.Descartado],
+  [TicketState.Presupuestado]: [TicketState.Aprobado, TicketState.Descartado],
+  [TicketState.Aprobado]: [TicketState.EnProceso, TicketState.Descartado],
+  [TicketState.EnProceso]: [TicketState.Completado, TicketState.Descartado],
+  [TicketState.Completado]: [], // Estado final
+  [TicketState.Descartado]: [TicketState.Nuevo], // Puede reabrirse
+};
+
+const isTransitionAllowed = (from: TicketState, to: TicketState): boolean => {
+  return ALLOWED_TRANSITIONS[from]?.includes(to) ?? false;
+};
+
 // Prefix para distinguir IDs de columna de IDs de ticket
 const colId = (status: TicketState) => `col::${status}`;
 
@@ -175,23 +190,30 @@ const DroppableColumn = ({
   status,
   tickets,
   onTicketClick,
+  disabled = false,
 }: {
   status: TicketState;
   tickets: Ticket[];
   onTicketClick: (id: string) => void;
+  disabled?: boolean;
 }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: colId(status),
     data: { type: "column", status },
+    disabled,
   });
 
   return (
-    <div ref={setNodeRef} className="tickets__column">
+    <div
+      ref={setNodeRef}
+      className={`tickets__column ${disabled ? 'tickets__column--disabled' : ''}`}
+    >
       <div className="tickets__column-header">
         <Badge status={status} size="lg" />
         <span className="tickets__column-count">{tickets.length}</span>
       </div>
-      <div className={`tickets__column-body ${isOver ? "tickets__column-body--over" : ""}`}
+      <div
+        className={`tickets__column-body ${isOver ? "tickets__column-body--over" : ""}`}
       >
         <SortableContext
           items={tickets.map((t) => t.id)}
@@ -301,6 +323,24 @@ export const Tickets = () => {
     const ticket = tickets?.find((t) => t.id === ticketId);
     if (!ticket || ticket.status === newStatus) return;
 
+    // Validar transición de estado
+    if (!isTransitionAllowed(ticket.status, newStatus)) {
+      const stateLabels: Record<TicketState, string> = {
+        [TicketState.Nuevo]: 'Nuevo',
+        [TicketState.EnVisita]: 'En Visita',
+        [TicketState.Presupuestado]: 'Presupuestado',
+        [TicketState.Aprobado]: 'Aprobado',
+        [TicketState.EnProceso]: 'En Proceso',
+        [TicketState.Completado]: 'Completado',
+        [TicketState.Descartado]: 'Descartado',
+      };
+      showToast(
+        `No se puede mover de "${stateLabels[ticket.status]}" a "${stateLabels[newStatus]}"`,
+        'warning'
+      );
+      return;
+    }
+
     const previousStatus = ticket.status;
 
     queryClient.setQueryData(['tickets'], (old: Ticket[] | undefined) => {
@@ -363,7 +403,7 @@ export const Tickets = () => {
               onTicketClick={(id) => {
                 if (!wasDragging) setSelectedTicketId(id);
               }}
-
+              disabled={activeTicket ? !isTransitionAllowed(activeTicket.status, status) : false}
             />
           ))}
         </div>
