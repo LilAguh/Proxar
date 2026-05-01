@@ -10,6 +10,7 @@ interface SelectProps {
   label?: string;
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   options: SelectOption[];
   required?: boolean;
   disabled?: boolean;
@@ -21,6 +22,7 @@ export const Select = ({
   label,
   value,
   onChange,
+  onBlur,
   options,
   required = false,
   disabled = false,
@@ -45,7 +47,10 @@ export const Select = ({
         value={value}
         onChange={handleChange}
         onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onBlur={() => {
+          setFocused(false);
+          onBlur?.();
+        }}
         disabled={disabled}
         className={`select ${focused ? 'select--focused' : ''} ${error ? 'select--error' : ''}`}
       >

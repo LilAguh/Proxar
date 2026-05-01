@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { Button } from '@presentation/atoms';
 import { Spinner } from '@presentation/molecules';
 import { apiClient } from '@/core/config/api.config';
+import { getErrorMessage } from '@core/utils/errorMessage';
 import './CompanyRegister.scss';
 
 export const CompanyRegister = () => {
@@ -178,34 +179,8 @@ export const CompanyRegister = () => {
         // Redirigir al dashboard
         navigate('/');
       }
-    } catch (err: any) {
-      console.error('Error al registrar:', err);
-
-      // Extraer mensaje de error del backend
-      let message = 'Error al registrar la empresa';
-
-      if (err?.response?.data) {
-        const errorData = err.response.data;
-
-        // Si es error de validación (400)
-        if (err.response.status === 400) {
-          if (typeof errorData === 'string') {
-            message = errorData;
-          } else if (errorData.message) {
-            message = errorData.message;
-          } else if (errorData.errors) {
-            // Errores de validación de DataAnnotations
-            const validationErrors = Object.values(errorData.errors).flat();
-            message = validationErrors.join('. ');
-          } else if (errorData.title) {
-            message = errorData.title;
-          }
-        } else if (errorData.message) {
-          message = errorData.message;
-        }
-      }
-
-      setError(message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Error al registrar la empresa'));
     } finally {
       setLoading(false);
     }
@@ -382,7 +357,7 @@ export const CompanyRegister = () => {
           >
             {loading ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
-                <Spinner size="sm" />
+                <Spinner size="xs" />
                 <span>Registrando empresa...</span>
               </div>
             ) : (
@@ -393,7 +368,7 @@ export const CompanyRegister = () => {
 
         <div className="company-register__footer">
           <p>¿Ya tenés una empresa?</p>
-          <a href="/company" className="company-register__link">
+          <a href="/company/login" className="company-register__link">
             Iniciá sesión
           </a>
         </div>

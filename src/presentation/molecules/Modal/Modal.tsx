@@ -1,5 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { Spinner } from '../Spinner/Spinner';
 import './Modal.scss';
 
 interface ModalProps {
@@ -9,6 +10,7 @@ interface ModalProps {
   children: ReactNode;
   width?: 'sm' | 'md' | 'lg' | 'xl';
   footer?: ReactNode;
+  isLoading?: boolean;
 }
 
 export const Modal = ({
@@ -18,6 +20,7 @@ export const Modal = ({
   children,
   width = 'md',
   footer,
+  isLoading = false,
 }: ModalProps) => {
   useEffect(() => {
     if (isOpen) {
@@ -33,31 +36,42 @@ export const Modal = ({
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape' && isOpen && !isLoading) {
         onClose();
       }
     };
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, isLoading]);
 
   if (!isOpen) return null;
 
+  const handleBackdropClick = () => {
+    if (!isLoading) onClose();
+  };
+
   return createPortal(
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop" onClick={handleBackdropClick}>
       <div
         className={`modal modal--${width}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal__header">
           <h2 className="modal__title">{title}</h2>
-          <button className="modal__close" onClick={onClose}>
+          <button className="modal__close" onClick={onClose} disabled={isLoading}>
             ×
           </button>
         </div>
 
-        <div className="modal__body">{children}</div>
+        <div className="modal__body">
+          {children}
+          {isLoading && (
+            <div className="modal__loading-overlay">
+              <Spinner size="lg" />
+            </div>
+          )}
+        </div>
 
         {footer && <div className="modal__footer">{footer}</div>}
       </div>

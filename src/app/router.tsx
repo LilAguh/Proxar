@@ -19,6 +19,10 @@ const pt = (element: React.ReactElement) => (
 export const router = createBrowserRouter([
   {
     path: '/company',
+    element: <Navigate to="/company/login" replace />,
+  },
+  {
+    path: '/company/login',
     element: pt(<CompanyLogin />),
   },
   {

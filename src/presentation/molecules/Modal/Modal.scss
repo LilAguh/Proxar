@@ -93,6 +93,17 @@
     overflow-y: auto;
     @include custom-scrollbar;
     flex: 1;
+    position: relative;
+  }
+
+  &__loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba($white, 0.75);
+    @include flex-center;
+    z-index: 10;
+    border-radius: 0;
+    backdrop-filter: blur(2px);
   }
 
   &__footer {

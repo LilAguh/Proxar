@@ -3,6 +3,7 @@ import { authRepository } from '@/data/repositories/auth.repository';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 import { useToastStore } from '@/stores/useToastStore';
+import { getErrorMessage } from '@core/utils/errorMessage';
 
 export function useLogin() {
   const { setAuth } = useAuthStore();
@@ -13,15 +14,12 @@ export function useLogin() {
     mutationFn: (credentials: { email: string; password: string }) =>
       authRepository.login(credentials),
     onSuccess: (data) => {
-      // Tu store espera (user, token) en ese orden
       setAuth(data.user, data.token);
       navigate('/');
       showToast('¡Bienvenido!', 'success');
     },
-    onError: (error: any) => {
-      console.error('Login error:', error);
-      const message = error?.response?.data?.message || 'Error al iniciar sesión';
-      showToast(message, 'error');
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al iniciar sesión'), 'error');
     },
   });
 }
@@ -45,7 +43,7 @@ export function useMe() {
     queryKey: ['me'],
     queryFn: () => authRepository.getMe(),
     enabled: !!token,
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -58,9 +56,8 @@ export function useChangePassword() {
     onSuccess: () => {
       showToast('Contraseña actualizada correctamente', 'success');
     },
-    onError: (error: any) => {
-      const message = error?.response?.data?.message || 'Error al cambiar contraseña';
-      showToast(message, 'error');
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al cambiar contraseña'), 'error');
     },
   });
 }
@@ -85,9 +82,8 @@ export function useCreateUser() {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       showToast('Usuario creado correctamente', 'success');
     },
-    onError: (error: any) => {
-      const message = error?.response?.data?.message || 'Error al crear usuario';
-      showToast(message, 'error');
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al crear usuario'), 'error');
     },
   });
 }
@@ -103,9 +99,8 @@ export function useUpdateUser() {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       showToast('Usuario actualizado correctamente', 'success');
     },
-    onError: (error: any) => {
-      const message = error?.response?.data?.message || 'Error al actualizar usuario';
-      showToast(message, 'error');
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al actualizar usuario'), 'error');
     },
   });
 }
@@ -120,9 +115,8 @@ export function useDeactivateUser() {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       showToast('Usuario desactivado correctamente', 'success');
     },
-    onError: (error: any) => {
-      const message = error?.response?.data?.message || 'Error al desactivar usuario';
-      showToast(message, 'error');
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al desactivar usuario'), 'error');
     },
   });
 }

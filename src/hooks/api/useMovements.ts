@@ -1,12 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { movementRepository } from '@data/repositories/movement.repository';
 import { useToastStore } from '@/stores';
+import { getErrorMessage } from '@core/utils/errorMessage';
 
 export function useMovements() {
   return useQuery({
     queryKey: ['movements'],
     queryFn: () => movementRepository.getAll(),
-    staleTime: 1 * 60 * 1000, // 1 minuto
+    staleTime: 1 * 60 * 1000,
   });
 }
 
@@ -30,8 +31,8 @@ export function useAccountBalances() {
   return useQuery({
     queryKey: ['movements', 'balances'],
     queryFn: () => movementRepository.getBalances(),
-    staleTime: 30 * 1000, // 30 segundos
-    refetchInterval: 30 * 1000, // Refetch cada 30s
+    staleTime: 30 * 1000,
+    refetchInterval: 30 * 1000,
   });
 }
 
@@ -47,8 +48,8 @@ export function useRegisterMovement() {
       const sign = data.type === 'Ingreso' ? '+' : '-';
       showToast(`Movimiento registrado: ${sign}$${data.amount.toLocaleString('es-AR')}`);
     },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Error al registrar movimiento', 'error');
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al registrar movimiento'), 'error');
     },
   });
 }
@@ -65,11 +66,8 @@ export function useDeleteMovement() {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       showToast('Movimiento eliminado y saldo revertido correctamente');
     },
-    onError: (error: any) => {
-      showToast(
-        error.response?.data?.message || 'Error al eliminar movimiento',
-        'error'
-      );
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al eliminar movimiento'), 'error');
     },
   });
 }

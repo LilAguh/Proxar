@@ -4,4 +4,5 @@ export { Button } from './Button/Button';
 export { Card } from './Card/Card';
 export { Input } from './Input/Input';
 export { Select } from './Select/Select';
+export { Skeleton } from './Skeleton/Skeleton';
 export { Textarea } from './Textarea/Textarea';

@@ -3,7 +3,7 @@ import { useClients, useCreateClient, useUpdateClient, useDeleteClient } from '@
 import { Card, Button, Input, Textarea } from '@presentation/atoms';
 import { Spinner, EmptyState, Modal, ConfirmDialog } from '@presentation/molecules';
 import { Client } from '@core/entities/Client.entity';
-import { useConfirm } from '@/hooks/api/useConfirm';
+import { useConfirm } from '@/hooks/useConfirm';
 import './Clients.scss';
 
 export const Clients = () => {

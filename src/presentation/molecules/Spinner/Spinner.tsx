@@ -1,7 +1,7 @@
 import './Spinner.scss';
 
 interface SpinnerProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
   className?: string;
 }
 

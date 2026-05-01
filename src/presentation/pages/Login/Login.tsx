@@ -22,7 +22,7 @@ export const Login = () => {
   const [serverError, setServerError] = useState('');
 
   useEffect(() => {
-    if (!company) navigate('/company', { replace: true });
+    if (!company) navigate('/company/login', { replace: true });
   }, [company, navigate]);
 
   useEffect(() => {
@@ -143,7 +143,7 @@ export const Login = () => {
         <Button type="submit" variant="primary" fullWidth disabled={!isValid || loading}>
           {loading ? (
             <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-              <Spinner size="sm" /> Ingresando...
+              <Spinner size="xs" /> Ingresando...
             </span>
           ) : 'Ingresar'}
         </Button>

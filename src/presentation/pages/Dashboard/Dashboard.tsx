@@ -1,8 +1,9 @@
 import { useDashboardSummary, useTickets, useTodayCashRegister } from '@/hooks/api';
 import { Card, Button } from '@presentation/atoms';
-import { Spinner, EmptyState } from '@presentation/molecules';
+import { EmptyState } from '@presentation/molecules';
 import { useNavigate } from 'react-router-dom';
 import { CashRegisterStatus } from '@core/enums';
+import { DashboardSkeleton } from './DashboardSkeleton';
 import './Dashboard.scss';
 
 export const Dashboard = () => {
@@ -13,13 +14,7 @@ export const Dashboard = () => {
 
   const cajaAbierta = todayRegister?.status === CashRegisterStatus.Open;
 
-  if (isLoading) {
-    return (
-      <div className="dashboard-loading">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
+  if (isLoading) return <DashboardSkeleton />;
 
   if (!summary) {
     return (

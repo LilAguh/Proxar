@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cashRegisterRepository, type OpenCashRegisterPayload, type CloseCashRegisterPayload } from '@data/repositories/cashRegister.repository';
 import { useToastStore } from '@/stores';
+import { getErrorMessage } from '@core/utils/errorMessage';
 
 const CASH_REGISTER_BASE = { refetchOnWindowFocus: false } as const;
 
@@ -53,8 +54,8 @@ export function useOpenCashRegister() {
       queryClient.invalidateQueries({ queryKey: ['cash-registers', 'history'] });
       showToast('Caja abierta correctamente');
     },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Error al abrir la caja', 'error');
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al abrir la caja'), 'error');
     },
   });
 }
@@ -72,8 +73,8 @@ export function useCloseCashRegister() {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       showToast('Caja cerrada correctamente');
     },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Error al cerrar la caja', 'error');
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al cerrar la caja'), 'error');
     },
   });
 }
