@@ -1,0 +1,330 @@
+@import '@/styles/variables';
+
+.reports {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  &__header {
+    margin-bottom: 2rem;
+  }
+
+  &__title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+  }
+
+  &__subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  &__tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  &__tab {
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: -2px;
+
+    &:hover {
+      color: var(--primary-color);
+      background: var(--hover-bg);
+    }
+
+    &--active {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+  }
+
+  &__content {
+    animation: fadeIn 0.3s ease;
+  }
+
+  // Métricas
+  &__metrics {
+    &-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+  }
+
+  &__metric-card {
+    padding: 1.5rem;
+
+    h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin: 0 0 1rem 0;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  &__metric-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+
+  &__metric-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+
+    div {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+  }
+
+  &__metric-stat {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+
+    strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+  }
+
+  &__income {
+    color: #16a34a;
+    font-weight: 500;
+  }
+
+  &__expense {
+    color: #dc2626;
+    font-weight: 500;
+  }
+
+  // Filtros
+  &__filters {
+    margin-bottom: 1.5rem;
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 1rem 0;
+    }
+
+    &-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+  }
+
+  // Resumen
+  &__summary {
+    margin-bottom: 1.5rem;
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 1rem 0;
+    }
+
+    h4 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin: 1.5rem 0 1rem 0;
+      letter-spacing: 0.05em;
+    }
+
+    &-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+
+      div {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+
+        strong {
+          color: var(--text-primary);
+          font-weight: 600;
+        }
+      }
+    }
+
+    &-totals {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    &-total {
+      padding: 1.5rem;
+      border-radius: 8px;
+      border-left: 4px solid var(--border-color);
+
+      &--income {
+        background: rgba(22, 163, 74, 0.05);
+        border-left-color: #16a34a;
+      }
+
+      &--expense {
+        background: rgba(220, 38, 38, 0.05);
+        border-left-color: #dc2626;
+      }
+
+      &--net {
+        background: rgba(59, 130, 246, 0.05);
+        border-left-color: #3b82f6;
+      }
+
+      &-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.05em;
+      }
+
+      &-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+    }
+  }
+
+  // Tabla
+  &__table {
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 1rem 0;
+    }
+
+    &-scroll {
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+
+      thead {
+        background: var(--bg-secondary);
+        border-bottom: 2px solid var(--border-color);
+
+        th {
+          padding: 0.75rem 1rem;
+          text-align: left;
+          font-weight: 600;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          font-size: 0.75rem;
+          letter-spacing: 0.05em;
+        }
+      }
+
+      tbody {
+        tr {
+          border-bottom: 1px solid var(--border-color);
+          transition: background 0.15s ease;
+
+          &:hover {
+            background: var(--hover-bg);
+          }
+        }
+
+        td {
+          padding: 0.875rem 1rem;
+          color: var(--text-primary);
+        }
+      }
+    }
+  }
+
+  &__amount {
+    &--income {
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    &--expense {
+      color: #dc2626;
+      font-weight: 600;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .reports {
+    padding: 1rem;
+
+    &__metrics-grid {
+      grid-template-columns: 1fr;
+    }
+
+    &__filters-grid {
+      grid-template-columns: 1fr;
+    }
+
+    &__summary-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    &__summary-totals {
+      grid-template-columns: 1fr;
+    }
+
+    &__tabs {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    &__tab {
+      white-space: nowrap;
+      min-width: 120px;
+    }
+  }
+}
