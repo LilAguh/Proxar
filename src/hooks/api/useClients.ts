@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { clientRepository } from '@data/repositories/client.repository';
 import { useToastStore } from '@/stores';
@@ -20,10 +21,21 @@ export function useClient(id: string) {
 }
 
 export function useSearchClients(name: string) {
+  const [debouncedName, setDebouncedName] = useState(name);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedName(name.trim());
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [name]);
+
   return useQuery({
-    queryKey: ['clients', 'search', name],
-    queryFn: () => clientRepository.searchByName(name),
-    enabled: name.length >= 2,
+    queryKey: ['clients', 'search', debouncedName],
+    queryFn: () => clientRepository.searchByName(debouncedName),
+    enabled: debouncedName.length >= 2,
+    staleTime: 60 * 1000,
   });
 }
 

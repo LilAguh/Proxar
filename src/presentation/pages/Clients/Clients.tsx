@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useClients, useCreateClient, useUpdateClient, useDeleteClient } from '@/hooks/api';
+import { useClients, useSearchClients, useCreateClient, useUpdateClient, useDeleteClient } from '@/hooks/api';
 import { Card, Button, Input, Textarea } from '@presentation/atoms';
 import { Spinner, EmptyState, Modal, ConfirmDialog } from '@presentation/molecules';
 import { Client } from '@core/entities/Client.entity';
@@ -7,7 +7,7 @@ import { useConfirm } from '@/hooks/useConfirm';
 import './Clients.scss';
 
 export const Clients = () => {
-  const { data: clients, isLoading } = useClients();
+  const { data: allClients, isLoading: isLoadingClients } = useClients();
   // const createClient = useCreateClient();
   // const updateClient = useUpdateClient();
   const deleteClient = useDeleteClient();
@@ -17,12 +17,9 @@ export const Clients = () => {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
 
   const { isOpen, options, confirm, handleConfirm, handleCancel } = useConfirm();
-
-  const filteredClients = clients?.filter((client) =>
-    client.name.toLowerCase().includes(search.toLowerCase()) ||
-    client.phone.includes(search) ||
-    client.email?.toLowerCase().includes(search.toLowerCase())
-  );
+  const hasSearch = search.trim().length >= 2;
+  const { data: searchedClients, isLoading: isLoadingSearch } = useSearchClients(search);
+  const clients = hasSearch ? searchedClients : allClients;
 
   const handleEdit = (client: Client) => {
     setEditingClient(client);
@@ -48,7 +45,7 @@ export const Clients = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoadingClients) {
     return (
       <div className="clients-loading">
         <Spinner size="lg" />
@@ -70,7 +67,7 @@ export const Clients = () => {
 
       <Card className="clients__search">
         <Input
-          placeholder="Buscar por nombre, teléfono o email..."
+          placeholder="Buscar por nombre..."
           value={search}
           onChange={setSearch}
           fullWidth
@@ -78,13 +75,17 @@ export const Clients = () => {
       </Card>
 
       <div className="clients__list">
-        {!filteredClients || filteredClients.length === 0 ? (
+        {hasSearch && isLoadingSearch && !searchedClients ? (
+          <div className="clients-loading">
+            <Spinner size="md" />
+          </div>
+        ) : !clients || clients.length === 0 ? (
           <EmptyState
             icon="◉"
             title="No hay clientes"
-            description={search ? 'No se encontraron resultados' : 'Creá tu primer cliente'}
+            description={hasSearch ? 'No se encontraron resultados' : 'Creá tu primer cliente'}
             action={
-              !search ? (
+              !hasSearch ? (
                 <Button variant="primary" onClick={handleCreate}>
                   + Nuevo Cliente
                 </Button>
@@ -93,7 +94,7 @@ export const Clients = () => {
           />
         ) : (
           <div className="clients__grid">
-            {filteredClients.map((client) => (
+            {clients.map((client) => (
               <Card key={client.id} className="clients__card" hoverable>
                 <div className="clients__card-header">
                   <h3 className="clients__card-name">{client.name}</h3>

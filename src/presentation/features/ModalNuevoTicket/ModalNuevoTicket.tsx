@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Modal } from '@presentation/molecules';
 import { Input, Select, Textarea, Button } from '@presentation/atoms';
-import { useClients, useCreateTicket } from '@/hooks/api';
+import { useClients, useSearchClients, useCreateTicket } from '@/hooks/api';
 import { TicketType, Priority } from '@core/enums';
 import './ModalNuevoTicket.scss';
 
@@ -51,11 +51,15 @@ const validateField = (field: keyof TicketForm, value: string): string => {
 const REQUIRED_FIELDS: (keyof TicketForm)[] = ['clientId', 'type', 'priority', 'title'];
 
 export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => {
-  const { data: clients } = useClients();
+  const { data: allClients } = useClients();
   const createTicket = useCreateTicket();
   const [form, setForm] = useState<TicketForm>(EMPTY_FORM);
+  const [clientSearch, setClientSearch] = useState('');
   const [errors, setErrors] = useState<Partial<Record<keyof TicketForm, string>>>({});
   const [touched, setTouched] = useState<Partial<Record<keyof TicketForm, boolean>>>({});
+  const hasClientSearch = clientSearch.trim().length >= 2;
+  const { data: searchedClients } = useSearchClients(clientSearch);
+  const clients = hasClientSearch ? searchedClients : allClients;
 
   const handleChange = (field: keyof TicketForm, value: string) => {
     const updated = { ...form, [field]: value };
@@ -99,6 +103,7 @@ export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => 
 
   const handleClose = () => {
     setForm(EMPTY_FORM);
+    setClientSearch('');
     setErrors({});
     setTouched({});
     onClose();
@@ -133,6 +138,14 @@ export const ModalNuevoTicket = ({ isOpen, onClose }: ModalNuevoTicketProps) => 
       }
     >
       <div className="modal-ticket">
+        <Input
+          label="Buscar cliente"
+          value={clientSearch}
+          onChange={setClientSearch}
+          placeholder="Escribí el nombre del cliente"
+          fullWidth
+        />
+
         <div className="modal-ticket__row">
           <Select
             label="Cliente"
