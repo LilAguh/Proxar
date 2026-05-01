@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5109/api';
 
@@ -114,6 +115,9 @@ apiClient.interceptors.response.use(
           version: 0,
         };
         localStorage.setItem('proxar-auth', JSON.stringify(updatedAuth));
+
+        // Actualizar Zustand store para que isAuthenticated() vea el nuevo token
+        useAuthStore.getState().setAuth(user, token, newRefreshToken, expiresAt, refreshTokenExpiresAt);
 
         // Actualizar header del request original
         if (originalRequest.headers) {
