@@ -434,6 +434,21 @@
       @include flex-column;
       gap: $space-2;
     }
+
+    &-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: $space-3;
+      padding: $space-4 $space-2;
+      margin-top: $space-3;
+
+      &-info {
+        font-size: $font-size-sm;
+        color: $gray-600;
+        font-weight: $font-weight-medium;
+      }
+    }
   }
 
   &__movement-row {
