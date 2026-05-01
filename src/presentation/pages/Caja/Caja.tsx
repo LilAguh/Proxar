@@ -163,6 +163,9 @@ interface TodayViewProps {
 }
 
 const MovementsSection = ({ movements, timeZoneId }: { movements: BoxMovement[]; timeZoneId?: string }) => {
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+
   if (!movements.length) {
     return (
       <div className="caja__movements-empty">
@@ -174,6 +177,11 @@ const MovementsSection = ({ movements, timeZoneId }: { movements: BoxMovement[];
   const income = movements.filter((m) => m.type === MovementType.Income).reduce((s, m) => s + m.amount, 0);
   const expense = movements.filter((m) => m.type === MovementType.Expense).reduce((s, m) => s + m.amount, 0);
 
+  const totalPages = Math.ceil(movements.length / pageSize);
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedMovements = movements.slice(startIndex, endIndex);
+
   return (
     <div className="caja__movements">
       <div className="caja__movements-summary">
@@ -182,7 +190,7 @@ const MovementsSection = ({ movements, timeZoneId }: { movements: BoxMovement[];
         <span className="caja__movements-net">Neto: {fmt(income - expense)}</span>
       </div>
       <div className="caja__movements-list">
-        {movements.map((m) => (
+        {paginatedMovements.map((m) => (
           <div key={m.id} className={`caja__movement-row caja__movement-row--${m.type === MovementType.Income ? 'income' : 'expense'}`}>
             <span className="caja__movement-number">#{m.number}</span>
             <span className="caja__movement-concept">{m.concept}</span>
@@ -196,6 +204,29 @@ const MovementsSection = ({ movements, timeZoneId }: { movements: BoxMovement[];
           </div>
         ))}
       </div>
+      {totalPages > 1 && (
+        <div className="caja__movements-pagination">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+          >
+            ← Anterior
+          </Button>
+          <span className="caja__movements-pagination-info">
+            Página {page} de {totalPages} • {movements.length} movimientos
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+          >
+            Siguiente →
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
