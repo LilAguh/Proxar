@@ -18,7 +18,7 @@ export const Sidebar = () => {
     { key: 'caja', label: 'Caja', icon: '⬡', path: '/caja' },
     { key: 'clients', label: 'Clientes', icon: '◉', path: '/clients' },
     { key: 'users', label: 'Usuarios', icon: '👥', path: '/users', adminOnly: true },
-    { key: 'reports', label: 'Reportes', icon: '▣', path: '/reports', soon: true },
+    { key: 'reports', label: 'Reportes', icon: '▣', path: '/reports' },
   ];
 
   const isActive = (path: string) => {
