@@ -4,10 +4,6 @@ import { MovementType } from '@core/enums';
 import { PagedResult } from '@core/types/PagedResult';
 
 class MovementRepository extends BaseRepository {
-  async getAll(page = 1, pageSize = 100): Promise<PagedResult<BoxMovement>> {
-    return this.get<PagedResult<BoxMovement>>(`/movements?page=${page}&pageSize=${pageSize}`);
-  }
-
   async getPaged(page: number, pageSize: number, type?: MovementType): Promise<PagedResult<BoxMovement>> {
     const typeQuery = type ? `&type=${encodeURIComponent(type)}` : '';
     return this.get<PagedResult<BoxMovement>>(`/movements?page=${page}&pageSize=${pageSize}${typeQuery}`);
