@@ -6,6 +6,7 @@ import { Input, Button } from '@presentation/atoms';
 import { Spinner } from '@presentation/molecules';
 import { AuthCard } from '@presentation/organisms';
 import { isValidEmail } from '@/utils/validators';
+import { getApiErrorMessage } from '@/utils/api.utils';
 import { apiClient } from '@/core/config/api.config';
 
 const isDevelopment = import.meta.env.DEV;
@@ -73,8 +74,8 @@ export const Login = () => {
           );
           navigate('/');
         }
-      } catch (err: any) {
-        setServerError(err?.response?.data?.message || 'Error al iniciar sesión. Verificá tus credenciales.');
+      } catch (err) {
+        setServerError(getApiErrorMessage(err, 'Error al iniciar sesión. Verificá tus credenciales.'));
       } finally {
         setLoading(false);
       }
