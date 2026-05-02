@@ -1,3 +1,4 @@
+import { Spinner } from '@presentation/molecules';
 import './Button.scss';
 
 interface ButtonProps {
@@ -40,7 +41,7 @@ export const Button = ({
         ${className}
       `.trim()}
     >
-      {loading && <span className="button__spinner" />}
+      {loading && <Spinner size="xs" />}
       {icon && <span className="button__icon">{icon}</span>}
       <span className="button__text">{children}</span>
     </button>
