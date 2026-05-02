@@ -4,7 +4,9 @@ import { Spinner, ConfirmDialog } from '@presentation/molecules';
 import { useTicketDetails, useUpdateTicketStatus, useDeleteTicket } from '@/hooks/api';
 import { TicketState, TICKET_STATE_CONFIG, PRIORITY_CONFIG } from '@core/enums';
 import { useAuthStore } from '@/stores';
+import { useCompanyStore } from '@/stores/useCompanyStore';
 import { useConfirm } from '@/hooks/useConfirm';
+import { formatDateInTimeZone } from '@/utils/dateTime';
 import './ModalTicketDetail.scss';
 
 const TICKET_TYPE_LABEL: Record<string, string> = {
@@ -39,13 +41,11 @@ interface Props {
   onClose: () => void;
 }
 
-const formatDate = (iso: string) =>
-  new Intl.DateTimeFormat('es-AR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso));
-
 const formatCurrency = (n: number) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(n);
 
 export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
+  const { company } = useCompanyStore();
   const { data: ticket, isLoading } = useTicketDetails(ticketId ?? '');
   const updateStatus = useUpdateTicketStatus();
   const deleteTicket = useDeleteTicket();
@@ -193,7 +193,9 @@ export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
                 </span>
                 <span className="ticket-detail__type">{TICKET_TYPE_LABEL[ticket.type] ?? ticket.type}</span>
               </div>
-              <span className="ticket-detail__date">{formatDate(ticket.createdAt)}</span>
+              <span className="ticket-detail__date">
+                {formatDateInTimeZone(ticket.createdAt, company?.timeZoneId, { dateStyle: 'medium', timeStyle: 'short' })}
+              </span>
             </div>
 
             <h2 className="ticket-detail__title">{ticket.title}</h2>
@@ -266,7 +268,9 @@ export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
                           )}
                         </div>
                         {h.comment && <p className="ticket-detail__history-comment">{h.comment}</p>}
-                        <span className="ticket-detail__history-date">{formatDate(h.timestamp)}</span>
+                        <span className="ticket-detail__history-date">
+                          {formatDateInTimeZone(h.timestamp, company?.timeZoneId, { dateStyle: 'medium', timeStyle: 'short' })}
+                        </span>
                       </div>
                     </div>
                   ))}
