@@ -7,6 +7,10 @@ export const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
+/**
+ * @deprecated Use formatDateInTimeZone from @/utils/dateTime instead.
+ * This function uses browser timezone, not company timezone.
+ */
 export const formatDate = (date: string | Date): string => {
   const d = typeof date === 'string' ? new Date(date) : date;
   return d.toLocaleDateString('es-AR', {
@@ -16,6 +20,10 @@ export const formatDate = (date: string | Date): string => {
   });
 };
 
+/**
+ * @deprecated Use formatDateInTimeZone from @/utils/dateTime instead.
+ * This function uses browser timezone, not company timezone.
+ */
 export const formatDateTime = (date: string | Date): string => {
   const d = typeof date === 'string' ? new Date(date) : date;
   return d.toLocaleDateString('es-AR', {
@@ -27,6 +35,10 @@ export const formatDateTime = (date: string | Date): string => {
   });
 };
 
+/**
+ * @deprecated Use formatDateInTimeZone from @/utils/dateTime instead.
+ * This function uses browser timezone, not company timezone.
+ */
 export const formatRelativeTime = (date: string | Date): string => {
   const d = typeof date === 'string' ? new Date(date) : date;
   const now = new Date();
