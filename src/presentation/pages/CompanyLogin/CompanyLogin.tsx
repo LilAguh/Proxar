@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useCompanyStore } from '@/stores/useCompanyStore';
 import { Input, Button } from '@presentation/atoms';
 import { AuthCard } from '@presentation/organisms';
+import { getApiErrorMessage } from '@/utils/api.utils';
 import { apiClient } from '@/core/config/api.config';
 import './CompanyLogin.scss';
 
@@ -50,8 +51,8 @@ export const CompanyLogin = () => {
       });
 
       navigate('/login');
-    } catch (err: any) {
-      setServerError(err?.response?.data?.message || 'No se pudo identificar la empresa');
+    } catch (err) {
+      setServerError(getApiErrorMessage(err, 'No se pudo identificar la empresa'));
     } finally {
       setLoading(false);
     }
