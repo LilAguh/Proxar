@@ -23,8 +23,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useTickets, useUpdateTicketStatus, useTodayCashRegister } from "@/hooks/api";
-import { Card, Badge, Button } from "@presentation/atoms";
-import { Spinner, EmptyState } from "@presentation/molecules";
+import { Card, Badge, Button, Skeleton } from "@presentation/atoms";
+import { EmptyState } from "@presentation/molecules";
 import { ModalTicketDetail } from "@presentation/features";
 import { useUIStore, useAuthStore } from "@/stores";
 import { TicketState, TicketType, Priority, CashRegisterStatus } from "@core/enums";
@@ -268,8 +268,33 @@ export const Tickets = () => {
 
   if (isLoading) {
     return (
-      <div className="tickets-loading">
-        <Spinner size="lg" />
+      <div className="tickets">
+        <div className="tickets__header">
+          <div>
+            <Skeleton width={120} height={34} />
+            <Skeleton width={240} height={18} />
+          </div>
+          <Skeleton width={140} height={40} borderRadius={8} />
+        </div>
+        <div className="tickets__kanban">
+          {Array.from({ length: 5 }).map((_, col) => (
+            <div key={col} className="tickets__column">
+              <div className="tickets__column-header">
+                <Skeleton width={120} height={28} borderRadius={14} />
+                <Skeleton width={28} height={28} borderRadius={14} />
+              </div>
+              <div className="tickets__column-body">
+                {Array.from({ length: 3 }).map((__, row) => (
+                  <Card key={row} className="tickets__card">
+                    <Skeleton width={70} height={14} />
+                    <Skeleton width="100%" height={18} />
+                    <Skeleton width="70%" height={16} />
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

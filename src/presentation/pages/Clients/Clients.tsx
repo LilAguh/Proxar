@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useClients, useSearchClients, useCreateClient, useUpdateClient, useDeleteClient } from '@/hooks/api';
-import { Card, Button, Input, Textarea } from '@presentation/atoms';
-import { Spinner, EmptyState, Modal, ConfirmDialog } from '@presentation/molecules';
+import { Card, Button, Input, Textarea, Skeleton } from '@presentation/atoms';
+import { EmptyState, Modal, ConfirmDialog } from '@presentation/molecules';
 import { Client } from '@core/entities/Client.entity';
 import { useConfirm } from '@/hooks/useConfirm';
 import './Clients.scss';
@@ -47,8 +47,31 @@ export const Clients = () => {
 
   if (isLoadingClients) {
     return (
-      <div className="clients-loading">
-        <Spinner size="lg" />
+      <div className="clients">
+        <div className="clients__header">
+          <div>
+            <Skeleton width={120} height={34} />
+            <Skeleton width={200} height={18} />
+          </div>
+          <Skeleton width={160} height={40} borderRadius={8} />
+        </div>
+        <Card className="clients__search">
+          <Skeleton width="100%" height={42} borderRadius={8} />
+        </Card>
+        <div className="clients__grid">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="clients__card">
+              <Skeleton width="70%" height={22} />
+              <Skeleton width="90%" height={16} />
+              <Skeleton width="80%" height={16} />
+              <Skeleton width="95%" height={16} />
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <Skeleton width={80} height={32} borderRadius={8} />
+                <Skeleton width={80} height={32} borderRadius={8} />
+              </div>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
@@ -76,8 +99,14 @@ export const Clients = () => {
 
       <div className="clients__list">
         {hasSearch && isLoadingSearch && !searchedClients ? (
-          <div className="clients-loading">
-            <Spinner size="md" />
+          <div className="clients__grid">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="clients__card">
+                <Skeleton width="70%" height={22} />
+                <Skeleton width="90%" height={16} />
+                <Skeleton width="80%" height={16} />
+              </Card>
+            ))}
           </div>
         ) : !clients || clients.length === 0 ? (
           <EmptyState

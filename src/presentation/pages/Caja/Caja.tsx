@@ -7,8 +7,8 @@ import {
   useOpenCashRegister,
   useCloseCashRegister,
 } from '@/hooks/api';
-import { Card, Button, Input } from '@presentation/atoms';
-import { Spinner, EmptyState } from '@presentation/molecules';
+import { Card, Button, Input, Skeleton } from '@presentation/atoms';
+import { EmptyState } from '@presentation/molecules';
 import { CashRegisterStatus, MovementType } from '@core/enums';
 import { useCompanyStore, useUIStore } from '@/stores';
 import type { CashRegister } from '@core/entities/CashRegister.entity';
@@ -78,7 +78,30 @@ export const Caja = () => {
   };
 
   if (isLoading) {
-    return <div className="caja-loading"><Spinner size="lg" /></div>;
+    return (
+      <div className="caja">
+        <div className="caja__header">
+          <div>
+            <Skeleton width={90} height={34} />
+            <Skeleton width={200} height={18} />
+          </div>
+          <div className="caja__header-tabs">
+            <Skeleton width={80} height={34} borderRadius={8} />
+            <Skeleton width={100} height={34} borderRadius={8} />
+          </div>
+        </div>
+        <Card className="caja__form-card">
+          <Skeleton width={200} height={24} />
+          <Skeleton width="70%" height={16} />
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} style={{ display: 'grid', gap: 8 }}>
+              <Skeleton width="45%" height={16} />
+              <Skeleton width="100%" height={42} borderRadius={8} />
+            </div>
+          ))}
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -428,7 +451,19 @@ interface HistoryViewProps {
 }
 
 const HistoryView = ({ history, isLoading, timeZoneId, onSelect }: HistoryViewProps) => {
-  if (isLoading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '48px' }}><Spinner size="lg" /></div>;
+  if (isLoading) {
+    return (
+      <Card className="caja__history">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="caja__history-item">
+            <Skeleton width="35%" height={18} />
+            <Skeleton width="30%" height={16} />
+            <Skeleton width={80} height={24} borderRadius={12} />
+          </div>
+        ))}
+      </Card>
+    );
+  }
   if (!history.length) return <EmptyState icon="⬡" title="No hay registros aún" description="Todavía no se registró ninguna apertura de caja" />;
 
   return (
@@ -470,7 +505,20 @@ interface DetailViewProps {
 const DetailView = ({ registerId, timeZoneId, onBack }: DetailViewProps) => {
   const { data: register, isLoading } = useCashRegisterById(registerId);
 
-  if (isLoading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '48px' }}><Spinner size="lg" /></div>;
+  if (isLoading) {
+    return (
+      <div className="caja__detail">
+        <Skeleton width={180} height={20} />
+        <Card className="caja__detail-card">
+          <Skeleton width="40%" height={28} />
+          <Skeleton width="70%" height={16} />
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} width="100%" height={34} borderRadius={6} />
+          ))}
+        </Card>
+      </div>
+    );
+  }
   if (!register) return null;
 
   const totalOpen = register.entries.reduce((s, e) => s + e.openingAmount, 0);
