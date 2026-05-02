@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 interface ConfirmOptions {
   title: string;
@@ -14,29 +14,29 @@ export const useConfirm = () => {
     title: '',
     message: '',
   });
-  const [resolver, setResolver] = useState<((value: boolean) => void) | null>(null);
+  const resolverRef = useRef<((value: boolean) => void) | null>(null);
 
   const confirm = (opts: ConfirmOptions): Promise<boolean> => {
     setOptions(opts);
     setIsOpen(true);
 
     return new Promise((resolve) => {
-      setResolver(() => resolve);
+      resolverRef.current = resolve;
     });
   };
 
   const handleConfirm = () => {
-    if (resolver) {
-      resolver(true);
-      setResolver(null);
+    if (resolverRef.current) {
+      resolverRef.current(true);
+      resolverRef.current = null;
     }
     setIsOpen(false);
   };
 
   const handleCancel = () => {
-    if (resolver) {
-      resolver(false);
-      setResolver(null);
+    if (resolverRef.current) {
+      resolverRef.current(false);
+      resolverRef.current = null;
     }
     setIsOpen(false);
   };
