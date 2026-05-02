@@ -3,12 +3,15 @@ import { Card, Button, Input, Select } from '@presentation/atoms';
 import { Spinner } from '@presentation/molecules';
 import { useTicketsReport, useMovementsReport, useMetrics } from '@/hooks/api/useReports';
 import { useClients } from '@/hooks/api';
-import { formatCurrency, formatDate } from '@/utils/formatters';
+import { formatCurrency } from '@/utils/formatters';
+import { formatDateInTimeZone } from '@/utils/dateTime';
+import { useCompanyStore } from '@/stores/useCompanyStore';
 import './Reports.scss';
 
 type TabType = 'tickets' | 'movements' | 'metrics';
 
 export const Reports = () => {
+  const { company } = useCompanyStore();
   const [activeTab, setActiveTab] = useState<TabType>('metrics');
 
   // Filtros Tickets
@@ -225,7 +228,7 @@ export const Reports = () => {
                     <td>{ticket.status}</td>
                     <td>{ticket.type}</td>
                     <td>{ticket.priority}</td>
-                    <td>{formatDate(ticket.createdAt)}</td>
+                    <td>{formatDateInTimeZone(ticket.createdAt, company?.timeZoneId)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -376,7 +379,7 @@ export const Reports = () => {
                       {formatCurrency(mov.amount)}
                     </td>
                     <td>{mov.concept}</td>
-                    <td>{formatDate(mov.movementDate)}</td>
+                    <td>{formatDateInTimeZone(mov.movementDate, company?.timeZoneId)}</td>
                   </tr>
                 ))}
               </tbody>
