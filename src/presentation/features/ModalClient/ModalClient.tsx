@@ -9,6 +9,7 @@ interface ModalClientProps {
   isOpen: boolean;
   onClose: () => void;
   client?: Client | null;
+  onClientCreated?: (clientId: string) => void;
 }
 
 interface ClientForm {
@@ -57,7 +58,7 @@ const validateField = (field: keyof ClientForm, value: string): string => {
 
 const REQUIRED_FIELDS: (keyof ClientForm)[] = ['name', 'phone'];
 
-export const ModalClient = ({ isOpen, onClose, client }: ModalClientProps) => {
+export const ModalClient = ({ isOpen, onClose, client, onClientCreated }: ModalClientProps) => {
   const createClient = useCreateClient();
   const updateClient = useUpdateClient();
 
@@ -112,7 +113,10 @@ export const ModalClient = ({ isOpen, onClose, client }: ModalClientProps) => {
     if (client) {
       await updateClient.mutateAsync({ id: client.id, data: form });
     } else {
-      await createClient.mutateAsync(form);
+      const newClient = await createClient.mutateAsync(form);
+      if (onClientCreated && newClient?.id) {
+        onClientCreated(newClient.id);
+      }
     }
     handleClose();
   };

@@ -26,6 +26,21 @@
     border-bottom: 2px solid $color-gray-200;
   }
 
+  &__client-select {
+    display: flex;
+    align-items: flex-end;
+    gap: $spacing-md;
+
+    > :first-child {
+      flex: 1;
+    }
+  }
+
+  &__client-button {
+    white-space: nowrap;
+    margin-bottom: 2px;
+  }
+
   &__row {
     display: grid;
     grid-template-columns: 1fr 1fr;

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal } from '@presentation/molecules';
 import { Button, Input, Select, Textarea } from '@presentation/atoms';
+import { ModalClient } from '@presentation/features/ModalClient/ModalClient';
 import { useClients } from '@/hooks/api';
 import { useCreateDirectBudget } from '@/hooks/api/useBudgets';
 import { TicketType, Priority } from '@core/enums';
@@ -22,6 +23,9 @@ interface DirectBudgetModalProps {
 export const DirectBudgetModal = ({ isOpen, onClose }: DirectBudgetModalProps) => {
   const { data: clients } = useClients();
   const createBudget = useCreateDirectBudget();
+
+  // Modal de cliente
+  const [isClientModalOpen, setIsClientModalOpen] = useState(false);
 
   // Datos del cliente y ticket
   const [clientId, setClientId] = useState('');
@@ -105,6 +109,11 @@ export const DirectBudgetModal = ({ isOpen, onClose }: DirectBudgetModalProps) =
     handleClose();
   };
 
+  const handleClientCreated = (newClientId: string) => {
+    setClientId(newClientId);
+    setIsClientModalOpen(false);
+  };
+
   const handleClose = () => {
     setClientId('');
     setTicketTitle('');
@@ -128,20 +137,31 @@ export const DirectBudgetModal = ({ isOpen, onClose }: DirectBudgetModalProps) =
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Nuevo Presupuesto">
+    <>
+      <Modal isOpen={isOpen} onClose={handleClose} title="Nuevo Presupuesto">
       <div className="direct-budget-modal">
         <div className="direct-budget-modal__section">
           <h3 className="direct-budget-modal__section-title">Cliente y Ticket</h3>
 
-          <Select
-            label="Cliente *"
-            value={clientId}
-            onChange={setClientId}
-            options={[
-              { value: '', label: 'Seleccionar cliente' },
-              ...(clients?.map((c) => ({ value: c.id, label: c.name })) || []),
-            ]}
-          />
+          <div className="direct-budget-modal__client-select">
+            <Select
+              label="Cliente *"
+              value={clientId}
+              onChange={setClientId}
+              options={[
+                { value: '', label: 'Seleccionar cliente' },
+                ...(clients?.map((c) => ({ value: c.id, label: c.name })) || []),
+              ]}
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsClientModalOpen(true)}
+              className="direct-budget-modal__client-button"
+            >
+              + Nuevo Cliente
+            </Button>
+          </div>
 
           <Input
             label="Título del trabajo *"
@@ -327,5 +347,12 @@ export const DirectBudgetModal = ({ isOpen, onClose }: DirectBudgetModalProps) =
         </div>
       </div>
     </Modal>
+
+    <ModalClient
+      isOpen={isClientModalOpen}
+      onClose={() => setIsClientModalOpen(false)}
+      onClientCreated={handleClientCreated}
+    />
+    </>
   );
 };
