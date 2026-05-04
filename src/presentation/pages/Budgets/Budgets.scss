@@ -14,6 +14,7 @@
   &__header {
     @include flex-between;
     align-items: center;
+    gap: $space-4;
   }
 
   &__title {
@@ -29,6 +30,28 @@
     background: $color-gray-100;
     padding: $space-2 $space-3;
     border-radius: $radius-full;
+    margin-top: $space-2;
+    display: inline-block;
+  }
+
+  &__search {
+    width: 400px;
+    padding: $space-3 $space-4;
+    border: $border-width solid $color-border;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+    color: $color-gray-900;
+    transition: all 0.2s ease;
+
+    &::placeholder {
+      color: $color-gray-400;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    }
   }
 
   &__empty {

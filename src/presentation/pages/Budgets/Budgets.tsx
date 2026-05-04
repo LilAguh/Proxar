@@ -17,12 +17,30 @@ const formatCurrency = (amount: number) => {
 
 export const Budgets = () => {
   const [page] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
   const { company } = useCompanyStore();
   const { data: budgets = [], isLoading } = useBudgets(page, 100);
 
-  const handleViewPdf = (budgetId: string) => {
-    window.open(budgetRepository.getPdfUrl(budgetId), '_blank');
+  const handleViewPdf = async (budgetId: string) => {
+    try {
+      await budgetRepository.downloadPdf(budgetId);
+    } catch (error) {
+      console.error('Error al descargar PDF:', error);
+    }
   };
+
+  // Filtrar presupuestos por nombre de cliente, teléfono o número
+  const filteredBudgets = budgets.filter((budget) => {
+    if (!searchTerm) return true;
+
+    const search = searchTerm.toLowerCase();
+    return (
+      budget.clientName.toLowerCase().includes(search) ||
+      budget.clientPhone?.toLowerCase().includes(search) ||
+      budget.number.toString().includes(search) ||
+      budget.id.toLowerCase().includes(search)
+    );
+  });
 
   if (isLoading) {
     return (
@@ -35,13 +53,28 @@ export const Budgets = () => {
   return (
     <div className="budgets">
       <div className="budgets__header">
-        <h1 className="budgets__title">Historial de Presupuestos</h1>
-        <span className="budgets__count">{budgets.length} presupuestos</span>
+        <div>
+          <h1 className="budgets__title">Historial de Presupuestos</h1>
+          <span className="budgets__count">
+            {filteredBudgets.length} de {budgets.length} presupuestos
+          </span>
+        </div>
+        <input
+          type="text"
+          className="budgets__search"
+          placeholder="Buscar por cliente, teléfono, # presupuesto o ID..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       {budgets.length === 0 ? (
         <div className="budgets__empty">
           <p>No hay presupuestos registrados</p>
+        </div>
+      ) : filteredBudgets.length === 0 ? (
+        <div className="budgets__empty">
+          <p>No se encontraron presupuestos que coincidan con "{searchTerm}"</p>
         </div>
       ) : (
         <div className="budgets__table-container">
@@ -60,7 +93,7 @@ export const Budgets = () => {
               </tr>
             </thead>
             <tbody>
-              {budgets.map((budget) => (
+              {filteredBudgets.map((budget) => (
                 <tr key={budget.id}>
                   <td className="budgets__number">#{budget.number}</td>
                   <td>
