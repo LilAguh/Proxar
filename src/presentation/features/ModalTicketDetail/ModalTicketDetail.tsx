@@ -113,8 +113,12 @@ export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
     }
   };
 
-  const handleViewBudgetPdf = (budgetId: string) => {
-    window.open(budgetRepository.getPdfUrl(budgetId), '_blank');
+  const handleViewBudgetPdf = async (budgetId: string) => {
+    try {
+      await budgetRepository.downloadPdf(budgetId);
+    } catch (error) {
+      console.error('Error al descargar PDF:', error);
+    }
   };
 
   return (

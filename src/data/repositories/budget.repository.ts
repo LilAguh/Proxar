@@ -43,6 +43,20 @@ class BudgetRepository extends BaseRepository {
     return this.patch<Budget>(`/budgets/${id}/status`, { status });
   }
 
+  async downloadPdf(id: string): Promise<void> {
+    const response = await this.get<Blob>(`/budgets/${id}/pdf`, {
+      responseType: 'blob',
+    } as any);
+
+    // Crear un blob URL y abrirlo en nueva pestaña
+    const blob = new Blob([response as any], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
+
+    // Liberar el objeto URL después de un tiempo
+    setTimeout(() => window.URL.revokeObjectURL(url), 100);
+  }
+
   getPdfUrl(id: string): string {
     return `${API_URL}/budgets/${id}/pdf`;
   }
