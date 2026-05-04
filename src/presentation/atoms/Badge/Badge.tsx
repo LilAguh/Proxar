@@ -1,16 +1,19 @@
 import './Badge.scss';
-import { TicketState, TICKET_STATE_CONFIG } from '@core/enums';
+import { TicketState, TICKET_STATE_CONFIG, BudgetStatus, BUDGET_STATUS_CONFIG } from '@core/enums';
 
 interface BadgeProps {
-  status: TicketState;
+  status: TicketState | BudgetStatus;
   size?: 'sm' | 'lg';
 }
 
 export const Badge = ({ status, size = 'sm' }: BadgeProps) => {
-  const config = TICKET_STATE_CONFIG[status];
+  // Determinar qué configuración usar basado en el tipo de status
+  const config = (status in TICKET_STATE_CONFIG)
+    ? TICKET_STATE_CONFIG[status as TicketState]
+    : BUDGET_STATUS_CONFIG[status as BudgetStatus];
 
   return (
-    <span 
+    <span
       className={`badge badge--${size}`}
       style={{
         backgroundColor: config.bg,

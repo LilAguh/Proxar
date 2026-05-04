@@ -2,6 +2,8 @@ import { Modal } from '@presentation/molecules';
 import { Badge, Button } from '@presentation/atoms';
 import { Spinner, ConfirmDialog } from '@presentation/molecules';
 import { useTicketDetails, useUpdateTicketStatus, useDeleteTicket } from '@/hooks/api';
+import { useBudgetsByTicket } from '@/hooks/api/useBudgets';
+import { budgetRepository } from '@data/repositories/budget.repository';
 import { TicketState, TICKET_STATE_CONFIG, PRIORITY_CONFIG } from '@core/enums';
 import { useAuthStore } from '@/stores';
 import { useCompanyStore } from '@/stores/useCompanyStore';
@@ -47,6 +49,7 @@ const formatCurrency = (n: number) =>
 export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
   const { company } = useCompanyStore();
   const { data: ticket, isLoading } = useTicketDetails(ticketId ?? '');
+  const { data: budgets = [] } = useBudgetsByTicket(ticketId ?? '');
   const updateStatus = useUpdateTicketStatus();
   const deleteTicket = useDeleteTicket();
   const { isAdmin } = useAuthStore();
@@ -108,6 +111,10 @@ export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
       await deleteTicket.mutateAsync(ticket.id);
       onClose(); // Cerrar el modal después de eliminar
     }
+  };
+
+  const handleViewBudgetPdf = (budgetId: string) => {
+    window.open(budgetRepository.getPdfUrl(budgetId), '_blank');
   };
 
   return (
@@ -244,6 +251,45 @@ export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
                       <span className={`ticket-detail__movement-amount ticket-detail__movement-amount--${m.type === 'Ingreso' ? 'in' : 'out'}`}>
                         {m.type === 'Ingreso' ? '+' : '-'}{formatCurrency(m.amount)}
                       </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Presupuestos */}
+            {budgets.length > 0 && (
+              <div className="ticket-detail__section">
+                <h4 className="ticket-detail__section-title">Presupuestos</h4>
+                <div className="ticket-detail__budgets">
+                  {budgets.map((budget) => (
+                    <div key={budget.id} className="ticket-detail__budget">
+                      <div className="ticket-detail__budget-info">
+                        <div className="ticket-detail__budget-header">
+                          <span className="ticket-detail__budget-number">Presupuesto #{budget.number}</span>
+                          <Badge status={budget.status} size="sm" />
+                        </div>
+                        <div className="ticket-detail__budget-details">
+                          <span className="ticket-detail__budget-detail">
+                            Total: <strong>{formatCurrency(budget.total)}</strong>
+                          </span>
+                          {budget.discount > 0 && (
+                            <span className="ticket-detail__budget-detail">
+                              Descuento: {formatCurrency(budget.discount)}
+                            </span>
+                          )}
+                          <span className="ticket-detail__budget-detail">
+                            Válido hasta: {formatDateInTimeZone(budget.validUntil, company?.timeZoneId, { dateStyle: 'short' })}
+                          </span>
+                        </div>
+                      </div>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleViewBudgetPdf(budget.id)}
+                      >
+                        Ver PDF
+                      </Button>
                     </div>
                   ))}
                 </div>

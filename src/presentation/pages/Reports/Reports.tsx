@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, Button, Input, Select } from '@presentation/atoms';
+import { Card, Input, Select } from '@presentation/atoms';
 import { Spinner } from '@presentation/molecules';
 import { useTicketsReport, useMovementsReport, useMetrics } from '@/hooks/api/useReports';
 import { useClients } from '@/hooks/api';

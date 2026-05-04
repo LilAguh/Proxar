@@ -4,6 +4,7 @@ import { ProtectedRoute } from '@presentation/guards/ProtectedRoute';
 import { PageTransition } from '@presentation/components/PageTransition/PageTransition';
 import { Dashboard } from '@presentation/pages/Dashboard/Dashboard';
 import { Tickets } from '@presentation/pages/Tickets/Tickets';
+import { Budgets } from '@presentation/pages/Budgets/Budgets';
 import { Caja } from '@presentation/pages/Caja/Caja';
 import { Clients } from '@presentation/pages/Clients/Clients';
 import { Users } from '@presentation/pages/Users/Users';
@@ -49,6 +50,10 @@ export const router = createBrowserRouter([
       {
         path: 'tickets',
         element: pt(<Tickets />),
+      },
+      {
+        path: 'budgets',
+        element: pt(<Budgets />),
       },
       {
         path: 'caja',
