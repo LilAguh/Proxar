@@ -1,10 +1,10 @@
-@import '@/styles/variables';
+@import '@/styles/design-tokens';
 @import '@/styles/mixins';
 
 .users {
-  padding: $space-7;
+  padding: $spacing-3xl;
   @include flex-column;
-  gap: $space-6;
+  gap: $spacing-2xl;
 
   &-loading {
     @include flex-center;
@@ -18,57 +18,57 @@
   &__title {
     margin: 0;
     font-size: $font-size-3xl;
-    font-weight: $font-weight-black;
-    color: $gray-900;
+    font-weight: $font-weight-extrabold;
+    color: $color-gray-900;
   }
 
   &__subtitle {
-    margin: $space-1 0 0;
+    margin: $spacing-xs 0 0;
     font-size: $font-size-base;
-    color: $gray-500;
+    color: $color-gray-500;
   }
 
   &__list {
-    padding: $space-5;
+    padding: $spacing-xl;
   }
 
   &__grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: $space-4;
+    gap: $spacing-lg;
   }
 
   &__modal-form {
     display: flex;
     flex-direction: column;
-    gap: $space-4;
+    gap: $spacing-lg;
   }
 
   &__password-field {
     display: flex;
     flex-direction: column;
-    gap: $space-2;
+    gap: $spacing-sm;
   }
 
   &__password-checklist {
     list-style: none;
     margin: 0;
-    padding: $space-3 $space-4;
-    background: $gray-50;
-    border: $border-width solid $border-color;
+    padding: $spacing-md $spacing-lg;
+    background: $color-gray-50;
+    border: 1px solid $color-gray-200;
     border-radius: $radius-md;
     display: flex;
     flex-direction: column;
-    gap: $space-1;
+    gap: $spacing-xs;
   }
 
   &__password-req {
     font-size: $font-size-sm;
-    color: $gray-400;
-    transition: color $transition-base;
+    color: $color-gray-400;
+    transition: color $transition-normal;
 
     &--met {
-      color: $success;
+      color: $color-success;
       font-weight: $font-weight-medium;
     }
   }
@@ -76,9 +76,9 @@
   &__checkbox-label {
     display: flex;
     align-items: center;
-    gap: $space-2;
+    gap: $spacing-sm;
     font-size: $font-size-base;
-    color: $gray-700;
+    color: $color-gray-700;
     cursor: pointer;
 
     input[type='checkbox'] {
@@ -89,12 +89,12 @@
   }
 
   &__card {
-    padding: $space-5;
+    padding: $spacing-xl;
     border-radius: $radius-md;
-    border: $border-width solid $border-color;
+    border: 1px solid $color-gray-200;
     @include flex-column;
-    gap: $space-4;
-    transition: box-shadow $transition-base;
+    gap: $spacing-lg;
+    transition: box-shadow $transition-normal;
 
     &:hover {
       box-shadow: $shadow-md;
@@ -102,7 +102,7 @@
 
     &-header {
       @include flex-between;
-      gap: $space-3;
+      gap: $spacing-md;
     }
 
     &-info {
@@ -114,18 +114,18 @@
       margin: 0;
       font-size: $font-size-lg;
       font-weight: $font-weight-bold;
-      color: $gray-900;
+      color: $color-gray-900;
     }
 
     &-email {
-      margin: $space-1 0 0;
+      margin: $spacing-xs 0 0;
       font-size: $font-size-sm;
-      color: $gray-500;
+      color: $color-gray-500;
       @include truncate;
     }
 
     &-role {
-      padding: $space-1 $space-3;
+      padding: $spacing-xs $spacing-md;
       border-radius: $radius-full;
       font-size: $font-size-xs;
       font-weight: $font-weight-semibold;
@@ -136,8 +136,8 @@
 
     &-footer {
       @include flex-between;
-      padding-top: $space-3;
-      border-top: $border-width solid $border-color;
+      padding-top: $spacing-md;
+      border-top: 1px solid $color-gray-200;
     }
 
     &-status {
@@ -145,11 +145,11 @@
       font-weight: $font-weight-medium;
 
       &--active {
-        color: $success;
+        color: $color-success;
       }
 
       &--inactive {
-        color: $gray-400;
+        color: $color-gray-400;
       }
     }
   }

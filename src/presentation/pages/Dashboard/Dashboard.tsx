@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useDashboardSummary, useTickets, useTodayCashRegister } from '@/hooks/api';
 import { Card, Button } from '@presentation/atoms';
 import { EmptyState } from '@presentation/molecules';
+import { DirectBudgetModal } from '@presentation/features/DirectBudgetModal';
 import { useNavigate } from 'react-router-dom';
 import { CashRegisterStatus } from '@core/enums';
 import { DashboardSkeleton } from './DashboardSkeleton';
@@ -11,6 +13,7 @@ export const Dashboard = () => {
   const { data: summary, isLoading } = useDashboardSummary();
   const { data: recentTickets } = useTickets();
   const { data: todayRegister } = useTodayCashRegister();
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
 
   const cajaAbierta = todayRegister?.status === CashRegisterStatus.Open;
 
@@ -41,6 +44,9 @@ export const Dashboard = () => {
           <h1 className="dashboard__title">Dashboard</h1>
           <p className="dashboard__subtitle">Resumen general de Proxar</p>
         </div>
+        <Button variant="primary" onClick={() => setShowBudgetModal(true)}>
+          + Nuevo Presupuesto
+        </Button>
       </div>
 
       {/* Banner apertura de caja */}
@@ -149,6 +155,11 @@ export const Dashboard = () => {
           )) || <EmptyState icon="🎫" title="No hay tickets" />}
         </div>
       </Card>
+
+      <DirectBudgetModal
+        isOpen={showBudgetModal}
+        onClose={() => setShowBudgetModal(false)}
+      />
     </div>
   );
 };

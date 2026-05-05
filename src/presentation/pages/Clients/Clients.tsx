@@ -1,15 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useClients, useSearchClients, useCreateClient, useUpdateClient, useDeleteClient } from '@/hooks/api';
-import { Card, Button, Input, Textarea, Skeleton } from '@presentation/atoms';
-import { EmptyState, Modal, ConfirmDialog } from '@presentation/molecules';
+import { useState } from 'react';
+import { useClients, useSearchClients, useDeleteClient } from '@/hooks/api';
+import { Card, Button, Input, Skeleton } from '@presentation/atoms';
+import { EmptyState, ConfirmDialog } from '@presentation/molecules';
+import { ModalClient } from '@presentation/features';
 import { Client } from '@core/entities/Client.entity';
 import { useConfirm } from '@/hooks/useConfirm';
 import './Clients.scss';
 
 export const Clients = () => {
   const { data: allClients, isLoading: isLoadingClients } = useClients();
-  // const createClient = useCreateClient();
-  // const updateClient = useUpdateClient();
   const deleteClient = useDeleteClient();
 
   const [search, setSearch] = useState('');
@@ -165,7 +164,7 @@ export const Clients = () => {
         )}
       </div>
 
-      <ClientModal
+      <ModalClient
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         client={editingClient}
@@ -183,182 +182,5 @@ export const Clients = () => {
         isLoading={deleteClient.isPending}
       />
     </div>
-  );
-};
-
-// Modal de Cliente (mismo código que antes, sin cambios)
-interface ClientModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  client: Client | null;
-}
-
-const ClientModal = ({ isOpen, onClose, client }: ClientModalProps) => {
-  const createClient = useCreateClient();
-  const updateClient = useUpdateClient();
-
-  const [form, setForm] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    address: '',
-    notes: '',
-  });
-
-  const [errors, setErrors] = useState({
-    name: '',
-    phone: '',
-    email: '',
-  });
-
-  const [touched, setTouched] = useState({
-    name: false,
-    phone: false,
-    email: false,
-  });
-
-  // Resetear formulario cuando cambia el modal
-  useEffect(() => {
-    if (isOpen) {
-      setForm({
-        name: client?.name || '',
-        phone: client?.phone || '',
-        email: client?.email || '',
-        address: client?.address || '',
-        notes: client?.notes || '',
-      });
-      setErrors({ name: '', phone: '', email: '' });
-      setTouched({ name: false, phone: false, email: false });
-    }
-  }, [client, isOpen]);
-
-  const validateField = (name: string, value: string): string => {
-    switch (name) {
-      case 'name':
-        if (!value) return 'El nombre es requerido';
-        return '';
-
-      case 'phone':
-        if (!value) return 'El teléfono es requerido';
-        const phoneDigits = value.replace(/\D/g, '');
-        if (phoneDigits.length < 8) return 'Mínimo 8 dígitos';
-        return '';
-
-      case 'email':
-        if (!value) return ''; // Email es opcional
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Email inválido';
-        return '';
-
-      default:
-        return '';
-    }
-  };
-
-  const handleChange = (field: string, value: string) => {
-    setForm({ ...form, [field]: value });
-
-    // Validar solo si el campo ya fue tocado
-    if (touched[field as keyof typeof touched]) {
-      const error = validateField(field, value);
-      setErrors({ ...errors, [field]: error });
-    }
-  };
-
-  const handleBlur = (field: string) => {
-    setTouched({ ...touched, [field]: true });
-    const error = validateField(field, form[field as keyof typeof form]);
-    setErrors({ ...errors, [field]: error });
-  };
-
-  const validateForm = (): boolean => {
-    const newErrors = {
-      name: validateField('name', form.name),
-      phone: validateField('phone', form.phone),
-      email: validateField('email', form.email),
-    };
-
-    setErrors(newErrors);
-    setTouched({ name: true, phone: true, email: true });
-
-    return !newErrors.name && !newErrors.phone && !newErrors.email;
-  };
-
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-
-    try {
-      if (client) {
-        await updateClient.mutateAsync({ id: client.id, data: form });
-      } else {
-        await createClient.mutateAsync(form);
-      }
-      onClose();
-    } catch (error) {
-      console.error('Error al guardar cliente:', error);
-    }
-  };
-
-  const isValid = form.name && form.phone && !errors.name && !errors.phone && !errors.email;
-
-  return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={client ? 'Editar Cliente' : 'Nuevo Cliente'}
-      footer={
-        <>
-          <Button variant="ghost" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handleSubmit}
-            disabled={!isValid || createClient.isPending || updateClient.isPending}
-          >
-            {createClient.isPending || updateClient.isPending ? 'Guardando...' : (client ? 'Guardar' : 'Crear')}
-          </Button>
-        </>
-      }
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <Input
-          label="Nombre"
-          value={form.name}
-          onChange={(v) => handleChange('name', v)}
-          onBlur={() => handleBlur('name')}
-          error={touched.name ? errors.name : ''}
-          required
-        />
-        <Input
-          label="Teléfono"
-          type="tel"
-          value={form.phone}
-          onChange={(v) => handleChange('phone', v)}
-          onBlur={() => handleBlur('phone')}
-          error={touched.phone ? errors.phone : ''}
-          hint="Mínimo 8 dígitos"
-          required
-        />
-        <Input
-          label="Email"
-          type="email"
-          value={form.email}
-          onChange={(v) => handleChange('email', v)}
-          onBlur={() => handleBlur('email')}
-          error={touched.email ? errors.email : ''}
-        />
-        <Input
-          label="Dirección"
-          value={form.address}
-          onChange={(v) => setForm({ ...form, address: v })}
-        />
-        <Textarea
-          label="Notas"
-          value={form.notes}
-          onChange={(v) => setForm({ ...form, notes: v })}
-          rows={4}
-        />
-      </div>
-    </Modal>
   );
 };

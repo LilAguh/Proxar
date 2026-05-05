@@ -26,6 +26,7 @@ import { useTickets, useUpdateTicketStatus, useTodayCashRegister } from "@/hooks
 import { Card, Badge, Button, Skeleton } from "@presentation/atoms";
 import { EmptyState } from "@presentation/molecules";
 import { ModalTicketDetail } from "@presentation/features";
+import { BudgetModal } from "@presentation/components/BudgetModal/BudgetModal";
 import { useUIStore, useAuthStore } from "@/stores";
 import { TicketState, TicketType, Priority, CashRegisterStatus } from "@core/enums";
 import { Ticket } from "@core/entities/Ticket.entity";
@@ -252,6 +253,8 @@ export const Tickets = () => {
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [showClosed, setShowClosed] = useState(false);
   const [wasDragging, setWasDragging] = useState(false);
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [budgetTicket, setBudgetTicket] = useState<Ticket | null>(null);
 
   const cajaAbierta = todayRegister?.status === CashRegisterStatus.Open;
   const canDrag = isAdmin() && cajaAbierta;
@@ -363,6 +366,13 @@ export const Tickets = () => {
         `No se puede mover de "${stateLabels[ticket.status]}" a "${stateLabels[newStatus]}"`,
         'warning'
       );
+      return;
+    }
+
+    // Si se está moviendo a Presupuestado, abrir modal de presupuesto
+    if (newStatus === TicketState.Presupuestado) {
+      setBudgetTicket(ticket);
+      setShowBudgetModal(true);
       return;
     }
 
@@ -527,6 +537,20 @@ export const Tickets = () => {
         ticketId={selectedTicketId}
         onClose={() => setSelectedTicketId(null)}
       />
+
+      {showBudgetModal && budgetTicket && (
+        <BudgetModal
+          ticketId={budgetTicket.id}
+          clientName={budgetTicket.client?.name || 'Sin cliente'}
+          onClose={() => {
+            setShowBudgetModal(false);
+            setBudgetTicket(null);
+          }}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['tickets'] });
+          }}
+        />
+      )}
     </div>
   );
 };

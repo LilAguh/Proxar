@@ -1,54 +1,54 @@
-@import '@/styles/variables';
+@import '@/styles/design-tokens';
 
 .reports {
-  padding: 2rem;
-  max-width: 1400px;
+  padding: $spacing-2xl;
+  max-width: $max-content-width;
   margin: 0 auto;
 
   &__header {
-    margin-bottom: 2rem;
+    margin-bottom: $spacing-2xl;
   }
 
   &__title {
-    font-size: 2rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 0.5rem 0;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-semibold;
+    color: $color-gray-900;
+    margin: 0 0 $spacing-sm 0;
   }
 
   &__subtitle {
-    font-size: 1rem;
-    color: var(--text-secondary);
+    font-size: $font-size-lg;
+    color: $color-gray-500;
     margin: 0;
   }
 
   &__tabs {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
-    border-bottom: 2px solid var(--border-color);
+    gap: $spacing-sm;
+    margin-bottom: $spacing-2xl;
+    border-bottom: 2px solid $color-gray-200;
   }
 
   &__tab {
-    padding: 1rem 1.5rem;
+    padding: $spacing-lg $spacing-xl;
     background: none;
     border: none;
     border-bottom: 3px solid transparent;
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--text-secondary);
+    font-size: $font-size-lg;
+    font-weight: $font-weight-medium;
+    color: $color-gray-500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all $transition-normal;
     margin-bottom: -2px;
 
     &:hover {
-      color: var(--primary-color);
-      background: var(--hover-bg);
+      color: $color-primary;
+      background: $color-gray-50;
     }
 
     &--active {
-      color: var(--primary-color);
-      border-bottom-color: var(--primary-color);
+      color: $color-primary;
+      border-bottom-color: $color-primary;
     }
   }
 
@@ -61,118 +61,118 @@
     &-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
+      gap: $spacing-xl;
+      margin-bottom: $spacing-2xl;
     }
   }
 
   &__metric-card {
-    padding: 1.5rem;
+    padding: $spacing-xl;
 
     h3 {
-      font-size: 0.875rem;
-      font-weight: 600;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
       text-transform: uppercase;
-      color: var(--text-secondary);
-      margin: 0 0 1rem 0;
+      color: $color-gray-500;
+      margin: 0 0 $spacing-lg 0;
       letter-spacing: 0.05em;
     }
   }
 
   &__metric-value {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 1rem;
+    font-size: $font-size-4xl;
+    font-weight: $font-weight-bold;
+    color: $color-gray-900;
+    margin-bottom: $spacing-lg;
   }
 
   &__metric-breakdown {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-    padding: 1rem 0;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
+    gap: $spacing-sm;
+    margin-bottom: $spacing-lg;
+    padding: $spacing-lg 0;
+    border-top: 1px solid $color-gray-200;
+    border-bottom: 1px solid $color-gray-200;
 
     div {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
+      font-size: $font-size-sm;
+      color: $color-gray-500;
     }
   }
 
   &__metric-stat {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    margin-top: 0.5rem;
+    font-size: $font-size-sm;
+    color: $color-gray-500;
+    margin-top: $spacing-sm;
 
     strong {
-      color: var(--text-primary);
-      font-weight: 600;
+      color: $color-gray-900;
+      font-weight: $font-weight-semibold;
     }
   }
 
   &__income {
-    color: #16a34a;
-    font-weight: 500;
+    color: $color-success;
+    font-weight: $font-weight-medium;
   }
 
   &__expense {
-    color: #dc2626;
-    font-weight: 500;
+    color: $color-danger;
+    font-weight: $font-weight-medium;
   }
 
   // Filtros
   &__filters {
-    margin-bottom: 1.5rem;
+    margin-bottom: $spacing-xl;
 
     h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0 0 1rem 0;
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $color-gray-900;
+      margin: 0 0 $spacing-lg 0;
     }
 
     &-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
+      gap: $spacing-lg;
     }
   }
 
   // Resumen
   &__summary {
-    margin-bottom: 1.5rem;
+    margin-bottom: $spacing-xl;
 
     h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0 0 1rem 0;
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $color-gray-900;
+      margin: 0 0 $spacing-lg 0;
     }
 
     h4 {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--text-secondary);
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      color: $color-gray-500;
       text-transform: uppercase;
-      margin: 1.5rem 0 1rem 0;
+      margin: $spacing-xl 0 $spacing-lg 0;
       letter-spacing: 0.05em;
     }
 
     &-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1rem;
+      gap: $spacing-lg;
+      margin-bottom: $spacing-lg;
 
       div {
-        font-size: 0.875rem;
-        color: var(--text-secondary);
+        font-size: $font-size-sm;
+        color: $color-gray-500;
 
         strong {
-          color: var(--text-primary);
-          font-weight: 600;
+          color: $color-gray-900;
+          font-weight: $font-weight-semibold;
         }
       }
     }
@@ -180,43 +180,43 @@
     &-totals {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
+      gap: $spacing-xl;
+      margin-bottom: $spacing-2xl;
     }
 
     &-total {
-      padding: 1.5rem;
-      border-radius: 8px;
-      border-left: 4px solid var(--border-color);
+      padding: $spacing-xl;
+      border-radius: $radius-lg;
+      border-left: 4px solid $color-gray-200;
 
       &--income {
         background: rgba(22, 163, 74, 0.05);
-        border-left-color: #16a34a;
+        border-left-color: $color-success;
       }
 
       &--expense {
         background: rgba(220, 38, 38, 0.05);
-        border-left-color: #dc2626;
+        border-left-color: $color-danger;
       }
 
       &--net {
         background: rgba(59, 130, 246, 0.05);
-        border-left-color: #3b82f6;
+        border-left-color: $color-info;
       }
 
       &-label {
-        font-size: 0.875rem;
-        font-weight: 600;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-semibold;
         text-transform: uppercase;
-        color: var(--text-secondary);
-        margin-bottom: 0.5rem;
+        color: $color-gray-500;
+        margin-bottom: $spacing-sm;
         letter-spacing: 0.05em;
       }
 
       &-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--text-primary);
+        font-size: $font-size-2xl;
+        font-weight: $font-weight-bold;
+        color: $color-gray-900;
       }
     }
   }
@@ -224,50 +224,50 @@
   // Tabla
   &__table {
     h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0 0 1rem 0;
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $color-gray-900;
+      margin: 0 0 $spacing-lg 0;
     }
 
     &-scroll {
       overflow-x: auto;
-      margin-top: 1rem;
+      margin-top: $spacing-lg;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.875rem;
+      font-size: $font-size-sm;
 
       thead {
-        background: var(--bg-secondary);
-        border-bottom: 2px solid var(--border-color);
+        background: $color-gray-50;
+        border-bottom: 2px solid $color-gray-200;
 
         th {
-          padding: 0.75rem 1rem;
+          padding: $spacing-md $spacing-lg;
           text-align: left;
-          font-weight: 600;
-          color: var(--text-secondary);
+          font-weight: $font-weight-semibold;
+          color: $color-gray-500;
           text-transform: uppercase;
-          font-size: 0.75rem;
+          font-size: $font-size-xs;
           letter-spacing: 0.05em;
         }
       }
 
       tbody {
         tr {
-          border-bottom: 1px solid var(--border-color);
-          transition: background 0.15s ease;
+          border-bottom: 1px solid $color-gray-200;
+          transition: background $transition-fast;
 
           &:hover {
-            background: var(--hover-bg);
+            background: $color-gray-50;
           }
         }
 
         td {
-          padding: 0.875rem 1rem;
-          color: var(--text-primary);
+          padding: $spacing-sm $spacing-lg;
+          color: $color-gray-900;
         }
       }
     }
@@ -275,13 +275,13 @@
 
   &__amount {
     &--income {
-      color: #16a34a;
-      font-weight: 600;
+      color: $color-success;
+      font-weight: $font-weight-semibold;
     }
 
     &--expense {
-      color: #dc2626;
-      font-weight: 600;
+      color: $color-danger;
+      font-weight: $font-weight-semibold;
     }
   }
 }
@@ -297,9 +297,9 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $breakpoint-md) {
   .reports {
-    padding: 1rem;
+    padding: $spacing-lg;
 
     &__metrics-grid {
       grid-template-columns: 1fr;

@@ -9,8 +9,6 @@ import { isValidEmail } from '@/utils/validators';
 import { getApiErrorMessage } from '@/utils/api.utils';
 import { apiClient } from '@/core/config/api.config';
 
-const isDevelopment = import.meta.env.DEV;
-
 export const Login = () => {
   const { company } = useCompanyStore();
   const { setAuth } = useAuthStore();
@@ -82,37 +80,9 @@ export const Login = () => {
     }
   };
 
-  const handleQuickFill = (emailValue: string, passwordValue: string) => {
-    setEmail(emailValue);
-    setPassword(passwordValue);
-    setTouched({ email: true, password: true });
-  };
-
   const isValid = email && password && !errors.email && !errors.password;
 
   const badge = company ? `🏢 ${company.name}` : undefined;
-
-  const footer = isDevelopment ? (
-    <>
-      <p style={{ margin: 0, fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>💡 Usuarios de prueba:</p>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
-        {[
-          { label: '👑 Admin', email: 'admin@sagitario.com', pass: 'Admin1234' },
-          { label: '👤 Operador', email: 'operador@sagitario.com', pass: 'Operador1234' },
-          { label: '👁️ Visor', email: 'visor@sagitario.com', pass: 'Visor1234' },
-        ].map(({ label, email: e, pass }) => (
-          <button
-            key={label}
-            type="button"
-            className="auth-quick-fill"
-            onClick={() => handleQuickFill(e, pass)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-    </>
-  ) : undefined;
 
   return (
     <AuthCard
@@ -120,7 +90,6 @@ export const Login = () => {
       subtitle="Ingresá tus credenciales para continuar"
       error={serverError}
       badge={badge}
-      footer={footer}
     >
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <Input

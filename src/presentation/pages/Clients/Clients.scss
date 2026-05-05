@@ -1,10 +1,10 @@
-@import '@/styles/variables';
+@import '@/styles/design-tokens';
 @import '@/styles/mixins';
 
 .clients {
-  padding: $space-7;
+  padding: $spacing-3xl;
   @include flex-column;
-  gap: $space-6;
+  gap: $spacing-2xl;
 
   &-loading {
     @include flex-center;
@@ -19,14 +19,14 @@
   &__title {
     margin: 0;
     font-size: $font-size-3xl;
-    font-weight: $font-weight-black;
-    color: $gray-900;
+    font-weight: $font-weight-extrabold;
+    color: $color-gray-900;
   }
 
   &__subtitle {
-    margin: $space-1 0 0;
+    margin: $spacing-xs 0 0;
     font-size: $font-size-base;
-    color: $gray-500;
+    color: $color-gray-500;
   }
 
   &__toolbar {
@@ -36,14 +36,14 @@
   &__grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: $space-4;
+    gap: $spacing-lg;
   }
 
   &__card {
-    padding: $space-5;
+    padding: $spacing-xl;
     @include flex-column;
-    gap: $space-4;
-    transition: box-shadow $transition-base;
+    gap: $spacing-lg;
+    transition: box-shadow $transition-normal;
 
     &:hover {
       box-shadow: $shadow-md;
@@ -57,27 +57,27 @@
     &-actions {
       display: flex;
       align-items: center;
-      gap: $space-1;
+      gap: $spacing-xs;
     }
 
     &-name {
       margin: 0;
       font-size: $font-size-lg;
       font-weight: $font-weight-bold;
-      color: $gray-900;
+      color: $color-gray-900;
     }
 
     &-info {
       @include flex-column;
-      gap: $space-2;
+      gap: $spacing-sm;
     }
 
     &-field {
       display: flex;
       align-items: center;
-      gap: $space-2;
+      gap: $spacing-sm;
       font-size: $font-size-sm;
-      color: $gray-600;
+      color: $color-gray-600;
     }
 
     &-icon {
@@ -88,12 +88,12 @@
     }
 
     &-notes {
-      margin-top: $space-1;
-      padding: $space-2 $space-3;
-      background: $gray-50;
+      margin-top: $spacing-xs;
+      padding: $spacing-sm $spacing-md;
+      background: $color-gray-50;
       border-radius: $radius-md;
       font-size: $font-size-sm;
-      color: $gray-500;
+      color: $color-gray-500;
       font-style: italic;
       line-height: 1.4;
     }
@@ -103,8 +103,8 @@
     width: 40px;
     height: 40px;
     border-radius: $radius-full;
-    background: $brand-light;
-    color: $brand;
+    background: $color-primary-light;
+    color: $color-primary;
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
     @include flex-center;
@@ -114,9 +114,9 @@
   &__confirm-delete {
     display: flex;
     align-items: center;
-    gap: $space-1;
+    gap: $spacing-xs;
     font-size: $font-size-sm;
-    color: $danger;
+    color: $color-danger;
     font-weight: $font-weight-medium;
   }
 }

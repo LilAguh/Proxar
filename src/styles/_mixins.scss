@@ -1,3 +1,5 @@
+@import './design-tokens';
+
 // ============================================
 // FLEXBOX MIXINS
 // ============================================
@@ -40,7 +42,7 @@
 // ============================================
 // FOCUS RING
 // ============================================
-@mixin focus-ring($color: $brand) {
+@mixin focus-ring($color: $color-primary) {
   outline: none;
   border-color: $color;
   box-shadow: 0 0 0 3px rgba($color, 0.15);
@@ -69,11 +71,11 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: $gray-300;
+    background: $color-gray-300;
     border-radius: 3px;
 
     &:hover {
-      background: $gray-400;
+      background: $color-gray-400;
     }
   }
 }
@@ -82,8 +84,8 @@
 // CARD
 // ============================================
 @mixin card {
-  background: $white;
-  border: $border-width solid $border-color;
+  background: $color-white;
+  border: 1px solid $color-gray-200;
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;
 }

@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
-  const { isAuthenticated, isAdmin, _hasHydrated: authHydrated, user, logout } = useAuthStore();
+  const { isAuthenticated, isAdmin, _hasHydrated: authHydrated, logout } = useAuthStore();
   const { hasCompany, _hasHydrated: companyHydrated, clearCompany } = useCompanyStore();
 
   // Esperar a que se hidraten ambos stores
