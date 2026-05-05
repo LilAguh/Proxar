@@ -8,8 +8,6 @@ import { getApiErrorMessage } from '@/utils/api.utils';
 import { apiClient } from '@/core/config/api.config';
 import './CompanyLogin.scss';
 
-const isDevelopment = import.meta.env.DEV;
-
 export const CompanyLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -66,46 +64,15 @@ export const CompanyLogin = () => {
     }
   };
 
-  const handleQuickFill = (emailValue: string, passwordValue: string) => {
-    setEmail(emailValue);
-    setPassword(passwordValue);
-    setTouched({ email: true, password: true });
-    setErrors({ email: '', password: '' });
-    setServerError('');
-  };
-
   const isValid = email && password && !errors.email && !errors.password;
 
   const footer = (
-    <>
-      {isDevelopment && (
-        <>
-          <p style={{ margin: 0, fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>💡 Cuentas de prueba:</p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            {[
-              { label: '🏢 Sagitario', email: 'admin@sagitario.com', password: 'password123' },
-              { label: '🪟 Vidrios Norte', email: 'admin@vidriosnorte.com', password: 'password123' },
-              { label: '🔧 AlumCor', email: 'admin@alumcor.com', password: 'password123' },
-            ].map(({ label, email: e, password: p }) => (
-              <button
-                key={label}
-                type="button"
-                className="auth-quick-fill"
-                onClick={() => handleQuickFill(e, p)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-      <div className="company-login__register">
-        <p>¿No tenés empresa?</p>
-        <a href="/company/register" className="company-login__link">
-          Registrate acá
-        </a>
-      </div>
-    </>
+    <div className="company-login__register">
+      <p>¿No tenés empresa?</p>
+      <a href="/company/register" className="company-login__link">
+        Registrate acá
+      </a>
+    </div>
   );
 
   return (
