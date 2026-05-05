@@ -23,9 +23,10 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useTickets, useUpdateTicketStatus, useTodayCashRegister } from "@/hooks/api";
-import { Card, Badge, Button } from "@presentation/atoms";
-import { Spinner, EmptyState } from "@presentation/molecules";
+import { Card, Badge, Button, Skeleton } from "@presentation/atoms";
+import { EmptyState } from "@presentation/molecules";
 import { ModalTicketDetail } from "@presentation/features";
+import { BudgetModal } from "@presentation/components/BudgetModal/BudgetModal";
 import { useUIStore, useAuthStore } from "@/stores";
 import { TicketState, TicketType, Priority, CashRegisterStatus } from "@core/enums";
 import { Ticket } from "@core/entities/Ticket.entity";
@@ -56,6 +57,21 @@ const COLUMNS = [
 ];
 
 const CLOSED_STATES = [TicketState.Completado, TicketState.Descartado];
+
+// Transiciones de estado permitidas
+const ALLOWED_TRANSITIONS: Record<TicketState, TicketState[]> = {
+  [TicketState.Nuevo]: [TicketState.EnVisita, TicketState.Presupuestado, TicketState.Descartado],
+  [TicketState.EnVisita]: [TicketState.Presupuestado, TicketState.Descartado],
+  [TicketState.Presupuestado]: [TicketState.Aprobado, TicketState.Descartado],
+  [TicketState.Aprobado]: [TicketState.EnProceso, TicketState.Descartado],
+  [TicketState.EnProceso]: [TicketState.Completado, TicketState.Descartado],
+  [TicketState.Completado]: [], // Estado final
+  [TicketState.Descartado]: [TicketState.Nuevo], // Puede reabrirse
+};
+
+const isTransitionAllowed = (from: TicketState, to: TicketState): boolean => {
+  return ALLOWED_TRANSITIONS[from]?.includes(to) ?? false;
+};
 
 // Prefix para distinguir IDs de columna de IDs de ticket
 const colId = (status: TicketState) => `col::${status}`;
@@ -175,23 +191,30 @@ const DroppableColumn = ({
   status,
   tickets,
   onTicketClick,
+  disabled = false,
 }: {
   status: TicketState;
   tickets: Ticket[];
   onTicketClick: (id: string) => void;
+  disabled?: boolean;
 }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: colId(status),
     data: { type: "column", status },
+    disabled,
   });
 
   return (
-    <div ref={setNodeRef} className="tickets__column">
+    <div
+      ref={setNodeRef}
+      className={`tickets__column ${disabled ? 'tickets__column--disabled' : ''}`}
+    >
       <div className="tickets__column-header">
         <Badge status={status} size="lg" />
         <span className="tickets__column-count">{tickets.length}</span>
       </div>
-      <div className={`tickets__column-body ${isOver ? "tickets__column-body--over" : ""}`}
+      <div
+        className={`tickets__column-body ${isOver ? "tickets__column-body--over" : ""}`}
       >
         <SortableContext
           items={tickets.map((t) => t.id)}
@@ -230,6 +253,8 @@ export const Tickets = () => {
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [showClosed, setShowClosed] = useState(false);
   const [wasDragging, setWasDragging] = useState(false);
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [budgetTicket, setBudgetTicket] = useState<Ticket | null>(null);
 
   const cajaAbierta = todayRegister?.status === CashRegisterStatus.Open;
   const canDrag = isAdmin() && cajaAbierta;
@@ -246,8 +271,33 @@ export const Tickets = () => {
 
   if (isLoading) {
     return (
-      <div className="tickets-loading">
-        <Spinner size="lg" />
+      <div className="tickets">
+        <div className="tickets__header">
+          <div>
+            <Skeleton width={120} height={34} />
+            <Skeleton width={240} height={18} />
+          </div>
+          <Skeleton width={140} height={40} borderRadius={8} />
+        </div>
+        <div className="tickets__kanban">
+          {Array.from({ length: 5 }).map((_, col) => (
+            <div key={col} className="tickets__column">
+              <div className="tickets__column-header">
+                <Skeleton width={120} height={28} borderRadius={14} />
+                <Skeleton width={28} height={28} borderRadius={14} />
+              </div>
+              <div className="tickets__column-body">
+                {Array.from({ length: 3 }).map((__, row) => (
+                  <Card key={row} className="tickets__card">
+                    <Skeleton width={70} height={14} />
+                    <Skeleton width="100%" height={18} />
+                    <Skeleton width="70%" height={16} />
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -300,6 +350,31 @@ export const Tickets = () => {
 
     const ticket = tickets?.find((t) => t.id === ticketId);
     if (!ticket || ticket.status === newStatus) return;
+
+    // Validar transición de estado
+    if (!isTransitionAllowed(ticket.status, newStatus)) {
+      const stateLabels: Record<TicketState, string> = {
+        [TicketState.Nuevo]: 'Nuevo',
+        [TicketState.EnVisita]: 'En Visita',
+        [TicketState.Presupuestado]: 'Presupuestado',
+        [TicketState.Aprobado]: 'Aprobado',
+        [TicketState.EnProceso]: 'En Proceso',
+        [TicketState.Completado]: 'Completado',
+        [TicketState.Descartado]: 'Descartado',
+      };
+      showToast(
+        `No se puede mover de "${stateLabels[ticket.status]}" a "${stateLabels[newStatus]}"`,
+        'warning'
+      );
+      return;
+    }
+
+    // Si se está moviendo a Presupuestado, abrir modal de presupuesto
+    if (newStatus === TicketState.Presupuestado) {
+      setBudgetTicket(ticket);
+      setShowBudgetModal(true);
+      return;
+    }
 
     const previousStatus = ticket.status;
 
@@ -363,7 +438,7 @@ export const Tickets = () => {
               onTicketClick={(id) => {
                 if (!wasDragging) setSelectedTicketId(id);
               }}
-
+              disabled={activeTicket ? !isTransitionAllowed(activeTicket.status, status) : false}
             />
           ))}
         </div>
@@ -462,6 +537,20 @@ export const Tickets = () => {
         ticketId={selectedTicketId}
         onClose={() => setSelectedTicketId(null)}
       />
+
+      {showBudgetModal && budgetTicket && (
+        <BudgetModal
+          ticketId={budgetTicket.id}
+          clientName={budgetTicket.client?.name || 'Sin cliente'}
+          onClose={() => {
+            setShowBudgetModal(false);
+            setBudgetTicket(null);
+          }}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['tickets'] });
+          }}
+        />
+      )}
     </div>
   );
 };

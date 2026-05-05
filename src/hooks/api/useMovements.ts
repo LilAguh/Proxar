@@ -2,11 +2,21 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { movementRepository } from '@data/repositories/movement.repository';
 import { useToastStore } from '@/stores';
 import { getErrorMessage } from '@core/utils/errorMessage';
+import { MovementType } from '@core/enums';
 
-export function useMovements() {
+export function useMovementsPage(page: number, pageSize: number, type?: MovementType) {
   return useQuery({
-    queryKey: ['movements'],
-    queryFn: () => movementRepository.getAll(),
+    queryKey: ['movements', 'page', page, pageSize, type ?? 'all'],
+    queryFn: () => movementRepository.getPaged(page, pageSize, type),
+    staleTime: 1 * 60 * 1000,
+  });
+}
+
+export function useMovementsByDateRange(startDate: string, endDate: string) {
+  return useQuery({
+    queryKey: ['movements', 'range', startDate, endDate],
+    queryFn: () => movementRepository.getByDateRange(startDate, endDate),
+    enabled: !!startDate && !!endDate,
     staleTime: 1 * 60 * 1000,
   });
 }

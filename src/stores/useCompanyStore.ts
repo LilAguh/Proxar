@@ -5,6 +5,7 @@ interface Company {
   slug: string;
   name: string;
   logoUrl?: string;
+  timeZoneId?: string;
 }
 
 interface CompanyStore {

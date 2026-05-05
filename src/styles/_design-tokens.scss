@@ -1,0 +1,109 @@
+// Design Tokens - SCSS Variables
+// Basado en Claude Design
+
+// ── Colores ──
+// Brand
+$color-primary: #d64717;
+$color-primary-light: #fff3ef;
+$color-primary-dark: #b33913;
+
+// Neutrales
+$color-gray-50: #f9fafb;
+$color-gray-100: #f3f4f6;
+$color-gray-200: #e5e7eb;
+$color-gray-300: #d1d5db;
+$color-gray-400: #9ca3af;
+$color-gray-500: #6b7280;
+$color-gray-600: #4b5563;
+$color-gray-700: #374151;
+$color-gray-800: #1f2937;
+$color-gray-900: #111827;
+
+// Estados
+$color-success: #16a34a;
+$color-warning: #f59e0b;
+$color-danger: #dc2626;
+$color-info: #3b82f6;
+
+// Estados de tickets
+$color-ticket-nuevo: #3b82f6;
+$color-ticket-en-visita: #8b5cf6;
+$color-ticket-presupuestado: #f59e0b;
+$color-ticket-aprobado: #16a34a;
+$color-ticket-en-proceso: #06b6d4;
+$color-ticket-completado: #6b7280;
+$color-ticket-descartado: #dc2626;
+
+// Básicos
+$color-white: #ffffff;
+$color-black: #000000;
+
+// ── Tipografía ──
+$font-primary: 'Inter', system-ui, -apple-system, sans-serif;
+$font-mono: 'Roboto Mono', monospace;
+
+// Font sizes
+$font-size-xs: 11px;
+$font-size-sm: 13px;
+$font-size-base: 14px;
+$font-size-lg: 16px;
+$font-size-xl: 18px;
+$font-size-2xl: 20px;
+$font-size-3xl: 24px;
+$font-size-4xl: 32px;
+
+// Font weights
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$font-weight-extrabold: 800;
+
+// ── Espaciado ──
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 20px;
+$spacing-2xl: 24px;
+$spacing-3xl: 28px;
+$spacing-4xl: 32px;
+
+// ── Border Radius ──
+$radius-sm: 4px;
+$radius-md: 6px;
+$radius-lg: 8px;
+$radius-xl: 12px;
+$radius-2xl: 16px;
+$radius-full: 9999px;
+
+// ── Sombras ──
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+$shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+$shadow-xl: 0 8px 30px rgba(0, 0, 0, 0.12);
+
+// ── Layout ──
+$sidebar-width: 220px;
+$topbar-height: 52px;
+$max-content-width: 1400px;
+
+// ── Transiciones ──
+$transition-fast: 0.15s ease;
+$transition-normal: 0.2s ease;
+$transition-slow: 0.3s ease;
+
+// ── Z-index ──
+$z-sidebar: 100;
+$z-topbar: 200;
+$z-dropdown: 300;
+$z-modal-backdrop: 800;
+$z-modal: 900;
+$z-toast: 1000;
+
+// ── Breakpoints ──
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;

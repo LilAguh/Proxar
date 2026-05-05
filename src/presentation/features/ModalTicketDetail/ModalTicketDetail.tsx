@@ -2,9 +2,13 @@ import { Modal } from '@presentation/molecules';
 import { Badge, Button } from '@presentation/atoms';
 import { Spinner, ConfirmDialog } from '@presentation/molecules';
 import { useTicketDetails, useUpdateTicketStatus, useDeleteTicket } from '@/hooks/api';
+import { useBudgetsByTicket } from '@/hooks/api/useBudgets';
+import { budgetRepository } from '@data/repositories/budget.repository';
 import { TicketState, TICKET_STATE_CONFIG, PRIORITY_CONFIG } from '@core/enums';
 import { useAuthStore } from '@/stores';
+import { useCompanyStore } from '@/stores/useCompanyStore';
 import { useConfirm } from '@/hooks/useConfirm';
+import { formatDateInTimeZone } from '@/utils/dateTime';
 import './ModalTicketDetail.scss';
 
 const TICKET_TYPE_LABEL: Record<string, string> = {
@@ -39,14 +43,13 @@ interface Props {
   onClose: () => void;
 }
 
-const formatDate = (iso: string) =>
-  new Intl.DateTimeFormat('es-AR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso));
-
 const formatCurrency = (n: number) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(n);
 
 export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
+  const { company } = useCompanyStore();
   const { data: ticket, isLoading } = useTicketDetails(ticketId ?? '');
+  const { data: budgets = [] } = useBudgetsByTicket(ticketId ?? '');
   const updateStatus = useUpdateTicketStatus();
   const deleteTicket = useDeleteTicket();
   const { isAdmin } = useAuthStore();
@@ -107,6 +110,14 @@ export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
     if (confirmed) {
       await deleteTicket.mutateAsync(ticket.id);
       onClose(); // Cerrar el modal después de eliminar
+    }
+  };
+
+  const handleViewBudgetPdf = async (budgetId: string) => {
+    try {
+      await budgetRepository.downloadPdf(budgetId);
+    } catch (error) {
+      console.error('Error al descargar PDF:', error);
     }
   };
 
@@ -193,7 +204,9 @@ export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
                 </span>
                 <span className="ticket-detail__type">{TICKET_TYPE_LABEL[ticket.type] ?? ticket.type}</span>
               </div>
-              <span className="ticket-detail__date">{formatDate(ticket.createdAt)}</span>
+              <span className="ticket-detail__date">
+                {formatDateInTimeZone(ticket.createdAt, company?.timeZoneId, { dateStyle: 'medium', timeStyle: 'short' })}
+              </span>
             </div>
 
             <h2 className="ticket-detail__title">{ticket.title}</h2>
@@ -248,6 +261,45 @@ export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
               </div>
             )}
 
+            {/* Presupuestos */}
+            {budgets.length > 0 && (
+              <div className="ticket-detail__section">
+                <h4 className="ticket-detail__section-title">Presupuestos</h4>
+                <div className="ticket-detail__budgets">
+                  {budgets.map((budget) => (
+                    <div key={budget.id} className="ticket-detail__budget">
+                      <div className="ticket-detail__budget-info">
+                        <div className="ticket-detail__budget-header">
+                          <span className="ticket-detail__budget-number">Presupuesto #{budget.number}</span>
+                          <Badge status={budget.status} size="sm" />
+                        </div>
+                        <div className="ticket-detail__budget-details">
+                          <span className="ticket-detail__budget-detail">
+                            Total: <strong>{formatCurrency(budget.total)}</strong>
+                          </span>
+                          {budget.discount > 0 && (
+                            <span className="ticket-detail__budget-detail">
+                              Descuento: {formatCurrency(budget.discount)}
+                            </span>
+                          )}
+                          <span className="ticket-detail__budget-detail">
+                            Válido hasta: {formatDateInTimeZone(budget.validUntil, company?.timeZoneId, { dateStyle: 'short' })}
+                          </span>
+                        </div>
+                      </div>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleViewBudgetPdf(budget.id)}
+                      >
+                        Ver PDF
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Historial */}
             {ticket.history?.length > 0 && (
               <div className="ticket-detail__section">
@@ -266,7 +318,9 @@ export const ModalTicketDetail = ({ ticketId, isOpen, onClose }: Props) => {
                           )}
                         </div>
                         {h.comment && <p className="ticket-detail__history-comment">{h.comment}</p>}
-                        <span className="ticket-detail__history-date">{formatDate(h.timestamp)}</span>
+                        <span className="ticket-detail__history-date">
+                          {formatDateInTimeZone(h.timestamp, company?.timeZoneId, { dateStyle: 'medium', timeStyle: 'short' })}
+                        </span>
                       </div>
                     </div>
                   ))}

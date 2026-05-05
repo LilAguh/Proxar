@@ -4,10 +4,12 @@ import { ProtectedRoute } from '@presentation/guards/ProtectedRoute';
 import { PageTransition } from '@presentation/components/PageTransition/PageTransition';
 import { Dashboard } from '@presentation/pages/Dashboard/Dashboard';
 import { Tickets } from '@presentation/pages/Tickets/Tickets';
+import { Budgets } from '@presentation/pages/Budgets/Budgets';
 import { Caja } from '@presentation/pages/Caja/Caja';
 import { Clients } from '@presentation/pages/Clients/Clients';
 import { Users } from '@presentation/pages/Users/Users';
 import { Saldo } from '@presentation/pages/Saldo/Saldo';
+import { Reports } from '@presentation/pages/Reports';
 import { Login } from '@presentation/pages/Login/Login';
 import { CompanyLogin } from '@presentation/pages/CompanyLogin/CompanyLogin';
 import { CompanyRegister } from '@presentation/pages/CompanyRegister/CompanyRegister';
@@ -50,12 +52,20 @@ export const router = createBrowserRouter([
         element: pt(<Tickets />),
       },
       {
+        path: 'budgets',
+        element: pt(<Budgets />),
+      },
+      {
         path: 'caja',
         element: pt(<Caja />),
       },
       {
         path: 'saldo',
         element: pt(<Saldo />),
+      },
+      {
+        path: 'reports',
+        element: pt(<Reports />),
       },
       {
         path: 'clients',

@@ -14,7 +14,7 @@ export function useLogin() {
     mutationFn: (credentials: { email: string; password: string }) =>
       authRepository.login(credentials),
     onSuccess: (data) => {
-      setAuth(data.user, data.token);
+      setAuth(data.user, data.token, data.refreshToken, data.expiresAt, data.refreshTokenExpiresAt);
       navigate('/');
       showToast('¡Bienvenido!', 'success');
     },

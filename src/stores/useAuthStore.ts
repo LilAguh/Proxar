@@ -6,9 +6,12 @@ import { UserRole } from '@core/enums';
 interface AuthStore {
   user: User | null;
   token: string | null;
+  refreshToken: string | null;
+  expiresAt: string | null;
+  refreshTokenExpiresAt: string | null;
   _hasHydrated: boolean;
-  setAuth: (user: User, token: string) => void;
-  clearAuth: () => void; // ← Agregado para compatibilidad
+  setAuth: (user: User, token: string, refreshToken: string, expiresAt: string, refreshTokenExpiresAt: string) => void;
+  clearAuth: () => void;
   logout: () => void;
   isAuthenticated: () => boolean;
   isAdmin: () => boolean;
@@ -20,20 +23,23 @@ export const useAuthStore = create<AuthStore>()(
     (set, get) => ({
       user: null,
       token: null,
+      refreshToken: null,
+      expiresAt: null,
+      refreshTokenExpiresAt: null,
       _hasHydrated: false,
 
-      setAuth: (user, token) => {
-        set({ user, token, _hasHydrated: true });
+      setAuth: (user, token, refreshToken, expiresAt, refreshTokenExpiresAt) => {
+        set({ user, token, refreshToken, expiresAt, refreshTokenExpiresAt, _hasHydrated: true });
       },
 
       clearAuth: () => {
-        set({ user: null, token: null });
+        set({ user: null, token: null, refreshToken: null, expiresAt: null, refreshTokenExpiresAt: null });
         localStorage.removeItem('token');
         localStorage.removeItem('proxar-auth');
       },
 
       logout: () => {
-        set({ user: null, token: null });
+        set({ user: null, token: null, refreshToken: null, expiresAt: null, refreshTokenExpiresAt: null });
         localStorage.removeItem('token');
         localStorage.removeItem('proxar-auth');
       },

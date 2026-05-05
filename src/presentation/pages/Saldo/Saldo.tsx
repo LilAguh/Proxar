@@ -1,28 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  useMovements,
+  useMovementsPage,
+  useTodayCashRegister,
   useAccountBalances,
   useActiveAccounts,
   useDeleteMovement,
 } from "@/hooks/api";
 import { Card, Button } from "@presentation/atoms";
 import { Spinner, EmptyState, ConfirmDialog } from "@presentation/molecules";
-import { useUIStore, useAuthStore } from "@/stores";
+import { useCompanyStore, useUIStore, useAuthStore } from "@/stores";
 import { MovementType } from "@core/enums";
 import { useConfirm } from "@/hooks/useConfirm";
+import { formatDateInTimeZone } from "@/utils/dateTime";
 import "./Saldo.scss";
 
 export const Saldo = () => {
-  const { data: movements, isLoading } = useMovements();
-  const { data: balances } = useAccountBalances();
-  const { data: accounts } = useActiveAccounts();
+  const { company } = useCompanyStore();
+  const [filter, setFilter] = useState<"all" | "income" | "expense">("all");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  const movementType =
+    filter === "income" ? MovementType.Income : filter === "expense" ? MovementType.Expense : undefined;
+
+  const { data: pagedMovements, isLoading: isLoadingMovements } = useMovementsPage(page, pageSize, movementType);
+  const { data: todayCashRegister, isLoading: isLoadingToday } = useTodayCashRegister();
+  const { data: balances, isLoading: isLoadingBalances } = useAccountBalances();
+  const { data: accounts, isLoading: isLoadingAccounts } = useActiveAccounts();
   const { openModalCaja } = useUIStore();
   const deleteMovement = useDeleteMovement();
   const { isAdmin } = useAuthStore();
 
   const { isOpen, options, confirm, handleConfirm, handleCancel } = useConfirm();
-
-  const [filter, setFilter] = useState<"all" | "income" | "expense">("all");
 
   const handleDelete = async (movement: any) => {
     const confirmed = await confirm({
@@ -35,7 +44,11 @@ export const Saldo = () => {
     if (confirmed) await deleteMovement.mutateAsync(movement.id);
   };
 
-  if (isLoading) {
+  useEffect(() => {
+    setPage(1);
+  }, [filter]);
+
+  if (isLoadingMovements || isLoadingToday || isLoadingBalances || isLoadingAccounts) {
     return <div className="saldo-loading"><Spinner size="lg" /></div>;
   }
 
@@ -46,32 +59,20 @@ export const Saldo = () => {
       minimumFractionDigits: 0,
     }).format(amount);
 
-  const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString("es-AR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
   const totalBalance = Object.values(balances || {}).reduce(
     (sum, bal) => sum + (bal as number),
     0
   );
 
-  const filteredMovements = movements?.filter((m) => {
-    if (filter === "income") return m.type === MovementType.Income;
-    if (filter === "expense") return m.type === MovementType.Expense;
-    return true;
-  });
+  const movements = pagedMovements?.items ?? [];
+  const totalPages = pagedMovements?.totalPages ?? 1;
+  const todayMovements = todayCashRegister?.movements ?? [];
 
-  const today = new Date().toISOString().split("T")[0];
-  const todayIncome = movements
-    ?.filter((m) => m.movementDate.split("T")[0] === today && m.type === MovementType.Income)
+  const todayIncome = todayMovements
+    ?.filter((m) => m.type === MovementType.Income)
     .reduce((sum, m) => sum + m.amount, 0) || 0;
-  const todayExpense = movements
-    ?.filter((m) => m.movementDate.split("T")[0] === today && m.type === MovementType.Expense)
+  const todayExpense = todayMovements
+    ?.filter((m) => m.type === MovementType.Expense)
     .reduce((sum, m) => sum + m.amount, 0) || 0;
 
   return (
@@ -127,12 +128,17 @@ export const Saldo = () => {
       </div>
 
       <Card className="saldo__movements">
-        <h3 className="saldo__movements-title">Movimientos</h3>
-        {!filteredMovements || filteredMovements.length === 0 ? (
+        <div className="saldo__movements-header">
+          <h3 className="saldo__movements-title">Movimientos</h3>
+          <span className="saldo__movements-meta">
+            Página {page} de {totalPages}
+          </span>
+        </div>
+        {!movements || movements.length === 0 ? (
           <EmptyState icon="💰" title="No hay movimientos" />
         ) : (
           <div className="saldo__movements-list">
-            {filteredMovements.map((mov) => (
+            {movements.map((mov) => (
               <div key={mov.id} className="saldo__movement">
                 <div className="saldo__movement-info">
                   <div className="saldo__movement-header">
@@ -145,7 +151,13 @@ export const Saldo = () => {
                   <div className="saldo__movement-concept">{mov.concept}</div>
                   <div className="saldo__movement-footer">
                     <span className="saldo__movement-account">{mov.account?.name || "Sin cuenta"}</span>
-                    <span className="saldo__movement-date">{formatDate(mov.movementDate)}</span>
+                    <span className="saldo__movement-date">{formatDateInTimeZone(mov.movementDate, company?.timeZoneId, {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}</span>
                   </div>
                 </div>
                 <div className="saldo__movement-actions">
@@ -162,6 +174,25 @@ export const Saldo = () => {
             ))}
           </div>
         )}
+
+        <div className="saldo__pagination">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+            disabled={page <= 1}
+          >
+            Anterior
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+            disabled={page >= totalPages}
+          >
+            Siguiente
+          </Button>
+        </div>
       </Card>
 
       <ConfirmDialog

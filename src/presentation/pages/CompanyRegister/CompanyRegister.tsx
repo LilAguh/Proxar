@@ -10,13 +10,32 @@ import './CompanyRegister.scss';
 
 export const CompanyRegister = () => {
   const [formData, setFormData] = useState({
+    // Usuario admin
     name: '',
     email: '',
     password: '',
     passwordConfirm: '',
+
+    // Datos básicos empresa
     companyName: '',
     companySlug: '',
+    legalName: '',
     logoUrl: '',
+
+    // Datos fiscales
+    cuit: '',
+    iva: '1', // ResponsableInscripto por defecto
+    iibb: '',
+    fiscalAddress: '',
+    fiscalCity: '',
+    fiscalProvince: '',
+    fiscalPostalCode: '',
+    startOfActivities: '',
+    defaultSalesPoint: '',
+
+    // Contacto
+    phone: '',
+    companyEmail: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -29,6 +48,12 @@ export const CompanyRegister = () => {
     passwordConfirm: '',
     companyName: '',
     companySlug: '',
+    cuit: '',
+    fiscalAddress: '',
+    fiscalCity: '',
+    fiscalProvince: '',
+    fiscalPostalCode: '',
+    startOfActivities: '',
   });
   const [touched, setTouched] = useState({
     name: false,
@@ -37,6 +62,12 @@ export const CompanyRegister = () => {
     passwordConfirm: false,
     companyName: false,
     companySlug: false,
+    cuit: false,
+    fiscalAddress: false,
+    fiscalCity: false,
+    fiscalProvince: false,
+    fiscalPostalCode: false,
+    startOfActivities: false,
   });
   const { setCompany } = useCompanyStore();
   const { setAuth } = useAuthStore();
@@ -73,6 +104,34 @@ export const CompanyRegister = () => {
         if (!value) return 'El slug es requerido';
         if (value.length < 2) return 'Mínimo 2 caracteres';
         if (!/^[a-z0-9-]+$/.test(value)) return 'Solo letras minúsculas, números y guiones';
+        return '';
+
+      case 'cuit':
+        if (!value) return 'El CUIT es requerido';
+        // Validar formato CUIT: 11 dígitos o con guiones 20-12345678-9
+        const cuitClean = value.replace(/-/g, '');
+        if (!/^\d{11}$/.test(cuitClean)) return 'CUIT inválido (11 dígitos)';
+        return '';
+
+      case 'fiscalAddress':
+        if (!value) return 'La dirección fiscal es requerida';
+        if (value.length < 5) return 'Mínimo 5 caracteres';
+        return '';
+
+      case 'fiscalCity':
+        if (!value) return 'La ciudad es requerida';
+        return '';
+
+      case 'fiscalProvince':
+        if (!value) return 'La provincia es requerida';
+        return '';
+
+      case 'fiscalPostalCode':
+        if (!value) return 'El código postal es requerido';
+        return '';
+
+      case 'startOfActivities':
+        if (!value) return 'La fecha de inicio es requerida';
         return '';
 
       default:
@@ -132,6 +191,12 @@ export const CompanyRegister = () => {
       passwordConfirm: validateField('passwordConfirm', formData.passwordConfirm),
       companyName: validateField('companyName', formData.companyName),
       companySlug: validateField('companySlug', formData.companySlug),
+      cuit: validateField('cuit', formData.cuit),
+      fiscalAddress: validateField('fiscalAddress', formData.fiscalAddress),
+      fiscalCity: validateField('fiscalCity', formData.fiscalCity),
+      fiscalProvince: validateField('fiscalProvince', formData.fiscalProvince),
+      fiscalPostalCode: validateField('fiscalPostalCode', formData.fiscalPostalCode),
+      startOfActivities: validateField('startOfActivities', formData.startOfActivities),
     };
 
     setFieldErrors(errors);
@@ -142,6 +207,12 @@ export const CompanyRegister = () => {
       passwordConfirm: true,
       companyName: true,
       companySlug: true,
+      cuit: true,
+      fiscalAddress: true,
+      fiscalCity: true,
+      fiscalProvince: true,
+      fiscalPostalCode: true,
+      startOfActivities: true,
     });
 
     return !Object.values(errors).some(err => err !== '');
@@ -160,8 +231,27 @@ export const CompanyRegister = () => {
     setLoading(true);
 
     try {
-      // Remover passwordConfirm antes de enviar
-      const { passwordConfirm, ...registerData } = formData;
+      // Preparar datos para enviar
+      const registerData = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        companyName: formData.companyName,
+        companySlug: formData.companySlug,
+        legalName: formData.legalName || formData.companyName,
+        logoUrl: formData.logoUrl || null,
+        CUIT: formData.cuit,
+        IVA: parseInt(formData.iva),
+        IIBB: formData.iibb || null,
+        FiscalAddress: formData.fiscalAddress,
+        FiscalCity: formData.fiscalCity,
+        FiscalProvince: formData.fiscalProvince,
+        FiscalPostalCode: formData.fiscalPostalCode,
+        StartOfActivities: formData.startOfActivities,
+        DefaultSalesPoint: formData.defaultSalesPoint ? parseInt(formData.defaultSalesPoint) : null,
+        Phone: formData.phone || null,
+        CompanyEmail: formData.companyEmail || null,
+      };
 
       const response = await apiClient.post('/auth/register', registerData);
 
@@ -171,10 +261,17 @@ export const CompanyRegister = () => {
           slug: formData.companySlug,
           name: formData.companyName,
           logoUrl: formData.logoUrl || undefined,
+          timeZoneId: 'America/Argentina/Buenos_Aires',
         });
 
         // Guardar auth (el usuario owner ya viene logueado)
-        setAuth(response.data.user, response.data.token);
+        setAuth(
+          response.data.user,
+          response.data.token,
+          response.data.refreshToken,
+          response.data.expiresAt,
+          response.data.refreshTokenExpiresAt
+        );
 
         // Redirigir al dashboard
         navigate('/');
@@ -241,6 +338,19 @@ export const CompanyRegister = () => {
             </div>
 
             <div className="company-register__field">
+              <label>Razón Social (opcional)</label>
+              <input
+                type="text"
+                name="legalName"
+                value={formData.legalName}
+                onChange={handleChange}
+                placeholder="Si es diferente al nombre comercial"
+                disabled={loading}
+              />
+              <small>Si no se especifica, se usará el nombre comercial</small>
+            </div>
+
+            <div className="company-register__field">
               <label>Logo URL (opcional)</label>
               <input
                 type="url"
@@ -250,6 +360,184 @@ export const CompanyRegister = () => {
                 placeholder="https://ejemplo.com/logo.png"
                 disabled={loading}
               />
+            </div>
+          </div>
+
+          <div className="company-register__section">
+            <h3>Datos Fiscales</h3>
+
+            <div className="company-register__field">
+              <label>CUIT *</label>
+              <input
+                type="text"
+                name="cuit"
+                value={formData.cuit}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="20-12345678-9"
+                maxLength={13}
+                className={touched.cuit && fieldErrors.cuit ? 'error' : ''}
+                disabled={loading}
+              />
+              {touched.cuit && fieldErrors.cuit && (
+                <span className="company-register__field-error">⚠️ {fieldErrors.cuit}</span>
+              )}
+            </div>
+
+            <div className="company-register__field">
+              <label>Condición frente al IVA *</label>
+              <select
+                name="iva"
+                value={formData.iva}
+                onChange={handleChange}
+                disabled={loading}
+                className="company-register__select"
+              >
+                <option value="1">Responsable Inscripto</option>
+                <option value="2">Monotributista</option>
+                <option value="3">Exento</option>
+                <option value="4">No Responsable</option>
+                <option value="5">Consumidor Final</option>
+              </select>
+            </div>
+
+            <div className="company-register__field">
+              <label>Ingresos Brutos (opcional)</label>
+              <input
+                type="text"
+                name="iibb"
+                value={formData.iibb}
+                onChange={handleChange}
+                placeholder="Nro. de Inscripción"
+                disabled={loading}
+              />
+            </div>
+
+            <div className="company-register__field">
+              <label>Dirección Fiscal *</label>
+              <input
+                type="text"
+                name="fiscalAddress"
+                value={formData.fiscalAddress}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="Calle y número"
+                className={touched.fiscalAddress && fieldErrors.fiscalAddress ? 'error' : ''}
+                disabled={loading}
+              />
+              {touched.fiscalAddress && fieldErrors.fiscalAddress && (
+                <span className="company-register__field-error">⚠️ {fieldErrors.fiscalAddress}</span>
+              )}
+            </div>
+
+            <div className="company-register__field">
+              <label>Ciudad *</label>
+              <input
+                type="text"
+                name="fiscalCity"
+                value={formData.fiscalCity}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="Córdoba"
+                className={touched.fiscalCity && fieldErrors.fiscalCity ? 'error' : ''}
+                disabled={loading}
+              />
+              {touched.fiscalCity && fieldErrors.fiscalCity && (
+                <span className="company-register__field-error">⚠️ {fieldErrors.fiscalCity}</span>
+              )}
+            </div>
+
+            <div className="company-register__field">
+              <label>Provincia *</label>
+              <input
+                type="text"
+                name="fiscalProvince"
+                value={formData.fiscalProvince}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="Córdoba"
+                className={touched.fiscalProvince && fieldErrors.fiscalProvince ? 'error' : ''}
+                disabled={loading}
+              />
+              {touched.fiscalProvince && fieldErrors.fiscalProvince && (
+                <span className="company-register__field-error">⚠️ {fieldErrors.fiscalProvince}</span>
+              )}
+            </div>
+
+            <div className="company-register__field">
+              <label>Código Postal *</label>
+              <input
+                type="text"
+                name="fiscalPostalCode"
+                value={formData.fiscalPostalCode}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="5000"
+                className={touched.fiscalPostalCode && fieldErrors.fiscalPostalCode ? 'error' : ''}
+                disabled={loading}
+              />
+              {touched.fiscalPostalCode && fieldErrors.fiscalPostalCode && (
+                <span className="company-register__field-error">⚠️ {fieldErrors.fiscalPostalCode}</span>
+              )}
+            </div>
+
+            <div className="company-register__field">
+              <label>Inicio de Actividades *</label>
+              <input
+                type="date"
+                name="startOfActivities"
+                value={formData.startOfActivities}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={touched.startOfActivities && fieldErrors.startOfActivities ? 'error' : ''}
+                disabled={loading}
+              />
+              {touched.startOfActivities && fieldErrors.startOfActivities && (
+                <span className="company-register__field-error">⚠️ {fieldErrors.startOfActivities}</span>
+              )}
+            </div>
+
+            <div className="company-register__field">
+              <label>Punto de Venta AFIP (opcional)</label>
+              <input
+                type="number"
+                name="defaultSalesPoint"
+                value={formData.defaultSalesPoint}
+                onChange={handleChange}
+                placeholder="1"
+                min="1"
+                disabled={loading}
+              />
+              <small>Punto de venta por defecto para facturación electrónica</small>
+            </div>
+          </div>
+
+          <div className="company-register__section">
+            <h3>Contacto</h3>
+
+            <div className="company-register__field">
+              <label>Teléfono (opcional)</label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="351-1234567"
+                disabled={loading}
+              />
+            </div>
+
+            <div className="company-register__field">
+              <label>Email de la Empresa (opcional)</label>
+              <input
+                type="email"
+                name="companyEmail"
+                value={formData.companyEmail}
+                onChange={handleChange}
+                placeholder="contacto@empresa.com"
+                disabled={loading}
+              />
+              <small>Email de contacto público (distinto al de administrador)</small>
             </div>
           </div>
 

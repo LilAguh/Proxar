@@ -1,4 +1,4 @@
-@import '@/styles/variables';
+@import '@/styles/design-tokens';
 @import '@/styles/mixins';
 
 .caja-loading {
@@ -7,38 +7,38 @@
 }
 
 .caja {
-  padding: $space-7;
+  padding: $spacing-3xl;
   @include flex-column;
-  gap: $space-6;
+  gap: $spacing-2xl;
 
   &__header {
     @include flex-between;
 
     &-tabs {
       display: flex;
-      gap: $space-2;
+      gap: $spacing-sm;
     }
   }
 
   &__title {
     margin: 0;
     font-size: $font-size-3xl;
-    font-weight: $font-weight-black;
-    color: $gray-900;
+    font-weight: $font-weight-extrabold;
+    color: $color-gray-900;
     letter-spacing: -0.5px;
   }
 
   &__subtitle {
-    margin: $space-1 0 0;
+    margin: $spacing-xs 0 0;
     font-size: $font-size-base;
-    color: $gray-500;
+    color: $color-gray-500;
   }
 
   // ─── Today view ────────────────────────────────────
   &__today {
     display: flex;
     flex-direction: column;
-    gap: $space-5;
+    gap: $spacing-xl;
     max-width: 680px;
   }
 
@@ -46,13 +46,13 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: $space-4;
-    padding: $space-10 $space-8;
+    gap: $spacing-lg;
+    padding: 40px $spacing-4xl;
     text-align: center;
 
-    &--idle .caja__status-icon { color: $gray-400; }
-    &--open .caja__status-icon { color: $warning; }
-    &--closed .caja__status-icon { color: $success; }
+    &--idle .caja__status-icon { color: $color-gray-400; }
+    &--open .caja__status-icon { color: $color-warning; }
+    &--closed .caja__status-icon { color: $color-success; }
   }
 
   &__status-icon {
@@ -64,19 +64,19 @@
     margin: 0;
     font-size: $font-size-2xl;
     font-weight: $font-weight-bold;
-    color: $gray-900;
+    color: $color-gray-900;
   }
 
   &__status-sub {
     margin: 0;
     font-size: $font-size-base;
-    color: $gray-500;
+    color: $color-gray-500;
   }
 
   &__today-actions {
     display: flex;
-    gap: $space-3;
-    margin-top: $space-2;
+    gap: $spacing-md;
+    margin-top: $spacing-sm;
   }
 
   // ─── Entries grid ──────────────────────────────────
@@ -84,127 +84,127 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: $space-2;
-    margin: $space-2 0;
+    gap: $spacing-sm;
+    margin: $spacing-sm 0;
   }
 
   &__entry-row {
     display: grid;
     grid-template-columns: 1fr auto auto auto;
-    gap: $space-4;
+    gap: $spacing-lg;
     align-items: center;
-    padding: $space-3 $space-4;
-    background: $gray-50;
+    padding: $spacing-md $spacing-lg;
+    background: $color-gray-50;
     border-radius: $radius-md;
     font-size: $font-size-base;
   }
 
   &__entry-name {
     font-weight: $font-weight-semibold;
-    color: $gray-800;
+    color: $color-gray-800;
   }
 
-  &__entry-open { color: $gray-600; }
-  &__entry-arrow { color: $gray-400; }
-  &__entry-close { font-weight: $font-weight-bold; color: $success; }
+  &__entry-open { color: $color-gray-600; }
+  &__entry-arrow { color: $color-gray-400; }
+  &__entry-close { font-weight: $font-weight-bold; color: $color-success; }
 
   // ─── Discrepancy card ──────────────────────────────
   &__discrepancy-card {
-    border: 2px solid rgba($warning, 0.4) !important;
-    background: rgba($warning, 0.05);
-    padding: $space-6;
+    border: 2px solid rgba($color-warning, 0.4) !important;
+    background: rgba($color-warning, 0.05);
+    padding: $spacing-2xl;
     display: flex;
     flex-direction: column;
-    gap: $space-4;
+    gap: $spacing-lg;
   }
 
   &__discrepancy-title {
     margin: 0;
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
-    color: $gray-900;
+    color: $color-gray-900;
   }
 
   &__discrepancy-sub {
     margin: 0;
     font-size: $font-size-sm;
-    color: $gray-600;
+    color: $color-gray-600;
   }
 
   &__discrepancy-list {
     display: flex;
     flex-direction: column;
-    gap: $space-2;
+    gap: $spacing-sm;
   }
 
   &__discrepancy-row {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr auto;
-    gap: $space-3;
+    gap: $spacing-md;
     align-items: center;
-    padding: $space-3 $space-4;
-    background: $white;
+    padding: $spacing-md $spacing-lg;
+    background: $color-white;
     border-radius: $radius-md;
     font-size: $font-size-sm;
   }
 
   &__discrepancy-account {
     font-weight: $font-weight-semibold;
-    color: $gray-800;
+    color: $color-gray-800;
   }
 
-  &__discrepancy-prev { color: $gray-500; }
-  &__discrepancy-current { color: $gray-700; }
+  &__discrepancy-prev { color: $color-gray-500; }
+  &__discrepancy-current { color: $color-gray-700; }
 
   &__discrepancy-diff {
     font-weight: $font-weight-bold;
-    &--pos { color: $success; }
-    &--neg { color: $danger; }
+    &--pos { color: $color-success; }
+    &--neg { color: $color-danger; }
   }
 
   // ─── Form card ─────────────────────────────────────
   &__form-card {
-    padding: $space-8;
+    padding: $spacing-4xl;
     display: flex;
     flex-direction: column;
-    gap: $space-5;
+    gap: $spacing-xl;
   }
 
   &__form-title {
     margin: 0;
     font-size: $font-size-2xl;
     font-weight: $font-weight-bold;
-    color: $gray-900;
+    color: $color-gray-900;
   }
 
   &__form-subtitle {
-    margin: -$space-3 0 0;
+    margin: -$spacing-md 0 0;
     font-size: $font-size-base;
-    color: $gray-500;
+    color: $color-gray-500;
   }
 
   &__form-alert {
-    padding: $space-4;
-    background: rgba($warning, 0.1);
-    border: 1px solid rgba($warning, 0.4);
+    padding: $spacing-lg;
+    background: rgba($color-warning, 0.1);
+    border: 1px solid rgba($color-warning, 0.4);
     border-radius: $radius-md;
     font-size: $font-size-sm;
-    color: $gray-800;
+    color: $color-gray-800;
     font-weight: $font-weight-medium;
   }
 
   &__form-grid {
     display: flex;
     flex-direction: column;
-    gap: $space-4;
+    gap: $spacing-lg;
   }
 
   &__form-row {
     display: flex;
     flex-direction: column;
-    gap: $space-2;
-    padding: $space-4;
-    background: $gray-50;
+    gap: $spacing-sm;
+    padding: $spacing-lg;
+    background: $color-gray-50;
     border-radius: $radius-md;
 
     &-header { @include flex-between; }
@@ -212,77 +212,77 @@
 
   &__form-account {
     font-weight: $font-weight-semibold;
-    color: $gray-800;
+    color: $color-gray-800;
     font-size: $font-size-base;
   }
 
   &__form-opened,
   &__form-suggested {
     font-size: $font-size-sm;
-    color: $gray-500;
+    color: $color-gray-500;
   }
 
   &__form-actions {
     display: flex;
     justify-content: flex-end;
-    gap: $space-3;
-    padding-top: $space-2;
-    border-top: 1px solid $border-color;
+    gap: $spacing-md;
+    padding-top: $spacing-sm;
+    border-top: 1px solid $color-gray-200;
   }
 
   // ─── History ───────────────────────────────────────
   &__history {
-    padding: $space-6;
+    padding: $spacing-2xl;
 
     &-title {
-      margin: 0 0 $space-5;
+      margin: 0 0 $spacing-xl;
       font-size: $font-size-xl;
       font-weight: $font-weight-bold;
-      color: $gray-900;
+      color: $color-gray-900;
     }
 
     &-list {
       display: flex;
       flex-direction: column;
-      gap: $space-2;
+      gap: $spacing-sm;
     }
 
     &-item {
       display: grid;
       grid-template-columns: 1fr auto auto auto;
-      gap: $space-4;
+      gap: $spacing-lg;
       align-items: center;
-      padding: $space-4 $space-5;
+      padding: $spacing-lg $spacing-xl;
       border-radius: $radius-md;
       cursor: pointer;
-      border: 1px solid $border-color;
+      border: 1px solid $color-gray-200;
       transition: all $transition-fast;
 
       &:hover {
-        background: $gray-50;
-        border-color: $brand;
+        background: $color-gray-50;
+        border-color: $color-primary;
         transform: translateX(3px);
       }
     }
 
     &-date {
       font-weight: $font-weight-semibold;
-      color: $gray-900;
+      color: $color-gray-900;
       font-size: $font-size-base;
       text-transform: capitalize;
     }
 
     &-amounts {
       display: flex;
-      gap: $space-5;
+      gap: $spacing-xl;
       font-size: $font-size-sm;
-      color: $gray-600;
+      color: $color-gray-600;
     }
 
-    &-close { color: $success; }
+    &-close { color: $color-success; }
 
     &-status {
-      padding: $space-1 $space-3;
+      padding: $spacing-xs $spacing-md;
       border-radius: $radius-full;
       font-size: $font-size-xs;
       font-weight: $font-weight-bold;
@@ -290,18 +290,18 @@
       letter-spacing: 0.5px;
 
       &--open {
-        background: rgba($warning, 0.15);
-        color: darken($warning, 15%);
+        background: rgba($color-warning, 0.15);
+        color: darken($color-warning, 15%);
       }
 
       &--closed {
-        background: rgba($success, 0.15);
-        color: darken($success, 10%);
+        background: rgba($color-success, 0.15);
+        color: darken($color-success, 10%);
       }
     }
 
     &-arrow {
-      color: $gray-400;
+      color: $color-gray-400;
       font-size: $font-size-lg;
     }
   }
@@ -310,13 +310,13 @@
   &__detail {
     display: flex;
     flex-direction: column;
-    gap: $space-5;
+    gap: $spacing-xl;
 
     &-back {
       background: none;
       border: none;
       cursor: pointer;
-      color: $brand;
+      color: $color-primary;
       font-size: $font-size-base;
       font-weight: $font-weight-semibold;
       padding: 0;
@@ -327,10 +327,10 @@
     }
 
     &-card {
-      padding: $space-8;
+      padding: $spacing-4xl;
       display: flex;
       flex-direction: column;
-      gap: $space-5;
+      gap: $spacing-xl;
     }
 
     &-header { @include flex-between; }
@@ -339,30 +339,30 @@
       margin: 0;
       font-size: $font-size-2xl;
       font-weight: $font-weight-bold;
-      color: $gray-900;
+      color: $color-gray-900;
       text-transform: capitalize;
     }
 
     &-meta {
       display: flex;
-      gap: $space-6;
+      gap: $spacing-2xl;
       font-size: $font-size-sm;
-      color: $gray-500;
+      color: $color-gray-500;
     }
 
     &-entries {
       display: flex;
       flex-direction: column;
-      gap: $space-1;
+      gap: $spacing-xs;
 
       &-header {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr 1fr;
-        gap: $space-4;
-        padding: $space-2 $space-4;
+        gap: $spacing-lg;
+        padding: $spacing-sm $spacing-lg;
         font-size: $font-size-xs;
         font-weight: $font-weight-bold;
-        color: $gray-500;
+        color: $color-gray-500;
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
@@ -371,89 +371,104 @@
     &-entry-row {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: $space-4;
+      gap: $spacing-lg;
       align-items: center;
-      padding: $space-3 $space-4;
-      background: $gray-50;
+      padding: $spacing-md $spacing-lg;
+      background: $color-gray-50;
       border-radius: $radius-md;
       font-size: $font-size-base;
 
       &--total {
-        background: $gray-100;
+        background: $color-gray-100;
         font-weight: $font-weight-bold;
-        margin-top: $space-2;
+        margin-top: $spacing-sm;
       }
     }
 
     &-notes {
-      padding: $space-4;
-      background: $gray-50;
+      padding: $spacing-lg;
+      background: $color-gray-50;
       border-radius: $radius-md;
       font-size: $font-size-sm;
-      color: $gray-700;
-      border-left: 3px solid $brand;
+      color: $color-gray-700;
+      border-left: 3px solid $color-primary;
     }
   }
 
   &__diff {
-    &--pos { color: $success; font-weight: $font-weight-bold; }
-    &--neg { color: $danger; font-weight: $font-weight-bold; }
+    &--pos { color: $color-success; font-weight: $font-weight-bold; }
+    &--neg { color: $color-danger; font-weight: $font-weight-bold; }
   }
 
   &__movements {
     &-title {
-      margin: 0 0 $space-4;
+      margin: 0 0 $spacing-lg;
       font-size: $font-size-lg;
       font-weight: $font-weight-bold;
-      color: $gray-900;
+      color: $color-gray-900;
     }
 
     &-empty {
-      padding: $space-6;
+      padding: $spacing-2xl;
       text-align: center;
-      color: $gray-400;
+      color: $color-gray-400;
       font-size: $font-size-sm;
     }
 
     &-summary {
       display: flex;
-      gap: $space-4;
-      padding: $space-3 $space-4;
-      background: $gray-50;
+      gap: $spacing-lg;
+      padding: $spacing-md $spacing-lg;
+      background: $color-gray-50;
       border-radius: $radius-md;
-      margin-bottom: $space-3;
+      margin-bottom: $spacing-md;
       font-size: $font-size-sm;
       font-weight: $font-weight-semibold;
     }
 
-    &-income { color: $success; }
-    &-expense { color: $danger; }
-    &-net { color: $gray-700; margin-left: auto; }
+    &-income { color: $color-success; }
+    &-expense { color: $color-danger; }
+    &-net { color: $color-gray-700; margin-left: auto; }
 
     &-list {
       @include flex-column;
-      gap: $space-2;
+      gap: $spacing-sm;
+    }
+
+    &-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: $spacing-md;
+      padding: $spacing-lg $spacing-sm;
+      margin-top: $spacing-md;
+
+      &-info {
+        font-size: $font-size-sm;
+        color: $color-gray-600;
+        font-weight: $font-weight-medium;
+      }
     }
   }
 
   &__movement-row {
     display: grid;
     grid-template-columns: auto 1fr auto auto auto;
-    gap: $space-3;
+    gap: $spacing-md;
     align-items: center;
-    padding: $space-3 $space-4;
+    padding: $spacing-md $spacing-lg;
     border-radius: $radius-md;
     font-size: $font-size-sm;
     border-left: 3px solid transparent;
 
     &--income {
-      background: rgba($success, 0.04);
-      border-left-color: $success;
+      background: rgba($color-success, 0.04);
+      border-left-color: $color-success;
     }
 
     &--expense {
-      background: rgba($danger, 0.04);
-      border-left-color: $danger;
+      background: rgba($color-danger, 0.04);
+      border-left-color: $color-danger;
     }
   }
 
@@ -462,20 +477,20 @@
       font-family: $font-mono;
       font-size: $font-size-xs;
       font-weight: $font-weight-bold;
-      color: $brand;
-      background: rgba($brand, 0.1);
-      padding: 2px $space-2;
+      color: $color-primary;
+      background: rgba($color-primary, 0.1);
+      padding: 2px $spacing-sm;
       border-radius: $radius-sm;
     }
 
-    &-concept { color: $gray-900; font-weight: $font-weight-medium; }
-    &-account { color: $gray-500; }
-    &-date { color: $gray-400; font-size: $font-size-xs; }
+    &-concept { color: $color-gray-900; font-weight: $font-weight-medium; }
+    &-account { color: $color-gray-500; }
+    &-date { color: $color-gray-400; font-size: $font-size-xs; }
 
     &-amount {
       font-weight: $font-weight-bold;
-      .caja__movement-row--income & { color: $success; }
-      .caja__movement-row--expense & { color: $danger; }
+      .caja__movement-row--income & { color: $color-success; }
+      .caja__movement-row--expense & { color: $color-danger; }
     }
   }
 }

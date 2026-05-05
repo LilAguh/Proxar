@@ -6,28 +6,25 @@ import {
   useCashRegisterById,
   useOpenCashRegister,
   useCloseCashRegister,
-  useMovements,
 } from '@/hooks/api';
-import { Card, Button, Input } from '@presentation/atoms';
-import { Spinner, EmptyState } from '@presentation/molecules';
+import { Card, Button, Input, Skeleton } from '@presentation/atoms';
+import { EmptyState } from '@presentation/molecules';
 import { CashRegisterStatus, MovementType } from '@core/enums';
-import { useUIStore } from '@/stores';
+import { useCompanyStore, useUIStore } from '@/stores';
 import type { CashRegister } from '@core/entities/CashRegister.entity';
 import type { BoxMovement } from '@core/entities/BoxMovement.entity';
+import { formatDateInTimeZone } from '@/utils/dateTime';
 import './Caja.scss';
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(n);
 
-const fmtDate = (d: string) =>
-  new Date(d).toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
-
 export const Caja = () => {
+  const { company } = useCompanyStore();
   const { openModalCaja } = useUIStore();
   const { data: today, isLoading: loadingToday } = useTodayCashRegister();
   const { data: preview, isLoading: loadingPreview } = useCashRegisterPreview();
   const { data: history, isLoading: loadingHistory } = useCashRegisterHistory();
-  const { data: allMovements } = useMovements();
   const openMutation = useOpenCashRegister();
   const closeMutation = useCloseCashRegister();
 
@@ -37,13 +34,9 @@ export const Caja = () => {
   const [closingAmounts, setClosingAmounts] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState('');
 
-  const isLoading = loadingToday || loadingPreview;
-
-  const todayDate = today?.date ? new Date(today.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-  const todayMovements = (allMovements ?? []).filter((m) => {
-    const md = new Date(m.movementDate).toISOString().split('T')[0];
-    return md === todayDate;
-  });
+  const isLoading = loadingToday || loadingPreview || loadingHistory;
+  const todayMovements = today?.movements ?? [];
+  const timeZoneId = company?.timeZoneId;
 
   const handleOpen = async () => {
     if (!preview) return;
@@ -85,7 +78,30 @@ export const Caja = () => {
   };
 
   if (isLoading) {
-    return <div className="caja-loading"><Spinner size="lg" /></div>;
+    return (
+      <div className="caja">
+        <div className="caja__header">
+          <div>
+            <Skeleton width={90} height={34} />
+            <Skeleton width={200} height={18} />
+          </div>
+          <div className="caja__header-tabs">
+            <Skeleton width={80} height={34} borderRadius={8} />
+            <Skeleton width={100} height={34} borderRadius={8} />
+          </div>
+        </div>
+        <Card className="caja__form-card">
+          <Skeleton width={200} height={24} />
+          <Skeleton width="70%" height={16} />
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} style={{ display: 'grid', gap: 8 }}>
+              <Skeleton width="45%" height={16} />
+              <Skeleton width="100%" height={42} borderRadius={8} />
+            </div>
+          ))}
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -113,6 +129,7 @@ export const Caja = () => {
           closingAmounts={closingAmounts}
           notes={notes}
           movements={todayMovements}
+          timeZoneId={timeZoneId}
           onOpeningChange={(id, val) => setOpeningAmounts((p) => ({ ...p, [id]: val }))}
           onClosingChange={(id, val) => setClosingAmounts((p) => ({ ...p, [id]: val }))}
           onNotesChange={setNotes}
@@ -130,6 +147,7 @@ export const Caja = () => {
         <HistoryView
           history={history ?? []}
           isLoading={loadingHistory}
+          timeZoneId={timeZoneId}
           onSelect={(r) => { setSelectedRegisterId(r.id); setView('detail'); }}
         />
       )}
@@ -137,6 +155,7 @@ export const Caja = () => {
       {view === 'detail' && selectedRegisterId && (
         <DetailView
           registerId={selectedRegisterId}
+          timeZoneId={timeZoneId}
           onBack={() => setView('history')}
         />
       )}
@@ -153,6 +172,7 @@ interface TodayViewProps {
   closingAmounts: Record<string, string>;
   notes: string;
   movements: BoxMovement[];
+  timeZoneId?: string;
   onOpeningChange: (id: string, val: string) => void;
   onClosingChange: (id: string, val: string) => void;
   onNotesChange: (val: string) => void;
@@ -165,7 +185,10 @@ interface TodayViewProps {
   onGoToMovements: () => void;
 }
 
-const MovementsSection = ({ movements }: { movements: BoxMovement[] }) => {
+const MovementsSection = ({ movements, timeZoneId }: { movements: BoxMovement[]; timeZoneId?: string }) => {
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+
   if (!movements.length) {
     return (
       <div className="caja__movements-empty">
@@ -177,6 +200,11 @@ const MovementsSection = ({ movements }: { movements: BoxMovement[] }) => {
   const income = movements.filter((m) => m.type === MovementType.Income).reduce((s, m) => s + m.amount, 0);
   const expense = movements.filter((m) => m.type === MovementType.Expense).reduce((s, m) => s + m.amount, 0);
 
+  const totalPages = Math.ceil(movements.length / pageSize);
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedMovements = movements.slice(startIndex, endIndex);
+
   return (
     <div className="caja__movements">
       <div className="caja__movements-summary">
@@ -185,7 +213,7 @@ const MovementsSection = ({ movements }: { movements: BoxMovement[] }) => {
         <span className="caja__movements-net">Neto: {fmt(income - expense)}</span>
       </div>
       <div className="caja__movements-list">
-        {movements.map((m) => (
+        {paginatedMovements.map((m) => (
           <div key={m.id} className={`caja__movement-row caja__movement-row--${m.type === MovementType.Income ? 'income' : 'expense'}`}>
             <span className="caja__movement-number">#{m.number}</span>
             <span className="caja__movement-concept">{m.concept}</span>
@@ -194,17 +222,41 @@ const MovementsSection = ({ movements }: { movements: BoxMovement[] }) => {
               {m.type === MovementType.Income ? '+' : '-'}{fmt(m.amount)}
             </span>
             <span className="caja__movement-date">
-              {new Date(m.movementDate).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+              {formatDateInTimeZone(m.movementDate, timeZoneId, { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
         ))}
       </div>
+      {totalPages > 1 && (
+        <div className="caja__movements-pagination">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+          >
+            ← Anterior
+          </Button>
+          <span className="caja__movements-pagination-info">
+            Página {page} de {totalPages} • {movements.length} movimientos
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+          >
+            Siguiente →
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
 
 const TodayView = ({
   today, preview, openingAmounts, closingAmounts, notes, movements,
+  timeZoneId,
   onOpeningChange, onClosingChange, onNotesChange,
   onOpen, onClose, onInitClosing, onInitOpening,
   isOpening, isClosing, onGoToMovements,
@@ -218,8 +270,8 @@ const TodayView = ({
           <div className="caja__status-icon">✓</div>
           <h2 className="caja__status-title">Caja cerrada</h2>
           <p className="caja__status-sub">
-            Abierta a las {new Date(today.openedAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} por {today.openedByName}
-            {today.closedAt && ` · Cerrada a las ${new Date(today.closedAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}`}
+            Abierta a las {formatDateInTimeZone(today.openedAt, timeZoneId, { hour: '2-digit', minute: '2-digit' })} por {today.openedByName}
+            {today.closedAt && ` · Cerrada a las ${formatDateInTimeZone(today.closedAt, timeZoneId, { hour: '2-digit', minute: '2-digit' })}`}
           </p>
           <div className="caja__entries-grid">
             {today.entries.map((e) => (
@@ -234,7 +286,7 @@ const TodayView = ({
         </Card>
         <Card>
           <h3 className="caja__movements-title">Movimientos del día</h3>
-          <MovementsSection movements={movements} />
+          <MovementsSection movements={movements} timeZoneId={timeZoneId} />
         </Card>
       </div>
     );
@@ -252,7 +304,7 @@ const TodayView = ({
             <div className="caja__status-icon">◎</div>
             <h2 className="caja__status-title">Caja abierta</h2>
             <p className="caja__status-sub">
-              Abierta a las {new Date(today.openedAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} por {today.openedByName}
+              Abierta a las {formatDateInTimeZone(today.openedAt, timeZoneId, { hour: '2-digit', minute: '2-digit' })} por {today.openedByName}
             </p>
             <div className="caja__entries-grid">
               {today.entries.map((e) => (
@@ -394,11 +446,24 @@ const TodayView = ({
 interface HistoryViewProps {
   history: CashRegister[];
   isLoading: boolean;
+  timeZoneId?: string;
   onSelect: (r: CashRegister) => void;
 }
 
-const HistoryView = ({ history, isLoading, onSelect }: HistoryViewProps) => {
-  if (isLoading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '48px' }}><Spinner size="lg" /></div>;
+const HistoryView = ({ history, isLoading, timeZoneId, onSelect }: HistoryViewProps) => {
+  if (isLoading) {
+    return (
+      <Card className="caja__history">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="caja__history-item">
+            <Skeleton width="35%" height={18} />
+            <Skeleton width="30%" height={16} />
+            <Skeleton width={80} height={24} borderRadius={12} />
+          </div>
+        ))}
+      </Card>
+    );
+  }
   if (!history.length) return <EmptyState icon="⬡" title="No hay registros aún" description="Todavía no se registró ninguna apertura de caja" />;
 
   return (
@@ -410,7 +475,9 @@ const HistoryView = ({ history, isLoading, onSelect }: HistoryViewProps) => {
           const totalClose = r.entries.reduce((s, e) => s + (e.closingAmount ?? 0), 0);
           return (
             <div key={r.id} className="caja__history-item" onClick={() => onSelect(r)}>
-              <div className="caja__history-date">{fmtDate(r.date)}</div>
+              <div className="caja__history-date">
+                {formatDateInTimeZone(r.date, timeZoneId, { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
+              </div>
               <div className="caja__history-amounts">
                 <span className="caja__history-open">Apertura: {fmt(totalOpen)}</span>
                 {r.status === CashRegisterStatus.Closed && (
@@ -431,13 +498,27 @@ const HistoryView = ({ history, isLoading, onSelect }: HistoryViewProps) => {
 
 interface DetailViewProps {
   registerId: string;
+  timeZoneId?: string;
   onBack: () => void;
 }
 
-const DetailView = ({ registerId, onBack }: DetailViewProps) => {
+const DetailView = ({ registerId, timeZoneId, onBack }: DetailViewProps) => {
   const { data: register, isLoading } = useCashRegisterById(registerId);
 
-  if (isLoading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '48px' }}><Spinner size="lg" /></div>;
+  if (isLoading) {
+    return (
+      <div className="caja__detail">
+        <Skeleton width={180} height={20} />
+        <Card className="caja__detail-card">
+          <Skeleton width="40%" height={28} />
+          <Skeleton width="70%" height={16} />
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} width="100%" height={34} borderRadius={6} />
+          ))}
+        </Card>
+      </div>
+    );
+  }
   if (!register) return null;
 
   const totalOpen = register.entries.reduce((s, e) => s + e.openingAmount, 0);
@@ -448,16 +529,18 @@ const DetailView = ({ registerId, onBack }: DetailViewProps) => {
       <button className="caja__detail-back" onClick={onBack}>← Volver al historial</button>
       <Card className="caja__detail-card">
         <div className="caja__detail-header">
-          <h2 className="caja__detail-date">{fmtDate(register.date)}</h2>
+          <h2 className="caja__detail-date">
+            {formatDateInTimeZone(register.date, timeZoneId, { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
+          </h2>
           <span className={`caja__history-status caja__history-status--${register.status === CashRegisterStatus.Open ? 'open' : 'closed'}`}>
             {register.status === CashRegisterStatus.Open ? 'Abierta' : 'Cerrada'}
           </span>
         </div>
 
         <div className="caja__detail-meta">
-          <span>Abierta por {register.openedByName} a las {new Date(register.openedAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
+          <span>Abierta por {register.openedByName} a las {formatDateInTimeZone(register.openedAt, timeZoneId, { hour: '2-digit', minute: '2-digit' })}</span>
           {register.closedAt && (
-            <span>Cerrada por {register.closedByName} a las {new Date(register.closedAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
+            <span>Cerrada por {register.closedByName} a las {formatDateInTimeZone(register.closedAt, timeZoneId, { hour: '2-digit', minute: '2-digit' })}</span>
           )}
         </div>
 

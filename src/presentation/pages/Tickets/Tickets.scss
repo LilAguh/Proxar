@@ -1,4 +1,4 @@
-@import '@/styles/variables';
+@import '@/styles/design-tokens';
 @import '@/styles/mixins';
 
 @keyframes slideIn {
@@ -24,10 +24,10 @@
 }
 
 .tickets {
-  padding: $space-7;
+  padding: $spacing-3xl;
   height: 100%;
   @include flex-column;
-  gap: $space-6;
+  gap: $spacing-2xl;
 
   &-loading {
     @include flex-center;
@@ -41,13 +41,13 @@
   &__caja-alert {
     display: flex;
     align-items: center;
-    gap: $space-3;
-    padding: $space-3 $space-5;
-    background: rgba($warning, 0.08);
-    border: 1.5px solid rgba($warning, 0.35);
+    gap: $spacing-md;
+    padding: $spacing-md $spacing-xl;
+    background: rgba($color-warning, 0.08);
+    border: 1.5px solid rgba($color-warning, 0.35);
     border-radius: $radius-xl;
     font-size: $font-size-sm;
-    color: $gray-700;
+    color: $color-gray-700;
     font-weight: $font-weight-medium;
 
     &-link {
@@ -55,7 +55,7 @@
       background: none;
       border: none;
       cursor: pointer;
-      color: $brand;
+      color: $color-primary;
       font-size: $font-size-sm;
       font-weight: $font-weight-bold;
       padding: 0;
@@ -68,36 +68,36 @@
   &__title {
     margin: 0;
     font-size: $font-size-3xl;
-    font-weight: $font-weight-black;
-    color: $gray-900;
+    font-weight: $font-weight-extrabold;
+    color: $color-gray-900;
   }
 
   &__subtitle {
-    margin: $space-1 0 0;
+    margin: $spacing-xs 0 0;
     font-size: $font-size-base;
-    color: $gray-500;
+    color: $color-gray-500;
   }
 
   &__kanban {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     align-items: stretch;
-    gap: $space-4;
+    gap: $spacing-lg;
     flex: 1;
     overflow-x: auto;
-    padding-bottom: $space-4;
+    padding-bottom: $spacing-lg;
   }
 
   &__column {
     min-width: 280px;
     @include flex-column;
-    gap: $space-3;
+    gap: $spacing-md;
     animation: scaleIn 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 
     &-header {
       @include flex-between;
-      padding: $space-3;
-      background: $gray-100;
+      padding: $spacing-md;
+      background: $color-gray-100;
       border-radius: $radius-md;
       transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
     }
@@ -105,19 +105,19 @@
     &-count {
       font-size: $font-size-sm;
       font-weight: $font-weight-bold;
-      color: $gray-600;
-      background: $white;
-      padding: $space-1 $space-2;
+      color: $color-gray-600;
+      background: $color-white;
+      padding: $spacing-xs $spacing-sm;
       border-radius: $radius-sm;
     }
 
     &-body {
       @include flex-column;
-      gap: $space-3;
+      gap: $spacing-md;
       flex: 1;
       min-height: 200px;
       overflow-y: auto;
-      padding: $space-2;
+      padding: $spacing-sm;
       border-radius: $radius-md;
       border: 2px dashed transparent;
       transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
@@ -125,10 +125,30 @@
       @include custom-scrollbar;
 
       &--over {
-        border-color: $brand;
-        background: rgba($brand, 0.04);
+        border-color: $color-primary;
+        background: rgba($color-primary, 0.04);
         transform: scale(1.01);
-        box-shadow: 0 0 0 1px rgba($brand, 0.1);
+        box-shadow: 0 0 0 1px rgba($color-primary, 0.1);
+      }
+    }
+
+    &--disabled {
+      opacity: 0.5;
+      pointer-events: none;
+
+      .tickets__column-header {
+        background: $color-gray-50;
+      }
+
+      .tickets__column-body {
+        border-color: $color-gray-200;
+        background: repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 10px,
+          rgba($color-gray-300, 0.1) 10px,
+          rgba($color-gray-300, 0.1) 20px
+        );
       }
     }
   }
@@ -143,7 +163,7 @@
   }
 
   &__card {
-    padding: $space-4;
+    padding: $spacing-lg;
     cursor: grab;
     animation: slideIn 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
@@ -165,54 +185,54 @@
 
     &-header {
       @include flex-between;
-      margin-bottom: $space-2;
+      margin-bottom: $spacing-sm;
     }
 
     &-number {
       font-family: $font-mono;
       font-size: $font-size-sm;
       font-weight: $font-weight-bold;
-      color: $brand;
+      color: $color-primary;
     }
 
     &-type {
       font-size: $font-size-xs;
-      color: $gray-500;
+      color: $color-gray-500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     &-title {
-      margin: 0 0 $space-2;
+      margin: 0 0 $spacing-sm;
       font-size: $font-size-base;
       font-weight: $font-weight-semibold;
-      color: $gray-900;
+      color: $color-gray-900;
       line-height: 1.4;
     }
 
     &-client {
       margin: 0;
       font-size: $font-size-sm;
-      color: $gray-500;
+      color: $color-gray-500;
     }
 
     &-assigned {
-      margin-top: $space-3;
-      padding-top: $space-3;
-      border-top: $border-width solid $border-color;
+      margin-top: $spacing-md;
+      padding-top: $spacing-md;
+      border-top: 1px solid $color-gray-200;
       font-size: $font-size-xs;
-      color: $gray-600;
+      color: $color-gray-600;
     }
   }
 
   &__closed-section {
-    margin-top: $space-4;
+    margin-top: $spacing-lg;
     animation: slideIn 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   }
 
   &__closed-toggle {
     width: 100%;
-    padding: $space-4;
+    padding: $spacing-lg;
     background: none;
     border: none;
     cursor: pointer;
@@ -220,7 +240,7 @@
     transition: background 0.2s;
 
     &:hover {
-      background: rgba($gray-100, 0.5);
+      background: rgba($color-gray-100, 0.5);
     }
   }
 
@@ -228,17 +248,17 @@
     margin: 0;
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
-    color: $gray-700;
+    color: $color-gray-700;
     display: flex;
     align-items: center;
-    gap: $space-2;
+    gap: $spacing-sm;
   }
 
   &__closed-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: $space-3;
-    padding: 0 $space-4 $space-4;
+    gap: $spacing-md;
+    padding: 0 $spacing-lg $spacing-lg;
     animation: slideIn 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   }
 }

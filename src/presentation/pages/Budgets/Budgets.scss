@@ -1,0 +1,156 @@
+@import '@/styles/variables';
+@import '@/styles/mixins';
+
+.budgets {
+  @include flex-column;
+  gap: $space-6;
+  padding: $space-6;
+
+  &__loading {
+    @include flex-center;
+    min-height: 400px;
+  }
+
+  &__header {
+    @include flex-between;
+    align-items: center;
+    gap: $space-4;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $color-gray-900;
+  }
+
+  &__count {
+    font-size: $font-size-sm;
+    color: $color-gray-500;
+    background: $color-gray-100;
+    padding: $space-2 $space-3;
+    border-radius: $radius-full;
+    margin-top: $space-2;
+    display: inline-block;
+  }
+
+  &__search {
+    width: 400px;
+    padding: $space-3 $space-4;
+    border: $border-width solid $color-border;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+    color: $color-gray-900;
+    transition: all 0.2s ease;
+
+    &::placeholder {
+      color: $color-gray-400;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    }
+  }
+
+  &__empty {
+    @include flex-center;
+    padding: $space-8;
+    background: $color-gray-50;
+    border: 2px dashed $color-border;
+    border-radius: $radius-lg;
+
+    p {
+      margin: 0;
+      font-size: $font-size-base;
+      color: $color-gray-500;
+    }
+  }
+
+  &__table-container {
+    overflow-x: auto;
+    background: $color-white;
+    border: $border-width solid $color-border;
+    border-radius: $radius-lg;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+      background: $color-gray-50;
+      border-bottom: 2px solid $color-border;
+
+      th {
+        padding: $space-4;
+        text-align: left;
+        font-size: $font-size-xs;
+        font-weight: $font-weight-bold;
+        color: $color-gray-600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: $border-width solid $color-border;
+        transition: background-color 0.15s ease;
+
+        &:hover {
+          background: $color-gray-50;
+        }
+
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+
+      td {
+        padding: $space-4;
+        font-size: $font-size-sm;
+        color: $color-gray-700;
+        vertical-align: middle;
+      }
+    }
+  }
+
+  &__number {
+    font-weight: $font-weight-bold;
+    color: $color-gray-900;
+    font-family: $font-mono;
+  }
+
+  &__client {
+    @include flex-column;
+    gap: 2px;
+
+    &-name {
+      font-weight: $font-weight-medium;
+      color: $color-gray-900;
+    }
+
+    &-phone {
+      font-size: $font-size-xs;
+      color: $color-gray-500;
+    }
+  }
+
+  &__amount {
+    font-family: $font-mono;
+    text-align: right;
+
+    strong {
+      font-weight: $font-weight-bold;
+      color: $color-gray-900;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: $space-2;
+    justify-content: flex-end;
+  }
+}

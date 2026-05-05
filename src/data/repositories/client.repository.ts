@@ -11,7 +11,7 @@ class ClientRepository extends BaseRepository {
   }
 
   async searchByName(name: string): Promise<Client[]> {
-    return this.get<Client[]>(`/clients/search?name=${name}`);
+    return this.get<Client[]>(`/clients/search?name=${encodeURIComponent(name)}`);
   }
 
   async create(data: Partial<Client>): Promise<Client> {

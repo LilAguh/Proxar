@@ -6,9 +6,8 @@ import { Input, Button } from '@presentation/atoms';
 import { Spinner } from '@presentation/molecules';
 import { AuthCard } from '@presentation/organisms';
 import { isValidEmail } from '@/utils/validators';
+import { getApiErrorMessage } from '@/utils/api.utils';
 import { apiClient } from '@/core/config/api.config';
-
-const isDevelopment = import.meta.env.DEV;
 
 export const Login = () => {
   const { company } = useCompanyStore();
@@ -64,48 +63,26 @@ export const Login = () => {
           password,
         });
         if (response.data) {
-          setAuth(response.data.user, response.data.token);
+          setAuth(
+            response.data.user,
+            response.data.token,
+            response.data.refreshToken,
+            response.data.expiresAt,
+            response.data.refreshTokenExpiresAt
+          );
           navigate('/');
         }
-      } catch (err: any) {
-        setServerError(err?.response?.data?.message || 'Error al iniciar sesión. Verificá tus credenciales.');
+      } catch (err) {
+        setServerError(getApiErrorMessage(err, 'Error al iniciar sesión. Verificá tus credenciales.'));
       } finally {
         setLoading(false);
       }
     }
   };
 
-  const handleQuickFill = (emailValue: string, passwordValue: string) => {
-    setEmail(emailValue);
-    setPassword(passwordValue);
-    setTouched({ email: true, password: true });
-  };
-
   const isValid = email && password && !errors.email && !errors.password;
 
   const badge = company ? `🏢 ${company.name}` : undefined;
-
-  const footer = isDevelopment ? (
-    <>
-      <p style={{ margin: 0, fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>💡 Usuarios de prueba:</p>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
-        {[
-          { label: '👑 Admin', email: 'admin@sagitario.com', pass: 'Admin1234' },
-          { label: '👤 Operador', email: 'operador@sagitario.com', pass: 'Operador1234' },
-          { label: '👁️ Visor', email: 'visor@sagitario.com', pass: 'Visor1234' },
-        ].map(({ label, email: e, pass }) => (
-          <button
-            key={label}
-            type="button"
-            className="auth-quick-fill"
-            onClick={() => handleQuickFill(e, pass)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-    </>
-  ) : undefined;
 
   return (
     <AuthCard
@@ -113,7 +90,6 @@ export const Login = () => {
       subtitle="Ingresá tus credenciales para continuar"
       error={serverError}
       badge={badge}
-      footer={footer}
     >
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <Input

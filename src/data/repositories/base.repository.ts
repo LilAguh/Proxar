@@ -2,8 +2,8 @@ import { apiClient } from '../../core/config/api.config';
 import { AxiosResponse } from 'axios';
 
 export class BaseRepository {
-  protected async get<T>(url: string): Promise<T> {
-    const response: AxiosResponse<T> = await apiClient.get(url);
+  protected async get<T>(url: string, config?: any): Promise<T> {
+    const response: AxiosResponse<T> = await apiClient.get(url, config);
     return response.data;
   }
 

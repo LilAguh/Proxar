@@ -8,29 +8,31 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
-  const { isAuthenticated, isAdmin, _hasHydrated: authHydrated, user } = useAuthStore();
-  const { hasCompany, _hasHydrated: companyHydrated } = useCompanyStore();
+  const { isAuthenticated, isAdmin, _hasHydrated: authHydrated, logout } = useAuthStore();
+  const { hasCompany, _hasHydrated: companyHydrated, clearCompany } = useCompanyStore();
 
   // Esperar a que se hidraten ambos stores
   if (!authHydrated || !companyHydrated) {
     return null;
   }
 
-  // 1. Verificar company primero
-  if (!hasCompany()) {
-    console.log('No company selected');
-    return <Navigate to="/company/login" replace />;
+  // 1. Verificar autenticación de empleado
+  if (!isAuthenticated()) {
+    return <Navigate to={hasCompany() ? '/login' : '/company/login'} replace />;
   }
 
-  // 2. Verificar autenticación de empleado
-  if (!isAuthenticated()) {
-    console.log('Not authenticated');
-    return <Navigate to="/login" replace />;
+  // 2. Si hay sesión activa pero falta empresa → estado inconsistente
+  // Puede pasar si el usuario manipula localStorage y borra proxar-company
+  // Limpiamos la sesión completa y redirigimos
+  if (!hasCompany()) {
+    console.warn('Inconsistent state: authenticated user without company. Logging out.');
+    logout();
+    clearCompany();
+    return <Navigate to="/company/login" replace />;
   }
 
   // 3. Requiere admin pero no lo es → redirect a home
   if (requireAdmin && !isAdmin()) {
-    console.log('Requires admin but user is not admin:', { requireAdmin, isAdmin: isAdmin(), userRole: user?.role });
     return <Navigate to="/" replace />;
   }
 

@@ -4,6 +4,15 @@ import { useLogout } from "@/hooks/api/useAuth";
 import { Avatar } from "@presentation/atoms";
 import "./Sidebar.scss";
 
+interface NavItem {
+  key: string;
+  label: string;
+  icon: string;
+  path: string;
+  adminOnly?: boolean;
+  soon?: boolean;
+}
+
 export const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -12,13 +21,14 @@ export const Sidebar = () => {
   const { openModalTicket, openModalCaja } = useUIStore();
   const logout = useLogout();
 
-  const navItems = [
+  const navItems: NavItem[] = [
     { key: 'dashboard', label: 'Dashboard', icon: '▦', path: '/' },
     { key: 'tickets', label: 'Tickets', icon: '◈', path: '/tickets' },
+    { key: 'budgets', label: 'Presupuestos', icon: '📋', path: '/budgets' },
     { key: 'caja', label: 'Caja', icon: '⬡', path: '/caja' },
     { key: 'clients', label: 'Clientes', icon: '◉', path: '/clients' },
     { key: 'users', label: 'Usuarios', icon: '👥', path: '/users', adminOnly: true },
-    { key: 'reports', label: 'Reportes', icon: '▣', path: '/reports', soon: true },
+    { key: 'reports', label: 'Reportes', icon: '▣', path: '/reports' },
   ];
 
   const isActive = (path: string) => {

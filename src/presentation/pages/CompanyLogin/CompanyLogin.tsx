@@ -1,30 +1,30 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { useCompanyStore } from '@/stores/useCompanyStore';
 import { Input, Button } from '@presentation/atoms';
 import { AuthCard } from '@presentation/organisms';
+import { getApiErrorMessage } from '@/utils/api.utils';
 import { apiClient } from '@/core/config/api.config';
-import { isValidEmail } from '@/utils/validators';
 import './CompanyLogin.scss';
-
-const isDevelopment = import.meta.env.DEV;
 
 export const CompanyLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [touched, setTouched] = useState({ email: false, password: false });
   const [errors, setErrors] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
   const { setCompany } = useCompanyStore();
+  const { setAuth } = useAuthStore();
   const navigate = useNavigate();
 
   const validateForm = (): boolean => {
     const newErrors = { email: '', password: '' };
     if (!email) newErrors.email = 'El email es requerido';
-    else if (!isValidEmail(email)) newErrors.email = 'El email no es válido';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = 'Email inválido';
     if (!password) newErrors.password = 'La contraseña es requerida';
-    else if (password.length < 8) newErrors.password = 'Mínimo 8 caracteres';
     setErrors(newErrors);
     return !newErrors.email && !newErrors.password;
   };
@@ -37,73 +37,49 @@ export const CompanyLogin = () => {
 
     setLoading(true);
     try {
-      const response = await apiClient.post('/auth/login', { email, password });
-      if (response.data) {
-        const { user, token } = response.data;
-        const companyResponse = await apiClient.get(`/companies/${user.companyId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCompany({
-          slug: companyResponse.data.slug,
-          name: companyResponse.data.name,
-          logoUrl: companyResponse.data.logoUrl,
-        });
-        navigate('/login');
-      }
-    } catch (err: any) {
-      setServerError(err?.response?.data?.message || 'Email o contraseña incorrectos');
+      const response = await apiClient.post('/auth/login', {
+        email: email.trim(),
+        password: password,
+      });
+
+      const { user, company, token, refreshToken, expiresAt, refreshTokenExpiresAt } = response.data;
+
+      // Guardar company en el store
+      setCompany({
+        slug: company.slug,
+        name: company.name,
+        logoUrl: company.logoUrl,
+        timeZoneId: company.timeZoneId,
+      });
+
+      // Guardar autenticación
+      setAuth(user, token, refreshToken, expiresAt, refreshTokenExpiresAt);
+
+      // Redirigir al dashboard
+      navigate('/');
+    } catch (err) {
+      setServerError(getApiErrorMessage(err, 'Email o contraseña incorrectos'));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleQuickFill = (emailValue: string, passwordValue: string) => {
-    setEmail(emailValue);
-    setPassword(passwordValue);
-    setTouched({ email: true, password: true });
-    setErrors({ email: '', password: '' });
-    setServerError('');
-  };
-
   const isValid = email && password && !errors.email && !errors.password;
 
   const footer = (
-    <>
-      {isDevelopment && (
-        <>
-          <p style={{ margin: 0, fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>💡 Empresas de prueba:</p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            {[
-              { label: '🏢 Sagitario', email: 'admin@sagitario.com', pass: 'Admin1234' },
-              { label: '🪟 Vidrios Norte', email: 'admin@vidriosnorte.com', pass: 'Admin1234' },
-              { label: '🔧 AlumCor', email: 'admin@alumcor.com', pass: 'Admin1234' },
-            ].map(({ label, email: e, pass }) => (
-              <button
-                key={label}
-                type="button"
-                className="auth-quick-fill"
-                onClick={() => handleQuickFill(e, pass)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-      <div className="company-login__register">
-        <p>¿No tenés empresa?</p>
-        <a href="/company/register" className="company-login__link">
-          Registrate acá
-        </a>
-      </div>
-    </>
+    <div className="company-login__register">
+      <p>¿No tenés empresa?</p>
+      <a href="/company/register" className="company-login__link">
+        Registrate acá
+      </a>
+    </div>
   );
 
   return (
     <>
       <AuthCard
-        title="Bienvenido a Proxar"
-        subtitle="Ingresá con tu cuenta para gestionar tu empresa"
+        title="Ingresá a tu Empresa"
+        subtitle="Usá tu email y contraseña de administrador"
         error={serverError}
         footer={footer}
       >
@@ -112,28 +88,60 @@ export const CompanyLogin = () => {
             label="Email"
             type="email"
             value={email}
-            onChange={(value) => { setEmail(value); if (!touched.email) setTouched({ ...touched, email: true }); }}
-            onBlur={() => { setTouched({ ...touched, email: true }); validateForm(); }}
-            placeholder="tu@email.com"
+            onChange={(value) => {
+              setEmail(value);
+              if (touched.email) validateForm();
+            }}
+            onBlur={() => {
+              setTouched({ ...touched, email: true });
+              validateForm();
+            }}
+            placeholder="tu@empresa.com"
             required
             disabled={loading}
             error={touched.email ? errors.email : ''}
             autoComplete="email"
           />
-          <Input
-            label="Contraseña"
-            type="password"
-            value={password}
-            onChange={(value) => { setPassword(value); if (!touched.password) setTouched({ ...touched, password: true }); }}
-            onBlur={() => { setTouched({ ...touched, password: true }); validateForm(); }}
-            placeholder="••••••••"
-            required
-            disabled={loading}
-            error={touched.password ? errors.password : ''}
-            autoComplete="current-password"
-          />
+
+          <div style={{ position: 'relative' }}>
+            <Input
+              label="Contraseña"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(value) => {
+                setPassword(value);
+                if (touched.password) validateForm();
+              }}
+              onBlur={() => {
+                setTouched({ ...touched, password: true });
+                validateForm();
+              }}
+              placeholder="••••••••"
+              required
+              disabled={loading}
+              error={touched.password ? errors.password : ''}
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '38px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '18px',
+              }}
+              tabIndex={-1}
+            >
+              {showPassword ? '👁️' : '👁️‍🗨️'}
+            </button>
+          </div>
+
           <Button type="submit" variant="primary" fullWidth disabled={!isValid || loading}>
-            {loading ? 'Ingresando...' : 'Iniciar Sesión'}
+            {loading ? 'Ingresando...' : 'Ingresar'}
           </Button>
         </form>
       </AuthCard>
