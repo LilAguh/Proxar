@@ -11,38 +11,42 @@ import './CompanyLogin.scss';
 const isDevelopment = import.meta.env.DEV;
 
 export const CompanyLogin = () => {
-  const [slug, setSlug] = useState('');
-  const [touched, setTouched] = useState({ slug: false });
-  const [errors, setErrors] = useState({ slug: '' });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [touched, setTouched] = useState({ email: false, password: false });
+  const [errors, setErrors] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
-  const { setCompany, clearCompany } = useCompanyStore();
-  const { logout } = useAuthStore();
+  const { setCompany } = useCompanyStore();
+  const { setAuth } = useAuthStore();
   const navigate = useNavigate();
 
   const validateForm = (): boolean => {
-    const newErrors = { slug: '' };
-    if (!slug) newErrors.slug = 'El slug de la empresa es requerido';
-    else if (!/^[a-z0-9-]+$/.test(slug)) newErrors.slug = 'Solo letras minúsculas, números y guiones';
+    const newErrors = { email: '', password: '' };
+    if (!email) newErrors.email = 'El email es requerido';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = 'Email inválido';
+    if (!password) newErrors.password = 'La contraseña es requerida';
     setErrors(newErrors);
-    return !newErrors.slug;
+    return !newErrors.email && !newErrors.password;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTouched({ slug: true });
+    setTouched({ email: true, password: true });
     setServerError('');
     if (!validateForm()) return;
 
     setLoading(true);
     try {
-      const response = await apiClient.get(`/companies/slug/${slug.trim().toLowerCase()}`);
-      const company = response.data;
+      const response = await apiClient.post('/auth/login', {
+        email: email.trim(),
+        password: password,
+      });
 
-      // Evita que una sesión previa quede activa durante la selección de empresa.
-      logout();
-      clearCompany();
+      const { user, company, token, refreshToken, expiresAt, refreshTokenExpiresAt } = response.data;
 
+      // Guardar company en el store
       setCompany({
         slug: company.slug,
         name: company.name,
@@ -50,39 +54,44 @@ export const CompanyLogin = () => {
         timeZoneId: company.timeZoneId,
       });
 
-      navigate('/login');
+      // Guardar autenticación
+      setAuth(user, token, refreshToken, expiresAt, refreshTokenExpiresAt);
+
+      // Redirigir al dashboard
+      navigate('/');
     } catch (err) {
-      setServerError(getApiErrorMessage(err, 'No se pudo identificar la empresa'));
+      setServerError(getApiErrorMessage(err, 'Email o contraseña incorrectos'));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleQuickFill = (slugValue: string) => {
-    setSlug(slugValue);
-    setTouched({ slug: true });
-    setErrors({ slug: '' });
+  const handleQuickFill = (emailValue: string, passwordValue: string) => {
+    setEmail(emailValue);
+    setPassword(passwordValue);
+    setTouched({ email: true, password: true });
+    setErrors({ email: '', password: '' });
     setServerError('');
   };
 
-  const isValid = slug && !errors.slug;
+  const isValid = email && password && !errors.email && !errors.password;
 
   const footer = (
     <>
       {isDevelopment && (
         <>
-          <p style={{ margin: 0, fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>💡 Empresas de prueba:</p>
+          <p style={{ margin: 0, fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>💡 Cuentas de prueba:</p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
             {[
-              { label: '🏢 sagitario', slug: 'sagitario' },
-              { label: '🪟 vidrios-norte', slug: 'vidrios-norte' },
-              { label: '🔧 alumcor', slug: 'alumcor' },
-            ].map(({ label, slug: s }) => (
+              { label: '🏢 Sagitario', email: 'admin@sagitario.com', password: 'password123' },
+              { label: '🪟 Vidrios Norte', email: 'admin@vidriosnorte.com', password: 'password123' },
+              { label: '🔧 AlumCor', email: 'admin@alumcor.com', password: 'password123' },
+            ].map(({ label, email: e, password: p }) => (
               <button
                 key={label}
                 type="button"
                 className="auth-quick-fill"
-                onClick={() => handleQuickFill(s)}
+                onClick={() => handleQuickFill(e, p)}
               >
                 {label}
               </button>
@@ -102,28 +111,70 @@ export const CompanyLogin = () => {
   return (
     <>
       <AuthCard
-        title="Identificá tu empresa"
-        subtitle="Ingresá el slug para continuar con el acceso"
+        title="Ingresá a tu Empresa"
+        subtitle="Usá tu email y contraseña de administrador"
         error={serverError}
         footer={footer}
       >
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <Input
-            label="Slug de empresa"
-            value={slug}
+            label="Email"
+            type="email"
+            value={email}
             onChange={(value) => {
-              setSlug(value.toLowerCase());
-              if (!touched.slug) setTouched({ ...touched, slug: true });
+              setEmail(value);
+              if (touched.email) validateForm();
             }}
-            onBlur={() => { setTouched({ ...touched, slug: true }); validateForm(); }}
-            placeholder="sagitario"
+            onBlur={() => {
+              setTouched({ ...touched, email: true });
+              validateForm();
+            }}
+            placeholder="tu@empresa.com"
             required
             disabled={loading}
-            error={touched.slug ? errors.slug : ''}
-            autoComplete="off"
+            error={touched.email ? errors.email : ''}
+            autoComplete="email"
           />
+
+          <div style={{ position: 'relative' }}>
+            <Input
+              label="Contraseña"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(value) => {
+                setPassword(value);
+                if (touched.password) validateForm();
+              }}
+              onBlur={() => {
+                setTouched({ ...touched, password: true });
+                validateForm();
+              }}
+              placeholder="••••••••"
+              required
+              disabled={loading}
+              error={touched.password ? errors.password : ''}
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '38px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '18px',
+              }}
+              tabIndex={-1}
+            >
+              {showPassword ? '👁️' : '👁️‍🗨️'}
+            </button>
+          </div>
+
           <Button type="submit" variant="primary" fullWidth disabled={!isValid || loading}>
-            {loading ? 'Buscando...' : 'Continuar'}
+            {loading ? 'Ingresando...' : 'Ingresar'}
           </Button>
         </form>
       </AuthCard>

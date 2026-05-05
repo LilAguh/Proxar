@@ -103,6 +103,28 @@
       }
     }
 
+    select {
+      padding: 0.875rem 1rem;
+      border: 2px solid $color-border;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      background-color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:focus {
+        outline: none;
+        border-color: $color-primary;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      }
+
+      &:disabled {
+        background-color: $color-background;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+    }
+
     small {
       font-size: 0.75rem;
       color: $color-text-tertiary;
