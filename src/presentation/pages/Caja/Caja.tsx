@@ -69,12 +69,20 @@ export const Caja = () => {
   };
 
   const initOpeningAmounts = () => {
-    if (!preview) return;
+    console.log('🔵 initOpeningAmounts called');
+    console.log('preview:', preview);
+    if (!preview) {
+      console.log('❌ No preview, returning');
+      return;
+    }
+    console.log('preview.accounts:', preview.accounts);
     const initial: Record<string, string> = {};
     preview.accounts.forEach((acc) => {
       initial[acc.accountId] = acc.suggestedAmount != null ? String(acc.suggestedAmount) : '';
     });
+    console.log('initial amounts:', initial);
     setOpeningAmounts(initial);
+    console.log('✅ openingAmounts set');
   };
 
   if (isLoading) {
