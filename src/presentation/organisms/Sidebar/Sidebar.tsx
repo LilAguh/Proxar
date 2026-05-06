@@ -26,6 +26,7 @@ export const Sidebar = () => {
     { key: 'tickets', label: 'Tickets', icon: '◈', path: '/tickets' },
     { key: 'budgets', label: 'Presupuestos', icon: '📋', path: '/budgets' },
     { key: 'caja', label: 'Caja', icon: '⬡', path: '/caja' },
+    { key: 'cuentas', label: 'Cuentas', icon: '💳', path: '/cuentas' },
     { key: 'clients', label: 'Clientes', icon: '◉', path: '/clients' },
     { key: 'users', label: 'Usuarios', icon: '👥', path: '/users', adminOnly: true },
     { key: 'reports', label: 'Reportes', icon: '▣', path: '/reports' },
