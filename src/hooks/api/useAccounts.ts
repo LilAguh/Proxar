@@ -36,6 +36,22 @@ export function useCreateAccount() {
   });
 }
 
+export function useUpdateAccount() {
+  const queryClient = useQueryClient();
+  const { showToast } = useToastStore();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => accountRepository.update(id, data),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      showToast(`Cuenta ${data.name} actualizada correctamente`);
+    },
+    onError: (error: unknown) => {
+      showToast(getErrorMessage(error, 'Error al actualizar cuenta'), 'error');
+    },
+  });
+}
+
 export function useDeleteAccount() {
   const queryClient = useQueryClient();
   const { showToast } = useToastStore();

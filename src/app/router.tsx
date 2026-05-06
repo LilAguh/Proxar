@@ -9,6 +9,7 @@ import { Caja } from '@presentation/pages/Caja/Caja';
 import { Clients } from '@presentation/pages/Clients/Clients';
 import { Users } from '@presentation/pages/Users/Users';
 import { Saldo } from '@presentation/pages/Saldo/Saldo';
+import { Cuentas } from '@presentation/pages/Cuentas/Cuentas';
 import { Reports } from '@presentation/pages/Reports';
 import { Login } from '@presentation/pages/Login/Login';
 import { CompanyLogin } from '@presentation/pages/CompanyLogin/CompanyLogin';
@@ -62,6 +63,10 @@ export const router = createBrowserRouter([
       {
         path: 'saldo',
         element: pt(<Saldo />),
+      },
+      {
+        path: 'cuentas',
+        element: pt(<Cuentas />),
       },
       {
         path: 'reports',
